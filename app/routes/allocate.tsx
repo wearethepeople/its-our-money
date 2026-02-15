@@ -1,0 +1,234 @@
+import { DrawerPreview as Drawer } from '@base-ui/react/drawer'
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { parseWithZod } from '@conform-to/zod'
+import { useActionData } from 'react-router'
+import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { z } from 'zod'
+
+import { FUNCTIONS, getFunctionDetailsById } from '@/constants'
+import { Icon } from '@/ui/icon'
+import { ConformSlider } from '@/ui/conform-slider.tsx'
+import { cn } from '@/utils/misc'
+import { checkHoneypot } from '@/utils/honeypot.server'
+
+import { type Route } from './+types/allocate'
+
+type OutlayDrawerPayload = {
+	code: string
+	description: string
+	commonUses: string[]
+	name: string
+}
+
+const formSchema = z.object({
+	allocations: z.array(
+		z.object({
+			id: z.string(),
+			weight: z.number().min(0).max(1000),
+		}),
+	),
+})
+
+export type AllocationFormInput = z.infer<typeof formSchema>
+
+export function loader() {
+	return null
+}
+
+export async function action({ request }: Route.ActionArgs) {
+	const formData = await request.formData()
+	await checkHoneypot(formData)
+
+	const submission = parseWithZod(formData, { schema: formSchema })
+
+	console.log('submission', JSON.stringify(submission, null, 2))
+
+	return submission.reply()
+}
+
+export default function AllocateRoute() {
+	const actionData = useActionData<typeof action>()
+	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
+	const zebraStripes = cn(
+		'even:border-muted rounded-lg border-l-4 p-4 odd:border-transparent',
+	)
+	const categoryColClasses = cn(
+		'min-w-0 font-extrabold sm:w-full',
+		zebraStripes,
+	)
+	const weightColClasses = cn('col-span-2 sm:col-span-1', zebraStripes)
+
+	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
+
+	// Form
+	const [form, fields] = useForm<AllocationFormInput>({
+		defaultValue: {
+			allocations: allocatableCategories.map((c) => ({ id: c.id, weight: 0 })),
+		},
+	})
+
+	const allocations = fields.allocations.getFieldList()
+
+	// console.log('allocations', allocations)
+
+	return (
+		<main>
+			<h1>Allocate</h1>
+			<section>
+				<h2 className="">Budget categories ({allocatableCategories.length})</h2>
+				<div className="mx-auto max-w-4xl px-4">
+					<form method="post" {...getFormProps(form)}>
+						<HoneypotInputs />
+						<div className="mt-8 [&>article:last-child>section]:border-b">
+							{allocations.map((a, i) => {
+								const categoryField = a.getFieldset()
+
+								if (categoryField.id.initialValue === undefined) return null
+
+								const data = getFunctionDetailsById(
+									categoryField.id.initialValue,
+								)
+
+								return (
+									<article
+										className="flex w-full flex-col"
+										key={categoryField.id.initialValue}
+									>
+										<div className="bg-secondary flex border border-gray-600">
+											<h3 className="grow p-1 pl-2 font-extrabold">
+												{i + 1}. {data?.name}
+											</h3>
+											<div className="pr-2">
+												<Drawer.Trigger
+													className="shrink"
+													handle={outlaysDrawer}
+													payload={{
+														code: data?.code,
+														description: data?.description,
+														commonUses: data?.commonUses,
+														name: data?.name,
+													}}
+													title={data?.name}
+												>
+													<Icon
+														name="question-mark-circled"
+														className="cursor-pointer text-gray-400 hover:text-gray-500"
+													/>
+												</Drawer.Trigger>
+											</div>
+										</div>
+										<section className="ml-auto w-[95%] border-x border-gray-600">
+											<div className="flex">
+												<div className="mt-auto mb-auto grow px-6 py-2">
+													<ConformSlider
+														meta={categoryField.weight}
+														min={0}
+														max={1000}
+														step={5}
+														ariaLabel="Category weight"
+													/>
+													<input
+														{...getInputProps(categoryField.id, {
+															type: 'hidden',
+														})}
+													/>
+												</div>
+												<cite className="flex shrink flex-col border-gray-600">
+													<div>
+														<div className="border-b border-l border-gray-600">
+															<p className="px-2 text-center text-sm font-semibold">
+																Code
+															</p>
+														</div>
+														<div>
+															<p className="border-l border-gray-600 py-1 text-center text-xs">
+																{data?.code}
+															</p>
+														</div>
+													</div>
+												</cite>
+											</div>
+										</section>
+									</article>
+								)
+							})}
+							{/*{allocatableCategories.map((f, i) => (*/}
+							{/*	<article className="flex w-full flex-col">*/}
+							{/*		/!*<input {...getInputProps(f.id, { type: 'hidden' })} />*!/*/}
+							{/*		<div className="bg-muted flex border border-gray-600">*/}
+							{/*			<h3 className="grow p-1 pl-2 font-extrabold">*/}
+							{/*				{i + 1}. {f.name}*/}
+							{/*			</h3>*/}
+							{/*			<div>H</div>*/}
+							{/*		</div>*/}
+							{/*		<section className="ml-auto w-[95%] border-x border-gray-600">*/}
+							{/*			<div className="flex">*/}
+							{/*				<div className="mt-auto mb-auto grow px-6 py-2">*/}
+							{/*					<Slider className="" />*/}
+							{/*				</div>*/}
+							{/*				<cite className="flex shrink flex-col border-gray-600">*/}
+							{/*					<div>*/}
+							{/*						<div className="border-b border-l border-gray-600">*/}
+							{/*							<p className="px-2 text-center text-sm font-semibold">*/}
+							{/*								Code*/}
+							{/*							</p>*/}
+							{/*						</div>*/}
+							{/*						<div>*/}
+							{/*							<p className="border-b border-l border-gray-600 py-1 text-center text-xs">*/}
+							{/*								{f.code}*/}
+							{/*							</p>*/}
+							{/*						</div>*/}
+							{/*					</div>*/}
+							{/*				</cite>*/}
+							{/*			</div>*/}
+							{/*		</section>*/}
+							{/*	</article>*/}
+							{/*))}*/}
+						</div>
+						<input
+							type="submit"
+							value="Submit"
+							className="btn btn-primary mt-8"
+						/>
+					</form>
+				</div>
+			</section>
+			<Drawer.Root handle={outlaysDrawer}>
+				{({ payload }) => {
+					return (
+						<Drawer.Portal>
+							<Drawer.Backdrop className="fixed inset-0 min-h-dvh bg-black opacity-[calc(var(--backdrop-opacity)*(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] [--backdrop-opacity:0.2] [--bleed:3rem] data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute dark:[--backdrop-opacity:0.7]" />
+							<Drawer.Viewport className="fixed inset-0 flex items-end">
+								<Drawer.Popup className="duration-450ms -mb-12 max-h-[calc(80vh+3rem)] w-full transform-[translateY(var(--drawer-swipe-movement-y))] touch-auto overflow-y-auto overscroll-contain rounded-t-2xl bg-gray-50 px-6 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+3rem)] text-gray-900 outline outline-gray-200 transition-transform ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:transform-[translateY(calc(100%-3rem))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-starting-style:transform-[translateY(calc(100%-3rem))] data-swiping:select-none dark:outline-gray-300">
+									<div className="mx-auto mb-4 h-1 w-12 rounded-full bg-gray-300" />
+									<Drawer.Content className="mx-auto w-full max-w-208">
+										<Drawer.Title className="mb-1 text-lg font-medium">
+											{payload?.code}: {payload?.name}
+										</Drawer.Title>
+										<Drawer.Description className="mb-6 text-base text-gray-600">
+											{payload?.description}
+										</Drawer.Description>
+										<Drawer.Description className="mb-6 text-base text-gray-600">
+											<ul>
+												{payload?.commonUses.map((use, i) => (
+													<li className="ml-8 list-disc" key={i}>
+														{use}
+													</li>
+												))}
+											</ul>
+										</Drawer.Description>
+										<div className="hidden justify-end gap-4 md:flex">
+											<Drawer.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
+												Close
+											</Drawer.Close>
+										</div>
+									</Drawer.Content>
+								</Drawer.Popup>
+							</Drawer.Viewport>
+						</Drawer.Portal>
+					)
+				}}
+			</Drawer.Root>
+		</main>
+	)
+}
