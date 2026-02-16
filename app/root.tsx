@@ -166,7 +166,9 @@ function App() {
 				<header className="container py-2">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<div>
-							<h1>It’s our money</h1>
+							<h1>
+								<Link to="/">It’s our money</Link>
+							</h1>
 						</div>
 						<div>
 							<Link to={href('/allocate')}>Allocate</Link>
