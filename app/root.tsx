@@ -203,41 +203,29 @@ function App() {
 				<header className="container py-6">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<div>
-							<p>It's our money</p>
-							<span className="text-sm"></span>
+							<h1>It’s our money</h1>
 						</div>
-						{/*<div className="flex items-center gap-10">*/}
-						{/*	{user ? (*/}
-						{/*		<UserDropdown />*/}
-						{/*	) : (*/}
-						{/*		<Button asChild variant="default" size="lg">*/}
-						{/*			<Link to="/login">Log In</Link>*/}
-						{/*		</Button>*/}
-						{/*	)}*/}
-						{/*</div>*/}
-						{/*<div className="block w-full sm:hidden">{searchBar}</div>*/}
 					</nav>
 				</header>
 
-				<div className="flex flex-1 flex-col">
+				<main className="flex flex-1 flex-col">
 					<Outlet />
-				</div>
+				</main>
 
-				<div className="container flex justify-between pb-5">
-					<Logo />
+				<footer className="container mt-8 flex justify-between pb-5">
 					<p className="text-sm leading-snug">
-						A{' '}
+						A&nbsp;
 						<Link
 							to="http://www.wearethepeople.us/"
 							target="_blank"
 							className="font-semibold"
 						>
-							We (ARE) the People
-						</Link>{' '}
-						project.
+							We&nbsp;(ARE)&nbsp;the&nbsp;People
+						</Link>
+						&nbsp;project.
 					</p>
 					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
+				</footer>
 			</div>
 			<EpicToaster closeButton position="top-center" theme={theme} />
 			<EpicProgress />
