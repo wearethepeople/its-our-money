@@ -4,13 +4,16 @@ import { parseWithZod } from '@conform-to/zod'
 import { useActionData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
+const { json } = HttpResponse
 
 import { FUNCTIONS, getFunctionDetailsById } from '@/constants'
 import { Icon } from '@/ui/icon'
 import { ConformSlider } from '@/ui/conform-slider.tsx'
 import { checkHoneypot } from '@/utils/honeypot.server'
+import { getOrCreateParticipantSession } from '@/utils/participant-session.server.ts'
 
 import { type Route } from './+types/allocate'
+import { HttpResponse } from 'msw'
 
 type OutlayDrawerPayload = {
 	code: string
@@ -30,8 +33,13 @@ const formSchema = z.object({
 
 export type AllocationFormInput = z.infer<typeof formSchema>
 
-export function loader() {
-	return null
+export async function loader({ request }: Route.LoaderArgs) {
+	const { participantId, headers, isNew } =
+		await getOrCreateParticipantSession(request)
+
+	console.log('Participant details', { participantId, isNew })
+
+	return json({}, { headers })
 }
 
 export async function action({ request }: Route.ActionArgs) {
