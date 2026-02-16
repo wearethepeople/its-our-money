@@ -59,115 +59,113 @@ export default function AllocateRoute() {
 
 	return (
 		<section>
-			<div className="mx-auto max-w-4xl px-4">
-				<p>
-					The US fiscal budget is made up of outlay functions, think of them as
-					categories or buckets, where money is prioritized and, like any
-					budget, tradeoffs are made.
-				</p>
-				<p>
-					Each outlay function is comprised of a name and a distinct code which
-					helps segment the primary categories of the budget.
-				</p>
-				<p>
-					As you might imagine, the US budget is a complicated document and for
-					the purpose of this exercise it's been simplified.
-				</p>
-				<form method="post" {...getFormProps(form)}>
-					<HoneypotInputs />
-					<div className="mt-8 [&>article:last-child>section]:border-b">
-						{allocations.map((a, i) => {
-							const categoryField = a.getFieldset()
+			<p>
+				The US fiscal budget is made up of outlay functions, think of them as
+				categories or buckets, where money is prioritized and, like any budget,
+				tradeoffs are made.
+			</p>
+			<p>
+				Each outlay function is comprised of a name and a distinct code which
+				helps segment the primary categories of the budget.
+			</p>
+			<p>
+				As you might imagine, the US budget is a complicated document and for
+				the purpose of this exercise it's been simplified.
+			</p>
+			<form method="post" {...getFormProps(form)}>
+				<HoneypotInputs />
+				<div className="mt-8 [&>article:last-child>section]:border-b">
+					{allocations.map((a, i) => {
+						const categoryField = a.getFieldset()
 
-							if (categoryField.id.initialValue === undefined) return null
+						if (categoryField.id.initialValue === undefined) return null
 
-							const data = getFunctionDetailsById(categoryField.id.initialValue)
+						const data = getFunctionDetailsById(categoryField.id.initialValue)
 
-							return (
-								<article
-									className="flex w-full flex-col"
-									key={categoryField.id.initialValue}
-								>
-									<div className="bg-secondary flex border border-gray-600">
-										<h3 className="grow p-1 pl-2 font-extrabold">
-											{i + 1}. {data?.name}
-										</h3>
-										<div className="pr-2">
-											<Drawer.Trigger
-												className="shrink"
-												handle={outlaysDrawer}
-												payload={{
-													code: data?.code,
-													description: data?.description,
-													commonUses: data?.commonUses,
-													name: data?.name,
-												}}
-												title={data?.name}
-											>
-												<Icon
-													name="question-mark-circled"
-													className="cursor-pointer text-gray-400 hover:text-gray-500"
-												/>
-											</Drawer.Trigger>
-										</div>
+						return (
+							<article
+								className="flex w-full flex-col"
+								key={categoryField.id.initialValue}
+							>
+								<div className="bg-secondary flex border border-gray-600">
+									<h3 className="grow p-1 pl-2 font-extrabold">
+										{i + 1}. {data?.name}
+									</h3>
+									<div className="pr-2">
+										<Drawer.Trigger
+											className="shrink"
+											handle={outlaysDrawer}
+											payload={{
+												code: data?.code,
+												description: data?.description,
+												commonUses: data?.commonUses,
+												name: data?.name,
+											}}
+											title={data?.name}
+										>
+											<Icon
+												name="question-mark-circled"
+												className="cursor-pointer text-gray-400 hover:text-gray-500"
+											/>
+										</Drawer.Trigger>
 									</div>
-									<section className="ml-auto w-[95%] border-x border-gray-600">
-										<div className="flex">
-											<div className="mt-auto mb-auto grow px-6 py-2">
-												<ConformSlider
-													meta={categoryField.weight}
-													min={0}
-													max={1000}
-													step={5}
-													ariaLabel="Category weight"
-												/>
-												<input
-													{...getInputProps(categoryField.id, {
-														type: 'hidden',
-													})}
-												/>
-											</div>
-											<cite className="flex shrink flex-col border-gray-600">
-												<div>
-													<div className="border-b border-l border-gray-600">
-														<p className="px-2 text-center text-sm font-semibold">
-															Code
-														</p>
-													</div>
-													<div>
-														<p className="border-l border-gray-600 py-1 text-center text-xs">
-															{data?.code}
-														</p>
-													</div>
-												</div>
-											</cite>
+								</div>
+								<section className="ml-auto w-[95%] border-x border-gray-600">
+									<div className="flex">
+										<div className="mt-auto mb-auto grow px-6 py-2">
+											<ConformSlider
+												meta={categoryField.weight}
+												min={0}
+												max={1000}
+												step={5}
+												ariaLabel="Category weight"
+											/>
+											<input
+												{...getInputProps(categoryField.id, {
+													type: 'hidden',
+												})}
+											/>
 										</div>
-									</section>
-								</article>
-							)
-						})}
+										<cite className="flex shrink flex-col border-gray-600">
+											<div>
+												<div className="border-b border-l border-gray-600">
+													<p className="px-2 text-center text-sm font-semibold">
+														Code
+													</p>
+												</div>
+												<div>
+													<p className="border-l border-gray-600 py-1 text-center text-xs">
+														{data?.code}
+													</p>
+												</div>
+											</div>
+										</cite>
+									</div>
+								</section>
+							</article>
+						)
+					})}
+				</div>
+				<div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
+					<div>
+						<p>
+							When you're finished prioritizing your budget, click the Submit
+							button and we'll turn your weighted allocations into percentages
+							for your review.
+						</p>
+						<p>
+							If you're happy with your allocations, you can proceed to the next
+							step where you can compare your budget with the actual US fiscal
+							budget.
+						</p>
 					</div>
-					<div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
-						<div>
-							<p>
-								When you're finished prioritizing your budget, click the Submit
-								button and we'll turn your weighted allocations into percentages
-								for your review.
-							</p>
-							<p>
-								If you're happy with your allocations, you can proceed to the
-								next step where you can compare your budget with the actual US
-								fiscal budget.
-							</p>
-						</div>
-						<input
-							type="submit"
-							value="Submit"
-							className="font-inherit m-0 flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
-						/>
-					</div>
-				</form>
-			</div>
+					<input
+						type="submit"
+						value="Submit"
+						className="font-inherit m-0 flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
+					/>
+				</div>
+			</form>
 			<Drawer.Root handle={outlaysDrawer}>
 				{({ payload }) => {
 					return (
@@ -183,15 +181,13 @@ export default function AllocateRoute() {
 										<Drawer.Description className="mb-6 text-base text-gray-600">
 											{payload?.description}
 										</Drawer.Description>
-										<Drawer.Description className="mb-6 text-base text-gray-600">
-											<ul>
-												{payload?.commonUses.map((use, i) => (
-													<li className="ml-8 list-disc" key={i}>
-														{use}
-													</li>
-												))}
-											</ul>
-										</Drawer.Description>
+										<ul>
+											{payload?.commonUses.map((use, i) => (
+												<li className="ml-8 list-disc" key={i}>
+													{use}
+												</li>
+											))}
+										</ul>
 										<div className="hidden justify-end gap-4 md:flex">
 											<Drawer.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
 												Close

@@ -1,6 +1,7 @@
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
+	href,
 	Link,
 	Links,
 	Meta,
@@ -28,7 +29,6 @@ import {
 	useTheme,
 } from './routes/resources/theme-switch.tsx'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
-import { getUserId, logout } from './utils/auth.server.ts'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
 import { prisma } from './utils/db.server.ts'
 import { getEnv } from './utils/env.server.ts'
@@ -70,47 +70,11 @@ export const meta: Route.MetaFunction = ({ data }) => {
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const timings = makeTimings('root loader')
-	const userId = await time(() => getUserId(request), {
-		timings,
-		type: 'getUserId',
-		desc: 'getUserId in root',
-	})
-
-	const user = userId
-		? await time(
-				() =>
-					prisma.user.findUnique({
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							image: { select: { objectKey: true } },
-							roles: {
-								select: {
-									name: true,
-									permissions: {
-										select: { entity: true, action: true, access: true },
-									},
-								},
-							},
-						},
-						where: { id: userId },
-					}),
-				{ timings, type: 'find user', desc: 'find user in root' },
-			)
-		: null
-	if (userId && !user) {
-		console.info('something weird happened')
-		// something weird happened... The user is authenticated but we can't find
-		// them in the database. Maybe they were deleted? Let's log them out.
-		await logout({ request, redirectTo: '/' })
-	}
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const honeyProps = await honeypot.getInputProps()
 
 	return data(
 		{
-			user,
 			requestInfo: {
 				hints: getHints(request),
 				origin: getDomainUrl(request),
@@ -190,7 +154,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function App() {
 	const data = useLoaderData<typeof loader>()
-	const user = useOptionalUser()
 	const theme = useTheme()
 	useToast(data.toast)
 
@@ -199,16 +162,19 @@ function App() {
 			optimizerEndpoint="/resources/images"
 			getSrc={getImgSrc}
 		>
-			<div className="flex min-h-screen flex-col justify-between">
-				<header className="container py-6">
+			<div className="mx-auto flex min-h-screen max-w-4xl flex-col justify-between">
+				<header className="container py-2">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<div>
 							<h1>It’s our money</h1>
 						</div>
+						<div>
+							<Link to={href('/allocate')}>Allocate</Link>
+						</div>
 					</nav>
 				</header>
 
-				<main className="flex flex-1 flex-col">
+				<main className="container mx-auto flex w-full flex-1 flex-col justify-between">
 					<Outlet />
 				</main>
 
