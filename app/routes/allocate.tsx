@@ -1,10 +1,15 @@
 import { DrawerPreview as Drawer } from '@base-ui/react/drawer'
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { Dialog } from '@base-ui/react/dialog'
+import {
+	getFormProps,
+	getInputProps,
+	useForm,
+	useInputControl,
+} from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
-import { useActionData } from 'react-router'
+import { redirect, useActionData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
-const { json } = HttpResponse
 
 import { FUNCTIONS, getFunctionDetailsById } from '@/constants'
 import { Icon } from '@/ui/icon'
@@ -14,6 +19,9 @@ import { getOrCreateParticipantSession } from '@/utils/participant-session.serve
 
 import { type Route } from './+types/allocate'
 import { HttpResponse } from 'msw'
+import { useState } from 'react'
+import { ConfigArraySymbol } from '@eslint/config-array'
+import schema = ConfigArraySymbol.schema
 
 type OutlayDrawerPayload = {
 	code: string
@@ -34,12 +42,9 @@ const formSchema = z.object({
 export type AllocationFormInput = z.infer<typeof formSchema>
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const { participantId, headers, isNew } =
-		await getOrCreateParticipantSession(request)
+	const { headers } = await getOrCreateParticipantSession(request)
 
-	console.log('Participant details', { participantId, isNew })
-
-	return json({}, { headers })
+	return HttpResponse.json({}, { headers })
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -48,38 +53,51 @@ export async function action({ request }: Route.ActionArgs) {
 
 	const submission = parseWithZod(formData, { schema: formSchema })
 
-	console.log('submission', JSON.stringify(submission, null, 2))
+	if (submission.status !== 'success') {
+		return HttpResponse.json({ result: submission.reply() }, { status: 400 })
+	}
 
-	return submission.reply()
+	console.log('Submitted', submission.value)
+
+	return redirect('/juxtapose')
 }
+
+const normalizedDialogHandle = Dialog.createHandle()
+const closeDialog = () => {}
 
 export default function AllocateRoute() {
 	const actionData = useActionData<typeof action>()
 	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
 	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
+	const [isFinalizeDialogOpen, setFinalizeDialogOpen] = useState(false)
 
 	const [form, fields] = useForm<AllocationFormInput>({
 		defaultValue: {
 			allocations: allocatableCategories.map((c) => ({ id: c.id, weight: 0 })),
+		},
+		onValidate: ({ formData }) => {
+			window.alert('Submit')
+
+			return parseWithZod(formData, { schema: formSchema })
 		},
 	})
 	const allocations = fields.allocations.getFieldList()
 
 	return (
 		<section>
-			<p>
-				The US fiscal budget is made up of outlay functions, think of them as
-				categories or buckets, where money is prioritized and, like any budget,
-				tradeoffs are made.
-			</p>
-			<p>
-				Each outlay function is comprised of a name and a distinct code which
-				helps segment the primary categories of the budget.
-			</p>
-			<p>
-				As you might imagine, the US budget is a complicated document and for
-				the purpose of this exercise it's been simplified.
-			</p>
+			{/*<p>*/}
+			{/*	The US fiscal budget is made up of outlay functions, think of them as*/}
+			{/*	categories or buckets, where money is prioritized and, like any budget,*/}
+			{/*	tradeoffs are made.*/}
+			{/*</p>*/}
+			{/*<p>*/}
+			{/*	Each outlay function is comprised of a name and a distinct code which*/}
+			{/*	helps segment the primary categories of the budget.*/}
+			{/*</p>*/}
+			{/*<p>*/}
+			{/*	As you might imagine, the US budget is a complicated document and for*/}
+			{/*	the purpose of this exercise it's been simplified.*/}
+			{/*</p>*/}
 			<form method="post" {...getFormProps(form)}>
 				<HoneypotInputs />
 				<div className="mt-8 [&>article:last-child>section]:border-b">
@@ -92,7 +110,7 @@ export default function AllocateRoute() {
 
 						return (
 							<article
-								className="flex w-full flex-col"
+								className="even:[&>section]:bg-muted flex w-full flex-col"
 								key={categoryField.id.initialValue}
 							>
 								<div className="bg-secondary flex border border-gray-600">
@@ -121,18 +139,23 @@ export default function AllocateRoute() {
 								<section className="ml-auto w-[95%] border-x border-gray-600">
 									<div className="flex">
 										<div className="mt-auto mb-auto grow px-6 py-2">
-											<ConformSlider
-												meta={categoryField.weight}
-												min={0}
-												max={1000}
-												step={5}
-												ariaLabel="Category weight"
-											/>
-											<input
-												{...getInputProps(categoryField.id, {
-													type: 'hidden',
-												})}
-											/>
+											<div className="flex flex-col">
+												<ConformSlider
+													meta={categoryField.weight}
+													min={0}
+													max={1000}
+													step={5}
+													ariaLabel="Category weight"
+												/>
+												<input
+													{...getInputProps(categoryField.id, {
+														type: 'hidden',
+													})}
+												/>
+												<div className="px-2 py-4">
+													<p className="text-sm">{data?.description}</p>
+												</div>
+											</div>
 										</div>
 										<cite className="flex shrink flex-col border-gray-600">
 											<div>
@@ -142,7 +165,7 @@ export default function AllocateRoute() {
 													</p>
 												</div>
 												<div>
-													<p className="border-l border-gray-600 py-1 text-center text-xs">
+													<p className="border-b border-l border-gray-600 py-1 text-center text-xs">
 														{data?.code}
 													</p>
 												</div>
@@ -157,7 +180,7 @@ export default function AllocateRoute() {
 				<div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
 					<div>
 						<p>
-							When you're finished prioritizing your budget, click the Submit
+							When you're finished prioritizing your budget, click the Finalize
 							button and we'll turn your weighted allocations into percentages
 							for your review.
 						</p>
@@ -167,12 +190,48 @@ export default function AllocateRoute() {
 							budget.
 						</p>
 					</div>
-					<input
-						type="submit"
-						value="Submit"
-						className="font-inherit m-0 flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
-					/>
+					<Dialog.Trigger handle={normalizedDialogHandle}>
+						<div className="font-inherit m-0 flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none">
+							Finalize
+						</div>
+					</Dialog.Trigger>
 				</div>
+				<Dialog.Root handle={normalizedDialogHandle}>
+					<Dialog.Portal>
+						<Dialog.Backdrop className="fixed inset-0 min-h-dvh bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute dark:opacity-70" />
+						<Dialog.Popup className="fixed top-1/2 left-1/2 -mt-8 w-lg max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-gray-50 p-6 text-gray-900 outline outline-1 outline-gray-200 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 dark:outline-gray-300">
+							<Dialog.Title className="-mt-1.5 mb-1 text-lg font-medium">
+								Your allocations as percentages
+							</Dialog.Title>
+							<Dialog.Description className="mb-6 text-base text-gray-600">
+								Your allocations have been converted to percentages and are
+								shown below. If you want to make changes click the "Keep
+								working" button otherwise click "Submit" to see how your budget
+								compares to the actual US budget.
+							</Dialog.Description>
+							<Dialog.Description>
+								{fields.allocations.getFieldList().map((allocation) => (
+									<AllocationPreviewItem
+										key={allocation.id}
+										allocation={allocation}
+									/>
+								))}
+							</Dialog.Description>
+							<div className="mt-8 flex justify-end gap-4">
+								<Dialog.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
+									Keep Working
+								</Dialog.Close>
+								<input
+									type="submit"
+									title={'Submit allocations'}
+									className="border border-red-500"
+									form={form.id}
+									value={'Submit allocations'}
+								/>
+							</div>
+						</Dialog.Popup>
+					</Dialog.Portal>
+				</Dialog.Root>
 			</form>
 			<Drawer.Root handle={outlaysDrawer}>
 				{({ payload }) => {
@@ -209,5 +268,21 @@ export default function AllocateRoute() {
 				}}
 			</Drawer.Root>
 		</section>
+	)
+}
+
+function AllocationPreviewItem({ allocation }: { allocation: any }) {
+	const { id, weight } = allocation.getFieldset()
+	const control = useInputControl(weight)
+	const currentWeight = Number(control.value ?? weight.initialValue ?? 0)
+	const data = getFunctionDetailsById(id.initialValue)
+
+	return (
+		<div className="even:[&>div]:bg-muted">
+			<div className="flex items-center p-2">
+				<strong className="grow">{data?.name}</strong>
+				<span>{currentWeight}%</span>
+			</div>
+		</div>
 	)
 }
