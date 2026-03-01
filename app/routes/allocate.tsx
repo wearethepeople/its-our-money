@@ -22,6 +22,7 @@ import { HttpResponse } from 'msw'
 import { useState } from 'react'
 import { ConfigArraySymbol } from '@eslint/config-array'
 import schema = ConfigArraySymbol.schema
+import { normalizeToBasisPoints } from '@/utils/normalize-weights.ts'
 
 type OutlayDrawerPayload = {
 	code: string
@@ -57,7 +58,14 @@ export async function action({ request }: Route.ActionArgs) {
 		return HttpResponse.json({ result: submission.reply() }, { status: 400 })
 	}
 
-	console.log('Submitted', submission.value)
+	const weights = submission.value.allocations.map((a) => a.weight)
+	const basisPoints = normalizeToBasisPoints(weights)
+	const finalAllocation = submission.value.allocations.map((a, i) => ({
+		id: a.id,
+		bps: basisPoints[i],
+	}))
+
+	// TODO: Store final allocation in the database
 
 	return redirect('/juxtapose')
 }
