@@ -1,5 +1,5 @@
 import { Slider } from '@base-ui/react/slider'
-import { getInputProps, useInputControl } from '@conform-to/react'
+import { useInputControl } from '@conform-to/react'
 
 type ConformSliderProps = {
 	meta: any // field metadata for categoryField.weight
@@ -23,20 +23,30 @@ export function ConformSlider({
 		control.value === '' || control.value == null
 			? Number(meta.initialValue ?? 0)
 			: Number(control.value)
+	const hiddenValue =
+		control.value == null || control.value === ''
+			? String(meta.initialValue ?? min)
+			: String(control.value)
 
 	return (
 		<>
-			<input {...getInputProps(meta, { type: 'hidden' })} />
+			<input
+				key={meta.key}
+				type="hidden"
+				name={meta.name}
+				form={meta.formId}
+				value={hiddenValue}
+				onChange={() => {}}
+			/>
 
-			<Slider.Root
-				defaultValue={0}
+			<Slider.Root<number>
+				defaultValue={Number(meta.initialValue ?? min)}
 				min={min}
 				max={max}
 				step={step}
-				value={valueNumber}
-				onValueChange={(next) => {
-					// Base UI gives number | number[]; you’re using single-thumb
-					control.change(String(next))
+				value={Number.isFinite(valueNumber) ? valueNumber : min}
+				onValueChange={(nextValue) => {
+					control.change(String(nextValue))
 				}}
 				onValueCommitted={() => {
 					// marks “touched” semantics in a way Conform understands

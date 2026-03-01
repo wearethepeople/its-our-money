@@ -1,7 +1,8 @@
-function sum(arr: number[]) {
-	return arr.reduce((sum, n) => sum + n, 0)
-}
-
+/**
+ * Normalize a set of weights to a set of basis points.
+ * @param weights
+ * @param totalBps
+ */
 export function normalizeToBasisPoints(weights: number[], totalBps = 10000) {
 	const total = sum(weights)
 
@@ -32,10 +33,22 @@ export function normalizeToBasisPoints(weights: number[], totalBps = 10000) {
 	return result
 }
 
+/**
+ * Normalize a set of weights to a set of percentages.
+ * @param weights
+ */
 export function normalizeToPercent(weights: number[]) {
 	const total = sum(weights)
 
 	if (total === 0) return weights.map(() => 0)
 
 	return weights.map((w) => (w / total) * 100)
+}
+
+/**
+ * Sum an array of numbers.
+ * @param arr
+ */
+export function sum(arr: number[]) {
+	return arr.reduce((sum, n) => sum + n, 0)
 }

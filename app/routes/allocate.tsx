@@ -7,22 +7,20 @@ import {
 	useInputControl,
 } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
-import { redirect, useActionData } from 'react-router'
+import { type MouseEvent } from 'react'
+import { data, redirect, useActionData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 
+import { ErrorList } from '@/components/forms'
 import { FUNCTIONS, getFunctionDetailsById } from '@/constants'
 import { Icon } from '@/ui/icon'
 import { ConformSlider } from '@/ui/conform-slider.tsx'
 import { checkHoneypot } from '@/utils/honeypot.server'
+import { normalizeToBasisPoints, sum } from '@/utils/normalize-weights.ts'
 import { getOrCreateParticipantSession } from '@/utils/participant-session.server.ts'
 
 import { type Route } from './+types/allocate'
-import { HttpResponse } from 'msw'
-import { useState } from 'react'
-import { ConfigArraySymbol } from '@eslint/config-array'
-import schema = ConfigArraySymbol.schema
-import { normalizeToBasisPoints } from '@/utils/normalize-weights.ts'
 
 type OutlayDrawerPayload = {
 	code: string
@@ -35,17 +33,23 @@ const formSchema = z.object({
 	allocations: z.array(
 		z.object({
 			id: z.string(),
-			weight: z.number().min(0).max(1000),
+			weight: z.coerce
+				.number()
+				.int()
+				.min(1, 'Every outlay function must have an allocation.')
+				.max(1000),
 		}),
 	),
 })
 
 export type AllocationFormInput = z.infer<typeof formSchema>
 
+const SUMMARY_TRIGGER_ID = 'summary'
+
 export async function loader({ request }: Route.LoaderArgs) {
 	const { headers } = await getOrCreateParticipantSession(request)
 
-	return HttpResponse.json({}, { headers })
+	return data({}, { headers })
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -55,7 +59,15 @@ export async function action({ request }: Route.ActionArgs) {
 	const submission = parseWithZod(formData, { schema: formSchema })
 
 	if (submission.status !== 'success') {
-		return HttpResponse.json({ result: submission.reply() }, { status: 400 })
+		return data(
+			{
+				resultType: 'error',
+				result: submission.reply({
+					formErrors: ['There was a problem processing your allocations.'],
+				}),
+			},
+			{ status: 400 },
+		)
 	}
 
 	const weights = submission.value.allocations.map((a) => a.weight)
@@ -66,32 +78,56 @@ export async function action({ request }: Route.ActionArgs) {
 	}))
 
 	// TODO: Store final allocation in the database
-	// totalWeightBps must eq 10000
+	if (sum(basisPoints) !== 10000) {
+		return data(
+			{
+				resultType: 'error',
+				result: submission.reply({
+					formErrors: ['Total weight must be 10000'],
+				}),
+			},
+			{ status: 400 },
+		)
+	}
 	// each item's range is valid
 
 	return redirect('/juxtapose')
 }
 
 const normalizedDialogHandle = Dialog.createHandle()
-const closeDialog = () => {}
 
 export default function AllocateRoute() {
 	const actionData = useActionData<typeof action>()
 	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
 	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
-	const [isFinalizeDialogOpen, setFinalizeDialogOpen] = useState(false)
 
 	const [form, fields] = useForm<AllocationFormInput>({
 		defaultValue: {
 			allocations: allocatableCategories.map((c) => ({ id: c.id, weight: 0 })),
 		},
+		lastResult: actionData?.result,
+		shouldValidate: 'onSubmit',
+		shouldRevalidate: 'onInput',
 		onValidate: ({ formData }) => {
-			window.alert('Submit')
-
 			return parseWithZod(formData, { schema: formSchema })
 		},
 	})
 	const allocations = fields.allocations.getFieldList()
+
+	const handleFinalizeClick = (event: MouseEvent<HTMLButtonElement>) => {
+		form.validate()
+
+		const formElement = event.currentTarget.form
+		if (!formElement) return
+
+		const submission = parseWithZod(new FormData(formElement), {
+			schema: formSchema,
+		})
+
+		if (submission.status === 'success') {
+			normalizedDialogHandle.open(SUMMARY_TRIGGER_ID)
+		}
+	}
 
 	return (
 		<section>
@@ -162,6 +198,10 @@ export default function AllocateRoute() {
 														type: 'hidden',
 													})}
 												/>
+												<ErrorList
+													id={categoryField.weight.errorId}
+													errors={categoryField.weight.errors}
+												/>
 												<div className="px-2 py-4">
 													<p className="text-sm">{data?.description}</p>
 												</div>
@@ -187,6 +227,7 @@ export default function AllocateRoute() {
 						)
 					})}
 				</div>
+				<ErrorList id={form.errorId} errors={form.errors} />
 				<div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
 					<div>
 						<p>
@@ -200,13 +241,18 @@ export default function AllocateRoute() {
 							budget.
 						</p>
 					</div>
-					<Dialog.Trigger handle={normalizedDialogHandle}>
-						<div className="font-inherit m-0 flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none">
-							Finalize
-						</div>
-					</Dialog.Trigger>
+					<button
+						type="button"
+						onClick={handleFinalizeClick}
+						className="font-inherit m-0 flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
+					>
+						Finalize
+					</button>
 				</div>
-				<Dialog.Root handle={normalizedDialogHandle}>
+				<Dialog.Root
+					handle={normalizedDialogHandle}
+					triggerId={SUMMARY_TRIGGER_ID}
+				>
 					<Dialog.Portal>
 						<Dialog.Backdrop className="fixed inset-0 min-h-dvh bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute dark:opacity-70" />
 						<Dialog.Popup className="fixed top-1/2 left-1/2 -mt-8 w-lg max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-gray-50 p-6 text-gray-900 outline outline-1 outline-gray-200 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 dark:outline-gray-300">
