@@ -1,13 +1,8 @@
 import { DrawerPreview as Drawer } from '@base-ui/react/drawer'
 import { Dialog } from '@base-ui/react/dialog'
-import {
-	getFormProps,
-	getInputProps,
-	useForm,
-	useInputControl,
-} from '@conform-to/react'
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
-import { type MouseEvent } from 'react'
+import { type MouseEvent, useState } from 'react'
 import { data, redirect, useActionData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
@@ -21,12 +16,18 @@ import { normalizeToBasisPoints, sum } from '@/utils/normalize-weights.ts'
 import { getOrCreateParticipantSession } from '@/utils/participant-session.server.ts'
 
 import { type Route } from './+types/allocate'
+import { FinalAllocationItem } from '@/utils/participants-db.server.ts'
 
 type OutlayDrawerPayload = {
 	code: string
 	description: string
 	commonUses: string[]
 	name: string
+}
+
+type PreviewAllocation = {
+	id: string
+	percent: number
 }
 
 const formSchema = z.object({
@@ -72,18 +73,41 @@ export async function action({ request }: Route.ActionArgs) {
 
 	const weights = submission.value.allocations.map((a) => a.weight)
 	const basisPoints = normalizeToBasisPoints(weights)
-	const finalAllocation = submission.value.allocations.map((a, i) => ({
-		id: a.id,
-		bps: basisPoints[i],
-	}))
+	let finalAllocation: FinalAllocationItem[]
 
-	// TODO: Store final allocation in the database
-	if (sum(basisPoints) !== 10000) {
+	try {
+		if (basisPoints.length !== submission.value.allocations.length) {
+			throw new Error('Normalization output length mismatch')
+		}
+
+		finalAllocation = submission.value.allocations.map((allocation, i) => {
+			const bps = basisPoints[i]
+
+			if (bps === undefined) {
+				throw new Error(`Missing basis points at index ${i}`)
+			}
+
+			return { id: allocation.id, bps }
+		})
+	} catch (error) {
 		return data(
 			{
 				resultType: 'error',
 				result: submission.reply({
-					formErrors: ['Total weight must be 10000'],
+					formErrors: ['Unable to normalize allocations.'],
+				}),
+			},
+			{ status: 400 },
+		)
+	}
+
+	// TODO: Store final allocation in the database
+	if (sum(finalAllocation.map((a) => a.bps)) !== 10000) {
+		return data(
+			{
+				resultType: 'error',
+				result: submission.reply({
+					formErrors: ['Unable to normalize allocations.'],
 				}),
 			},
 			{ status: 400 },
@@ -100,6 +124,9 @@ export default function AllocateRoute() {
 	const actionData = useActionData<typeof action>()
 	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
 	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
+	const [previewAllocations, setPreviewAllocations] = useState<
+		PreviewAllocation[]
+	>([])
 
 	const [form, fields] = useForm<AllocationFormInput>({
 		defaultValue: {
@@ -125,6 +152,23 @@ export default function AllocateRoute() {
 		})
 
 		if (submission.status === 'success') {
+			const basisPoints = normalizeToBasisPoints(
+				submission.value.allocations.map((allocation) => allocation.weight),
+			)
+
+			if (basisPoints.length !== submission.value.allocations.length) return
+
+			const preview = submission.value.allocations.map((allocation, i) => {
+				const bps = basisPoints[i]
+				if (bps === undefined) {
+					throw new Error(`Missing basis points at index ${i}`)
+				}
+				return {
+					id: allocation.id,
+					percent: bps / 100,
+				}
+			})
+			setPreviewAllocations(preview)
 			normalizedDialogHandle.open(SUMMARY_TRIGGER_ID)
 		}
 	}
@@ -265,14 +309,20 @@ export default function AllocateRoute() {
 								working" button otherwise click "Submit" to see how your budget
 								compares to the actual US budget.
 							</Dialog.Description>
-							<Dialog.Description>
-								{fields.allocations.getFieldList().map((allocation) => (
-									<AllocationPreviewItem
-										key={allocation.id}
-										allocation={allocation}
-									/>
-								))}
-							</Dialog.Description>
+							<div>
+								{previewAllocations.map((allocation) => {
+									const data = getFunctionDetailsById(allocation.id)
+
+									return (
+										<div className="even:[&>div]:bg-muted" key={allocation.id}>
+											<div className="flex items-center p-2">
+												<strong className="grow">{data?.name}</strong>
+												<span>{allocation.percent}%</span>
+											</div>
+										</div>
+									)
+								})}
+							</div>
 							<div className="mt-8 flex justify-end gap-4">
 								<Dialog.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
 									Keep Working
@@ -324,21 +374,5 @@ export default function AllocateRoute() {
 				}}
 			</Drawer.Root>
 		</section>
-	)
-}
-
-function AllocationPreviewItem({ allocation }: { allocation: any }) {
-	const { id, weight } = allocation.getFieldset()
-	const control = useInputControl(weight)
-	const currentWeight = Number(control.value ?? weight.initialValue ?? 0)
-	const data = getFunctionDetailsById(id.initialValue)
-
-	return (
-		<div className="even:[&>div]:bg-muted">
-			<div className="flex items-center p-2">
-				<strong className="grow">{data?.name}</strong>
-				<span>{currentWeight}%</span>
-			</div>
-		</div>
 	)
 }
