@@ -24,7 +24,6 @@ export async function getOrCreateParticipantSession(request: Request): Promise<{
 
 	// 1) Try to hydrate via an existing cookie-backed DB session
 	const sessionId = await getSessionId(request)
-	console.log('sessionId', sessionId)
 	const participant = await getParticipantBySessionId(sessionId)
 
 	if (participant) {

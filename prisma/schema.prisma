@@ -9,10 +9,11 @@ datasource db {
 }
 
 model Participant {
-  id        String    @id @default(cuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  sessions  Session[]
+  id          String                  @id @default(cuid())
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  sessions    Session[]
+  allocations ParticipantAllocation[]
 }
 
 model Session {
@@ -24,4 +25,33 @@ model Session {
   participant    Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
   @@index([participantId])
+}
+
+model ParticipantAllocation {
+  id            String                      @id @default(cuid())
+  participantId String
+  fiscalYear    Int
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+  participant   Participant                 @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  items         ParticipantAllocationItem[]
+
+  @@unique([participantId, fiscalYear])
+  @@index([participantId])
+  @@index([fiscalYear])
+  @@map("participant_allocations")
+}
+
+model ParticipantAllocationItem {
+  allocationId String
+  categoryCode String
+  /// Must be in [1, 10000]. Add DB CHECK via SQL migration for SQLite.
+  weightBps    Int                   @default(1)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  allocation   ParticipantAllocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+
+  @@id([allocationId, categoryCode])
+  @@index([categoryCode])
+  @@map("participant_allocation_items")
 }

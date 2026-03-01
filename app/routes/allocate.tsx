@@ -66,6 +66,8 @@ export async function action({ request }: Route.ActionArgs) {
 	}))
 
 	// TODO: Store final allocation in the database
+	// totalWeightBps must eq 10000
+	// each item's range is valid
 
 	return redirect('/juxtapose')
 }
