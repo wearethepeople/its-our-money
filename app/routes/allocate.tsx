@@ -16,7 +16,10 @@ import { normalizeToBasisPoints, sum } from '@/utils/normalize-weights.ts'
 import { getOrCreateParticipantSession } from '@/utils/participant-session.server.ts'
 
 import { type Route } from './+types/allocate'
-import { FinalAllocationItem } from '@/utils/participants-db.server.ts'
+import {
+	FinalAllocationItem,
+	saveParticipantAllocations,
+} from '@/utils/participants-db.server.ts'
 
 type OutlayDrawerPayload = {
 	code: string
@@ -54,6 +57,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+	const { headers, participantId } =
+		await getOrCreateParticipantSession(request)
 	const formData = await request.formData()
 	await checkHoneypot(formData)
 
@@ -101,7 +106,7 @@ export async function action({ request }: Route.ActionArgs) {
 		)
 	}
 
-	// TODO: Store final allocation in the database
+	// Ensure the basis points sum to 10,000
 	if (sum(finalAllocation.map((a) => a.bps)) !== 10000) {
 		return data(
 			{
@@ -113,7 +118,12 @@ export async function action({ request }: Route.ActionArgs) {
 			{ status: 400 },
 		)
 	}
-	// each item's range is valid
+
+	await saveParticipantAllocations({
+		participantId,
+		fiscalYear: 2026,
+		allocations: finalAllocation,
+	})
 
 	return redirect('/juxtapose')
 }
