@@ -171,7 +171,9 @@ function App() {
 							</h1>
 						</div>
 						<div>
-							<Link to={href('/allocate')}>Allocate</Link>
+							<Link to={href('/allocate/:year', { year: '2026' })}>
+								Allocate 2026
+							</Link>
 						</div>
 					</nav>
 				</header>
