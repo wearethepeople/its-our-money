@@ -3,7 +3,7 @@ import { Dialog } from '@base-ui/react/dialog'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { type MouseEvent, useState } from 'react'
-import { data, redirect, useActionData } from 'react-router'
+import { data, href, redirect, useActionData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 
@@ -18,6 +18,7 @@ import { getOrCreateParticipantSession } from '@/utils/participant-session.serve
 import { type Route } from './+types/allocate'
 import {
 	FinalAllocationItem,
+	getParticipantAllocation,
 	saveParticipantAllocations,
 } from '@/utils/participants-db.server.ts'
 
@@ -50,8 +51,20 @@ export type AllocationFormInput = z.infer<typeof formSchema>
 
 const SUMMARY_TRIGGER_ID = 'summary'
 
-export async function loader({ request }: Route.LoaderArgs) {
-	const { headers } = await getOrCreateParticipantSession(request)
+export async function loader({ params, request }: Route.LoaderArgs) {
+	const { headers, isNew, participantId } =
+		await getOrCreateParticipantSession(request)
+
+	if (!isNew) {
+		const currentAllocation = await getParticipantAllocation(
+			participantId,
+			+params.year,
+		)
+
+		if (currentAllocation) {
+			return redirect(href('/juxtapose'))
+		}
+	}
 
 	return data({}, { headers })
 }
