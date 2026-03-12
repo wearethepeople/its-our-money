@@ -1,18 +1,12 @@
-import type { RouteConfig } from '@react-router/dev/routes'
-import { autoRoutes } from 'react-router-auto-routes'
+import { type RouteConfig, index, route } from '@react-router/dev/routes'
 
-export default autoRoutes({
-	ignoredRouteFiles: [
-		'.*',
-		'**/*.css',
-		'**/*.test.{js,jsx,ts,tsx}',
-		'**/__*.*',
-		// This is for server-side utilities you want to colocate
-		// next to your routes without making an additional
-		// directory. If you need a route that includes "server" or
-		// "client" in the filename, use the escape brackets like:
-		// my-route.[server].tsx
-		'**/*.server.*',
-		'**/*.client.*',
-	],
-}) satisfies RouteConfig
+export default [
+	index('./routes/index.tsx'),
+	route('allocate/:year', './routes/allocate.tsx'),
+	route('resources/healthcheck', './routes/resources/healthcheck.tsx'),
+	route('resources/images', './routes/resources/images.tsx'),
+	route('resources/theme-switch', './routes/resources/theme-switch.tsx'),
+	route('robots.txt', './routes/_seo/robots[.]txt.ts'),
+	route('sitemap.xml', './routes/_seo/sitemap[.]xml.ts'),
+	route('*', './routes/$.tsx'),
+] satisfies RouteConfig
