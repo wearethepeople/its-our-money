@@ -8,7 +8,7 @@ export function normalizeToBasisPoints(weights: number[], totalBps = 10000) {
 
 	if (total === 0) return weights.map(() => 0)
 
-	const raw = weights.map((w) => (w * totalBps) / total)
+	const raw = weights.map((w) => deriveBasisPoints(w, total, totalBps))
 
 	const floored = raw.map((n) => Math.floor(n))
 	let remainder = totalBps - floored.reduce((sum, n) => sum + n, 0)
@@ -31,6 +31,15 @@ export function normalizeToBasisPoints(weights: number[], totalBps = 10000) {
 	}
 
 	return result
+}
+
+/**
+ * Derive basis points for a value against a total.
+ * Returns an unrounded basis-points value so callers can choose rounding behavior.
+ */
+export function deriveBasisPoints(value: number, total: number, totalBps = 10000) {
+	if (total === 0) return 0
+	return (value * totalBps) / total
 }
 
 /**

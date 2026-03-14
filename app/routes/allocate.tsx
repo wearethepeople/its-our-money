@@ -8,7 +8,7 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 
 import { ErrorList } from '@/components/forms'
-import { FUNCTIONS, getFunctionDetailsById } from '@/constants'
+import { FUNCTIONS } from '@/constants/budget-functions.ts'
 import { Icon } from '@/ui/icon'
 import { ConformSlider } from '@/ui/conform-slider.tsx'
 import { checkHoneypot } from '@/utils/honeypot.server'
@@ -21,6 +21,7 @@ import {
 	getParticipantAllocation,
 	saveParticipantAllocations,
 } from '@/utils/participants-db.server.ts'
+import { getFunctionDetailsById } from '@/utils/budget-data.ts'
 
 type OutlayDrawerPayload = {
 	code: string

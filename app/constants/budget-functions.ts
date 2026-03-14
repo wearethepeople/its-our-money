@@ -338,6 +338,3 @@ export const FUNCTIONS: OutlayFunction[] = [
 		],
 	},
 ]
-
-export const getFunctionDetailsById = (id: string) =>
-	FUNCTIONS.find((f) => f.id === id)

@@ -1,0 +1,256 @@
+{
+	"system": {
+		"id": "us_federal_budget",
+		"label": "US Federal Budget (OMB Budget Functions)",
+		"currency": "USD",
+		"budget_states": ["estimate", "proposed", "revised", "actual"]
+	},
+	"source": {
+		"publisher": "Office of Management and Budget (OMB)",
+		"dataset": "Historical Tables",
+		"table": "3.2",
+		"description": "Outlays by Function and Subfunction",
+		"retrieved_at": "2026-02-08",
+		"notes": [
+			"Values are in millions of dollars as published in OMB Historical Tables.",
+			"Extraction uses function section scanning with special-case handling for 570 (Medicare) and 650 (Social Security)."
+		]
+	},
+	"normalization_policy": {
+		"allocatable_function_codes": [
+			"050",
+			"150",
+			"250",
+			"270",
+			"300",
+			"350",
+			"370",
+			"400",
+			"450",
+			"500",
+			"550",
+			"570",
+			"600",
+			"650",
+			"700",
+			"750",
+			"800",
+			"TOTAL_OVERLAYS"
+		],
+		"excluded_function_codes": ["900", "920", "950", "TOTAL_OUTLAYS"],
+		"excluded_reason_by_code": {
+			"900": "Net interest reflects past borrowing decisions and debt service obligations, not discretionary programmatic spending choices, and is excluded to focus allocations on policy-controlled outlays.",
+			"920": "Allowances are planning placeholders, not a policy spending category.",
+			"950": "Undistributed offsetting receipts are accounting adjustments, not a policy spending category.",
+			"TOTAL_OUTLAYS": "This is the total and used for checks"
+		},
+		"share_unit": "basis_points",
+		"basis_points_total": 10000
+	},
+	"taxonomy": {
+		"functions": [
+			{
+				"code": "050",
+				"id": "national_defense",
+				"name": "National Defense",
+				"order": 1
+			},
+			{
+				"code": "150",
+				"id": "international_affairs",
+				"name": "International Affairs",
+				"order": 2
+			},
+			{
+				"code": "250",
+				"id": "general_science_space_technology",
+				"name": "General Science, Space, and Technology",
+				"order": 3
+			},
+			{
+				"code": "270",
+				"id": "energy",
+				"name": "Energy",
+				"order": 4
+			},
+			{
+				"code": "300",
+				"id": "natural_resources_environment",
+				"name": "Natural Resources and Environment",
+				"order": 5
+			},
+			{
+				"code": "350",
+				"id": "agriculture",
+				"name": "Agriculture",
+				"order": 6
+			},
+			{
+				"code": "370",
+				"id": "commerce_housing_credit",
+				"name": "Commerce and Housing Credit",
+				"order": 7
+			},
+			{
+				"code": "400",
+				"id": "transportation",
+				"name": "Transportation",
+				"order": 8
+			},
+			{
+				"code": "450",
+				"id": "community_regional_development",
+				"name": "Community and Regional Development",
+				"order": 9
+			},
+			{
+				"code": "500",
+				"id": "education_training_employment_social_services",
+				"name": "Education, Training, Employment, and Social Services",
+				"order": 10
+			},
+			{
+				"code": "550",
+				"id": "health",
+				"name": "Health",
+				"order": 11
+			},
+			{
+				"code": "570",
+				"id": "medicare",
+				"name": "Medicare",
+				"order": 12
+			},
+			{
+				"code": "600",
+				"id": "income_security",
+				"name": "Income Security",
+				"order": 13
+			},
+			{
+				"code": "650",
+				"id": "social_security",
+				"name": "Social Security",
+				"order": 14
+			},
+			{
+				"code": "700",
+				"id": "veteran_benefits_services",
+				"name": "Veterans Benefits and Services",
+				"order": 15
+			},
+			{
+				"code": "750",
+				"id": "administration_justice",
+				"name": "Administration of Justice",
+				"order": 16
+			},
+			{
+				"code": "800",
+				"id": "general_government",
+				"name": "General Government",
+				"order": 17
+			},
+			{
+				"code": "900",
+				"id": "net_interest",
+				"name": "Net Interest",
+				"order": 97,
+				"allocatable": false
+			},
+			{
+				"code": "920",
+				"id": "allowances",
+				"name": "Allowances",
+				"order": 98,
+				"allocatable": false
+			},
+			{
+				"code": "950",
+				"id": "undistributed_offsetting_receipts",
+				"name": "Undistributed Offsetting Receipts",
+				"order": 99,
+				"allocatable": false
+			},
+			{
+				"code": "TOTAL_OUTLAYS",
+				"id": "total_outlays",
+				"name": "Total Outlays",
+				"order": 100,
+				"allocatable": false
+			}
+		]
+	},
+	"actual_outlays_by_function": {
+		"measure": "outlays",
+		"unit": "millions_of_dollars",
+		"year_budget_state": {
+			"2025": "estimate"
+		},
+		"by_code": {
+			"150": {
+				"2025": 66484
+			},
+			"250": {
+				"2025": 43831
+			},
+			"270": {
+				"2025": 39136
+			},
+			"300": {
+				"2025": 73192
+			},
+			"350": {
+				"2025": 33713
+			},
+			"370": {
+				"2025": 13485
+			},
+			"400": {
+				"2025": 150180
+			},
+			"450": {
+				"2025": 60795
+			},
+			"500": {
+				"2025": 187707
+			},
+			"550": {
+				"2025": 888926
+			},
+			"570": {
+				"2025": 946011
+			},
+			"600": {
+				"2025": 936828
+			},
+			"650": {
+				"2025": 1549737
+			},
+			"700": {
+				"2025": 370124
+			},
+			"750": {
+				"2025": 87352
+			},
+			"800": {
+				"2025": 51027
+			},
+			"900": {
+				"2025": 965470
+			},
+			"920": {
+				"2025": 24513
+			},
+			"950": {
+				"2025": -149311
+			},
+			"050": {
+				"2025": 926763
+			},
+			"TOTAL_OUTLAYS": {
+				"2025": 7265963
+			}
+		}
+	}
+}
