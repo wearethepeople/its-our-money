@@ -36,6 +36,11 @@ model ParticipantAllocation {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // publishing fields
+  publicId      String?   @unique
+  publishedAt   DateTime?
+  unpublishedAt DateTime?
+
   participant Participant                 @relation(fields: [participantId], references: [id], onDelete: Cascade)
   items       ParticipantAllocationItem[]
 
