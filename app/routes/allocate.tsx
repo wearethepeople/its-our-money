@@ -52,15 +52,12 @@ export type AllocationFormInput = z.infer<typeof formSchema>
 
 const SUMMARY_TRIGGER_ID = 'summary'
 
-export async function loader({ params, request }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
 	const { headers, isNew, participantId } =
 		await getOrCreateParticipantSession(request)
 
 	if (!isNew) {
-		const currentAllocation = await getParticipantAllocation(
-			participantId,
-			+params.year,
-		)
+		const currentAllocation = await getParticipantAllocation(participantId)
 
 		if (currentAllocation) {
 			return redirect(href('/juxtapose'))
@@ -135,7 +132,6 @@ export async function action({ request }: Route.ActionArgs) {
 
 	await saveParticipantAllocations({
 		participantId,
-		fiscalYear: 2026,
 		allocations: finalAllocation,
 	})
 

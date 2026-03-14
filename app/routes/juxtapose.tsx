@@ -37,9 +37,8 @@ export default function JuxtaposeRoute({ loaderData }: Route.ComponentProps) {
 			const participantAllocation = allocation.items.find(
 				(a) => a.categoryCode === f.id,
 			)
-
-			const budgetPercent =
-				usBudgetData[f.id]?.bps != null ? usBudgetData[f.id].bps / 100 : null
+			const budgetEntry = usBudgetData[f.id]
+			const budgetPercent = budgetEntry ? budgetEntry.bps / 100 : null
 			const participantPercent =
 				participantAllocation?.weightBps != null
 					? participantAllocation.weightBps / 100

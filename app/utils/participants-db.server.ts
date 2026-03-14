@@ -7,7 +7,6 @@ export type FinalAllocationItem = {
 
 type SaveParticipantAllocationsInput = {
 	participantId: string
-	fiscalYear: number
 	allocations: FinalAllocationItem[]
 }
 
@@ -44,14 +43,10 @@ export async function getParticipantBySessionId(sessionId?: string | null) {
 	return session?.participant ?? null
 }
 
-export async function getParticipantAllocation(
-	participantId: string,
-	year?: number,
-) {
+export async function getParticipantAllocation(participantId: string) {
 	return prisma.participantAllocation.findFirst({
 		where: {
 			participantId,
-			...(year ? { fiscalYear: year } : {}),
 		},
 		orderBy: {
 			createdAt: 'desc',
@@ -64,15 +59,10 @@ export async function getParticipantAllocation(
 
 export async function saveParticipantAllocations({
 	participantId,
-	fiscalYear,
 	allocations,
 }: SaveParticipantAllocationsInput) {
 	if (!participantId) {
 		throw new Error('participantId is required')
-	}
-
-	if (!Number.isInteger(fiscalYear)) {
-		throw new Error('fiscalYear must be an integer')
 	}
 
 	if (!allocations.length) {
@@ -115,20 +105,15 @@ export async function saveParticipantAllocations({
 	return prisma.$transaction(async (tx) => {
 		const allocation = await tx.participantAllocation.upsert({
 			where: {
-				participantId_fiscalYear: {
-					participantId,
-					fiscalYear,
-				},
+				participantId,
 			},
 			create: {
 				participantId,
-				fiscalYear,
 			},
 			update: {},
 			select: {
 				id: true,
 				participantId: true,
-				fiscalYear: true,
 				createdAt: true,
 				updatedAt: true,
 			},
