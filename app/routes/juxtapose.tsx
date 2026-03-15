@@ -10,7 +10,12 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { z } from 'zod'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { getSessionId } from '@/utils/session.server.ts'
-import { getAllocationByParticipantId } from '@/services/allocation-service.server.ts'
+import {
+	AllocationService,
+	AllocationServiceServer,
+} from '@/services/allocation-service.server.ts'
+import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { checkHoneypot } from '@/utils/honeypot.server.ts'
 
 const manageAllocationSchema = z.object({
 	intent: z.enum(['publish', 'unpublish']),
@@ -26,7 +31,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 		await getOrCreateParticipantSession(request)
 
 	if (!isNew) {
-		const allocation = await getAllocationByParticipantId(participantId)
+		const allocation =
+			await AllocationService.getAllocationByParticipantId(participantId)
 
 		if (allocation) {
 			const usBudgetData = getOmbBudgetByCodeForYear(2025)
@@ -82,7 +88,9 @@ export async function action({ request }: Route.ActionArgs) {
 		})
 	}
 
-	const allocation = await getAllocationByParticipantId(participant.id)
+	const allocation = await AllocationService.getAllocationByParticipantId(
+		participant.id,
+	)
 
 	if (!allocation) {
 		return data({
@@ -96,25 +104,76 @@ export async function action({ request }: Route.ActionArgs) {
 		})
 	}
 
+	const allocationOwnedByParticipant =
+		allocation.participantId === participant.id
+	const allocationId = allocation.id
+
 	const formData = await request.formData()
-	formData.set('allocationId', allocation.id)
+	await checkHoneypot(formData)
+	formData.set('allocationId', allocationId)
 
 	const submission = parseWithZod(formData, {
 		schema: manageAllocationSchema,
 	})
 
-	if (submission.status !== 'success') {
+	if (submission.status !== 'success' || !allocationOwnedByParticipant) {
+		const formError = !allocationOwnedByParticipant
+			? 'You do not own this allocation.'
+			: 'Unable to process allocation.'
+
 		return data({
 			resultType: 'error' as const,
 			result: submission.reply({
-				formErrors: ['Unable to process allocation.'],
+				formErrors: [formError],
 			}),
 		})
 	}
 
+	switch (submission.value.intent) {
+		case 'unpublish': {
+			await AllocationService.unpublishAllocation(allocationId)
+
+			return data(
+				{
+					resultType: 'success' as const,
+					result: submission.reply(),
+				},
+				{ status: 200 },
+			)
+		}
+		case 'publish': {
+			try {
+				await AllocationService.publishAllocation(allocationId)
+
+				return data(
+					{
+						resultType: 'success' as const,
+						result: submission.reply(),
+					},
+					{ status: 200 },
+				)
+			} catch (error) {
+				if (error instanceof AllocationServiceServer) {
+					if (error.code === 'PUBLIC_ID_COLLISION') {
+						return data({
+							resultType: 'error' as const,
+							result: submission.reply({
+								formErrors: [
+									'Unable to publish allocation due to a collision with another allocation. Please try again.',
+								],
+							}),
+						})
+					}
+				}
+			}
+		}
+	}
+
 	return data({
-		resultType: 'success' as const,
-		result: submission.reply(),
+		resultType: 'error' as const,
+		result: submission.reply({
+			formErrors: ['Unable to process allocation.'],
+		}),
 	})
 }
 
@@ -125,9 +184,7 @@ export default function JuxtaposeRoute({
 	const { allocation, pairedData } = loaderData
 	const lastResult = actionData?.result
 	const publishState =
-		allocation.publicId && allocation.publishedAt && !allocation.unpublishedAt
-			? 'Published'
-			: 'Unpublished'
+		allocation.publicId && allocation.publishedAt ? 'Published' : 'Unpublished'
 	const publishButtonText =
 		publishState === 'Published' ? 'Unpublish' : 'Publish'
 
@@ -137,11 +194,6 @@ export default function JuxtaposeRoute({
 		},
 		lastResult,
 		onValidate({ formData }) {
-			console.log(
-				'Validation',
-				parseWithZod(formData, { schema: inputFormSchema }),
-			)
-
 			return parseWithZod(formData, { schema: inputFormSchema })
 		},
 		constraint: getZodConstraint(inputFormSchema),
@@ -186,16 +238,32 @@ export default function JuxtaposeRoute({
 					</div>
 					<div>
 						<Form method="post" {...getFormProps(form)}>
+							<HoneypotInputs />
 							<input
-								{...getInputProps(fields.intent, {
-									type: 'hidden',
-								})}
+								type="hidden"
+								name="intent"
+								value={publishButtonText.toLowerCase()}
 							/>
 							<Button>{publishButtonText}</Button>
 						</Form>
 					</div>
 				</div>
+				{allocation.publicId && publishState === 'Published' && (
+					<ShareInfo publicId={allocation.publicId} />
+				)}
 			</section>
+		</div>
+	)
+}
+
+function ShareInfo({ publicId }: { publicId: string }) {
+	return (
+		<div>
+			{'Share this link with your friends to see how they compare to you: '}
+			<br />
+			<a href={`https://itsourmoney.org/s/${publicId}`}>
+				https://itsourmoney.org/s/{publicId}
+			</a>
 		</div>
 	)
 }

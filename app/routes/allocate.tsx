@@ -21,7 +21,7 @@ import {
 	saveParticipantAllocations,
 } from '@/utils/participants-db.server.ts'
 import { getFunctionDetailsById } from '@/utils/budget-data.ts'
-import { getAllocationByParticipantId } from '@/services/allocation-service.server.ts'
+import { AllocationService } from '@/services/allocation-service.server.ts'
 
 type OutlayDrawerPayload = {
 	code: string
@@ -57,7 +57,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 		await getOrCreateParticipantSession(request)
 
 	if (!isNew) {
-		const currentAllocation = await getAllocationByParticipantId(participantId)
+		const currentAllocation =
+			await AllocationService.getAllocationByParticipantId(participantId)
 
 		if (currentAllocation) {
 			return redirect(href('/juxtapose'))
