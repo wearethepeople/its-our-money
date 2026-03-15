@@ -4,6 +4,7 @@ import { getParticipantAllocation } from '@/utils/participants-db.server.ts'
 import { href, redirect } from 'react-router'
 import { FUNCTIONS } from '@/constants/budget-functions.ts'
 import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
+import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const { headers, isNew, participantId } =
@@ -13,7 +14,34 @@ export async function loader({ request }: Route.LoaderArgs) {
 		const allocation = await getParticipantAllocation(participantId)
 
 		if (allocation) {
-			return { allocation }
+			const usBudgetData = getOmbBudgetByCodeForYear(2025)
+			const pairedData = FUNCTIONS.filter((f) => f.allocatable !== false).map(
+				(f) => {
+					const participantAllocation = allocation.items.find(
+						(a) => a.categoryCode === f.id,
+					)
+					const budgetEntry = usBudgetData[f.id]
+					const budgetPercent = budgetEntry ? budgetEntry.bps / 100 : null
+					const participantPercent =
+						participantAllocation?.weightBps != null
+							? participantAllocation.weightBps / 100
+							: null
+					const delta =
+						participantPercent != null && budgetPercent != null
+							? participantPercent - budgetPercent
+							: null
+
+					return {
+						code: f.code,
+						category: f.name,
+						participantPercent: formatPercent(participantPercent),
+						budgetPercent: formatPercent(budgetPercent),
+						delta: formatSignedPercent(delta),
+					}
+				},
+			)
+
+			return { allocation, pairedData }
 		}
 	}
 
@@ -24,39 +52,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function JuxtaposeRoute({ loaderData }: Route.ComponentProps) {
-	const { allocation } = loaderData
-	const usBudgetData = getOmbBudgetByCodeForYear(2025)
+	const { allocation, pairedData } = loaderData
 
-	const formatPercent = (value: number | null) =>
-		value == null ? '-' : `${value.toFixed(1)}%`
-	const formatSignedPercent = (value: number | null) =>
-		value == null ? '-' : `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
-
-	const pairedData = FUNCTIONS.filter((f) => f.allocatable !== false).map(
-		(f) => {
-			const participantAllocation = allocation.items.find(
-				(a) => a.categoryCode === f.id,
-			)
-			const budgetEntry = usBudgetData[f.id]
-			const budgetPercent = budgetEntry ? budgetEntry.bps / 100 : null
-			const participantPercent =
-				participantAllocation?.weightBps != null
-					? participantAllocation.weightBps / 100
-					: null
-			const delta =
-				participantPercent != null && budgetPercent != null
-					? participantPercent - budgetPercent
-					: null
-
-			return {
-				code: f.code,
-				category: f.name,
-				participantPercent: formatPercent(participantPercent),
-				budgetPercent: formatPercent(budgetPercent),
-				delta: formatSignedPercent(delta),
-			}
-		},
-	)
+	console.log('allocation', allocation)
+	console.log('pairedData', pairedData)
 
 	return (
 		<div>
