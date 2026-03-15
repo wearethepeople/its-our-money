@@ -1,9 +1,6 @@
 import { Route } from './+types/juxtapose'
 import { getOrCreateParticipantSession } from '@/utils/participant-session.server.ts'
-import {
-	getParticipantAllocation,
-	getParticipantBySessionId,
-} from '@/utils/participants-db.server.ts'
+import { getParticipantBySessionId } from '@/utils/participants-db.server.ts'
 import { href, redirect, Form, data } from 'react-router'
 import { FUNCTIONS } from '@/constants/budget-functions.ts'
 import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
@@ -13,6 +10,7 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { z } from 'zod'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { getSessionId } from '@/utils/session.server.ts'
+import { getAllocationByParticipantId } from '@/services/allocation-service.server.ts'
 
 const manageAllocationSchema = z.object({
 	intent: z.enum(['publish', 'unpublish']),
@@ -28,7 +26,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		await getOrCreateParticipantSession(request)
 
 	if (!isNew) {
-		const allocation = await getParticipantAllocation(participantId)
+		const allocation = await getAllocationByParticipantId(participantId)
 
 		if (allocation) {
 			const usBudgetData = getOmbBudgetByCodeForYear(2025)
@@ -84,7 +82,7 @@ export async function action({ request }: Route.ActionArgs) {
 		})
 	}
 
-	const allocation = await getParticipantAllocation(participant.id)
+	const allocation = await getAllocationByParticipantId(participant.id)
 
 	if (!allocation) {
 		return data({

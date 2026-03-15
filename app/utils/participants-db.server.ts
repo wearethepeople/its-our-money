@@ -43,20 +43,6 @@ export async function getParticipantBySessionId(sessionId?: string | null) {
 	return session?.participant ?? null
 }
 
-export async function getParticipantAllocation(participantId: string) {
-	return prisma.participantAllocation.findFirst({
-		where: {
-			participantId,
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-		include: {
-			items: true,
-		},
-	})
-}
-
 export async function saveParticipantAllocations({
 	participantId,
 	allocations,
