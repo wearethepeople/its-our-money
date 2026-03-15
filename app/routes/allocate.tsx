@@ -13,15 +13,16 @@ import { Icon } from '@/ui/icon'
 import { ConformSlider } from '@/ui/conform-slider.tsx'
 import { checkHoneypot } from '@/utils/honeypot.server'
 import { normalizeToBasisPoints, sum } from '@/utils/normalize-weights.ts'
-import { getOrCreateParticipantSession } from '@/utils/participant-session.server.ts'
+import {
+	getOrCreateParticipantSession,
+	getParticipantBySession,
+} from '@/utils/participant-session.server.ts'
 
 import { type Route } from './+types/allocate'
-import {
-	FinalAllocationItem,
-	saveParticipantAllocations,
-} from '@/utils/participants-db.server.ts'
 import { getFunctionDetailsById } from '@/utils/budget-data.ts'
 import { AllocationService } from '@/services/allocation-service.server.ts'
+import { ParticipantService } from '@/services/participant-service.server.ts'
+import type { FinalAllocationItem } from '@/services/participant-service.server.ts'
 
 type OutlayDrawerPayload = {
 	code: string
@@ -53,19 +54,18 @@ export type AllocationFormInput = z.infer<typeof formSchema>
 const SUMMARY_TRIGGER_ID = 'summary'
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const { headers, isNew, participantId } =
-		await getOrCreateParticipantSession(request)
+	const participant = await getParticipantBySession(request)
 
-	if (!isNew) {
+	if (participant) {
 		const currentAllocation =
-			await AllocationService.getAllocationByParticipantId(participantId)
+			await AllocationService.getAllocationByParticipantId(participant.id)
 
 		if (currentAllocation) {
 			return redirect(href('/juxtapose'))
 		}
 	}
 
-	return data({}, { headers })
+	return data({})
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -84,7 +84,7 @@ export async function action({ request }: Route.ActionArgs) {
 					formErrors: ['There was a problem processing your allocations.'],
 				}),
 			},
-			{ status: 400 },
+			{ headers, status: 400 },
 		)
 	}
 
@@ -114,7 +114,7 @@ export async function action({ request }: Route.ActionArgs) {
 					formErrors: ['Unable to normalize allocations.'],
 				}),
 			},
-			{ status: 400 },
+			{ headers, status: 400 },
 		)
 	}
 
@@ -127,16 +127,16 @@ export async function action({ request }: Route.ActionArgs) {
 					formErrors: ['Unable to normalize allocations.'],
 				}),
 			},
-			{ status: 400 },
+			{ headers, status: 400 },
 		)
 	}
 
-	await saveParticipantAllocations({
+	await ParticipantService.saveParticipantAllocations({
 		participantId,
 		allocations: finalAllocation,
 	})
 
-	return redirect('/juxtapose')
+	return redirect(href('/juxtapose'), { headers })
 }
 
 const normalizedDialogHandle = Dialog.createHandle()

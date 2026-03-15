@@ -1,12 +1,18 @@
 import {
-	createParticipant,
-	getParticipantBySessionId,
-} from '@/utils/participants-db.server'
-import {
 	commitSessionIdCookie,
 	creatSessionRecord,
 	getSessionId,
 } from '@/utils/session.server'
+import { ParticipantService } from '@/services/participant-service.server.ts'
+
+/**
+ * Reads the current request's participant session without creating anything.
+ * Returns the participant when the session cookie maps to a valid, non-expired DB session.
+ */
+export async function getParticipantBySession(request: Request) {
+	const sessionId = await getSessionId(request)
+	return ParticipantService.getParticipantBySessionId(sessionId)
+}
 
 /**
  * Ensures this request is associated with a Participant.
@@ -24,14 +30,15 @@ export async function getOrCreateParticipantSession(request: Request): Promise<{
 
 	// 1) Try to hydrate via an existing cookie-backed DB session
 	const sessionId = await getSessionId(request)
-	const participant = await getParticipantBySessionId(sessionId)
+	const participant =
+		await ParticipantService.getParticipantBySessionId(sessionId)
 
 	if (participant) {
 		return { participantId: participant.id, headers, isNew: false }
 	}
 
 	// 2) Otherwise, create a new Participant + DB Session and set the session cookie
-	const newParticipant = await createParticipant()
+	const newParticipant = await ParticipantService.createParticipant()
 	const dbSession = await creatSessionRecord({
 		participantId: newParticipant.id,
 	})

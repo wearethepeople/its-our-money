@@ -1,6 +1,8 @@
 import { Route } from './+types/juxtapose'
-import { getOrCreateParticipantSession } from '@/utils/participant-session.server.ts'
-import { getParticipantBySessionId } from '@/utils/participants-db.server.ts'
+import {
+	getOrCreateParticipantSession,
+	getParticipantBySession,
+} from '@/utils/participant-session.server.ts'
 import { href, redirect, Form, data } from 'react-router'
 import { FUNCTIONS } from '@/constants/budget-functions.ts'
 import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
@@ -16,6 +18,7 @@ import {
 } from '@/services/allocation-service.server.ts'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { checkHoneypot } from '@/utils/honeypot.server.ts'
+import { ParticipantService } from '@/services/participant-service.server.ts'
 
 const manageAllocationSchema = z.object({
 	intent: z.enum(['publish', 'unpublish']),
@@ -27,12 +30,12 @@ const inputFormSchema = manageAllocationSchema.omit({
 })
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const { headers, isNew, participantId } =
-		await getOrCreateParticipantSession(request)
+	const participant = await getParticipantBySession(request)
 
-	if (!isNew) {
-		const allocation =
-			await AllocationService.getAllocationByParticipantId(participantId)
+	if (participant) {
+		const allocation = await AllocationService.getAllocationByParticipantId(
+			participant.id,
+		)
 
 		if (allocation) {
 			const usBudgetData = getOmbBudgetByCodeForYear(2025)
@@ -68,13 +71,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	return redirect(
 		href('/allocate/:year', { year: new Date().getFullYear().toString() }),
-		{ headers },
 	)
 }
 
 export async function action({ request }: Route.ActionArgs) {
 	const sessionId = await getSessionId(request)
-	const participant = await getParticipantBySessionId(sessionId)
+	const participant =
+		await ParticipantService.getParticipantBySessionId(sessionId)
 
 	if (!participant) {
 		return data({
