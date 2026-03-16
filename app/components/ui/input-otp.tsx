@@ -1,7 +1,7 @@
 import { OTPInput, OTPInputContext } from 'input-otp'
 import * as React from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@/utils/misc.tsx'
 
 const InputOTP = ({
 	className,

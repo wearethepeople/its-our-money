@@ -1,8 +1,8 @@
 import { promises as fs, constants } from 'node:fs'
 import { invariantResponse } from '@epic-web/invariant'
 import { getImgResponse } from 'openimg/node'
-import { getDomainUrl } from '#app/utils/misc.tsx'
-import { getSignedGetRequestInfo } from '#app/utils/storage.server.ts'
+import { getDomainUrl } from '@/utils/misc.tsx'
+import { getSignedGetRequestInfo } from '@/utils/storage.server.ts'
 import { type Route } from './+types/images'
 
 let cacheDir: string | null = null

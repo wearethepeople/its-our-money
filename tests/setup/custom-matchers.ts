@@ -1,14 +1,14 @@
 import * as setCookieParser from 'set-cookie-parser'
 import { expect } from 'vitest'
-import { sessionKey } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
-import { authSessionStorage } from '#app/utils/session.server.ts'
+import { sessionKey } from '@/utils/auth.server.ts'
+import { prisma } from '@/utils/db.server.ts'
+import { sessionStorage } from '@/utils/session.server.ts'
 import {
 	type ToastInput,
 	toastSessionStorage,
 	toastKey,
-} from '#app/utils/toast.server.ts'
-import { convertSetCookieToCookie } from '#tests/utils.ts'
+} from '@/utils/toast.server.ts'
+import { convertSetCookieToCookie } from '@/tests/utils.ts'
 
 import '@testing-library/jest-dom/vitest'
 
@@ -76,7 +76,7 @@ expect.extend({
 				)} but got ${this.utils.printReceived(location)}`,
 		}
 	},
-	async toHaveSessionForUser(response: Response, userId: string) {
+	async toHaveSessionForUser(response: Response, participantId: string) {
 		const setCookies = response.headers.getSetCookie()
 		const sessionSetCookie = setCookies.find(
 			(c) => setCookieParser.parseString(c).name === 'en_session',
@@ -92,7 +92,7 @@ expect.extend({
 			}
 		}
 
-		const authSession = await authSessionStorage.getSession(
+		const authSession = await sessionStorage.getSession(
 			convertSetCookieToCookie(sessionSetCookie),
 		)
 		const sessionValue = authSession.get(sessionKey)
@@ -106,7 +106,7 @@ expect.extend({
 
 		const session = await prisma.session.findUnique({
 			select: { id: true },
-			where: { userId, id: sessionValue },
+			where: { participantId, id: sessionValue },
 		})
 
 		return {
@@ -114,7 +114,7 @@ expect.extend({
 			message: () =>
 				`A session was${
 					this.isNot ? ' not' : ''
-				} created in the database for ${userId}`,
+				} created in the database for ${participantId}`,
 		}
 	},
 	async toSendToast(response: Response, toast: ToastInput) {
@@ -159,7 +159,7 @@ expect.extend({
 
 interface CustomMatchers<R = unknown> {
 	toHaveRedirect(redirectTo: string | null): R
-	toHaveSessionForUser(userId: string): Promise<R>
+	toHaveSessionForUser(participantId: string): Promise<R>
 	toSendToast(toast: ToastInput): Promise<R>
 }
 

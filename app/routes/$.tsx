@@ -6,8 +6,8 @@
 // message for them than the Remix and/or browser default.
 
 import { href, Link, redirect, useLocation } from 'react-router'
-import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { Icon } from '#app/components/ui/icon.tsx'
+import { GeneralErrorBoundary } from '@/components/error-boundary.tsx'
+import { Icon } from '@/components/ui/icon.tsx'
 
 import { type Route } from './+types/$'
 

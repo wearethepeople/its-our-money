@@ -1,11 +1,11 @@
 import 'dotenv/config'
 import './db-setup.ts'
-import '#app/utils/env.server.ts'
+import '@/utils/env.server.ts'
 // we need these to be imported first 👆
 
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi, type MockInstance } from 'vitest'
-import { server } from '#tests/mocks/index.ts'
+import { server } from '@/tests/mocks/index.ts'
 import './custom-matchers.ts'
 
 afterEach(() => server.resetHandlers())

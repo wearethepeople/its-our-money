@@ -1,5 +1,5 @@
 import { generateSitemap } from '@nasa-gcn/remix-seo'
-import { getDomainUrl } from '#app/utils/misc.tsx'
+import { getDomainUrl } from '@/utils/misc.tsx'
 import { type Route } from './+types/sitemap[.]xml.ts'
 
 export async function loader({ request, context }: Route.LoaderArgs) {

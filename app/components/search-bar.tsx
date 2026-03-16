@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { Form, useSearchParams, useSubmit } from 'react-router'
-import { useDebounce, useIsPending } from '#app/utils/misc.tsx'
+import { useDebounce, useIsPending } from '@/utils/misc.tsx'
 import { Icon } from './ui/icon.tsx'
 import { Input } from './ui/input.tsx'
 import { Label } from './ui/label.tsx'

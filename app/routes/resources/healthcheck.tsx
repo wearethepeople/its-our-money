@@ -1,5 +1,5 @@
 // learn more: https://fly.io/docs/reference/configuration/#services-http_checks
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@/utils/db.server.ts'
 import { type Route } from './+types/healthcheck.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -10,7 +10,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		// if we can connect to the database and make a simple query
 		// and make a HEAD request to ourselves, then we're good.
 		await Promise.all([
-			prisma.user.count(),
+			prisma.participant.count(),
 			fetch(`${new URL(request.url).protocol}${host}`, {
 				method: 'HEAD',
 				headers: { 'X-Healthcheck': 'true' },

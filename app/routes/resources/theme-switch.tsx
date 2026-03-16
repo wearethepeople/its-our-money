@@ -4,13 +4,10 @@ import { invariantResponse } from '@epic-web/invariant'
 import { data, redirect, useFetcher, useFetchers } from 'react-router'
 import { ServerOnly } from 'remix-utils/server-only'
 import { z } from 'zod'
-import { Icon } from '#app/components/ui/icon.tsx'
-import { useHints, useOptionalHints } from '#app/utils/client-hints.tsx'
-import {
-	useOptionalRequestInfo,
-	useRequestInfo,
-} from '#app/utils/request-info.ts'
-import { type Theme, setTheme } from '#app/utils/theme.server.ts'
+import { Icon } from '@/components/ui/icon.tsx'
+import { useHints, useOptionalHints } from '@/utils/client-hints.tsx'
+import { useOptionalRequestInfo, useRequestInfo } from '@/utils/request-info.ts'
+import { type Theme, setTheme } from '@/utils/theme.server.ts'
 import { type Route } from './+types/theme-switch.ts'
 const ThemeFormSchema = z.object({
 	theme: z.enum(['system', 'light', 'dark']),

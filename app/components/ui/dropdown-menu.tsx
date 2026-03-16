@@ -1,7 +1,7 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import * as React from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@/utils/misc.tsx'
 
 function DropdownMenu(
 	props: React.ComponentProps<typeof DropdownMenuPrimitive.Root>,
