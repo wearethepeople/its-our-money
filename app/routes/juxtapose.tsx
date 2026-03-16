@@ -1,14 +1,11 @@
 import { Route } from './+types/juxtapose'
-import {
-	getOrCreateParticipantSession,
-	getParticipantBySession,
-} from '@/utils/participant-session.server.ts'
+import { getParticipantBySession } from '@/utils/participant-session.server.ts'
 import { href, redirect, Form, data } from 'react-router'
 import { FUNCTIONS } from '@/constants/budget-functions.ts'
 import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
 import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
 import { Button } from '@/ui/button.tsx'
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getFormProps, useForm } from '@conform-to/react'
 import { z } from 'zod'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { getSessionId } from '@/utils/session.server.ts'
@@ -19,6 +16,7 @@ import {
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { checkHoneypot } from '@/utils/honeypot.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
+import CompareAllocation from '@/components/compare-allocation.tsx'
 
 const manageAllocationSchema = z.object({
 	intent: z.enum(['publish', 'unpublish']),
@@ -38,32 +36,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 		)
 
 		if (allocation) {
-			const usBudgetData = getOmbBudgetByCodeForYear(2025)
-			const pairedData = FUNCTIONS.filter((f) => f.allocatable !== false).map(
-				(f) => {
-					const participantAllocation = allocation.items.find(
-						(a) => a.categoryCode === f.id,
-					)
-					const budgetEntry = usBudgetData[f.id]
-					const budgetPercent = budgetEntry ? budgetEntry.bps / 100 : null
-					const participantPercent =
-						participantAllocation?.weightBps != null
-							? participantAllocation.weightBps / 100
-							: null
-					const delta =
-						participantPercent != null && budgetPercent != null
-							? participantPercent - budgetPercent
-							: null
-
-					return {
-						code: f.code,
-						category: f.name,
-						participantPercent: formatPercent(participantPercent),
-						budgetPercent: formatPercent(budgetPercent),
-						delta: formatSignedPercent(delta),
-					}
-				},
-			)
+			const pairedData =
+				await AllocationService.zipAllocationWithUsFiscalBudget(allocation)
 
 			return { allocation, pairedData }
 		}
@@ -205,28 +179,7 @@ export default function JuxtaposeRoute({
 	return (
 		<div>
 			<h1>You & the US Fiscal Budget</h1>
-			<table>
-				<thead>
-					<tr className="font-semibold">
-						<td>Code</td>
-						<td>Category</td>
-						<td>Yours %</td>
-						<td>Theirs %</td>
-						<td>Delta %</td>
-					</tr>
-				</thead>
-				<tbody>
-					{pairedData.map((d) => (
-						<tr key={d.code} className="text-center">
-							<td>{d.code}</td>
-							<td className="text-left">{d.category}</td>
-							<td>{d.participantPercent}</td>
-							<td>{d.budgetPercent}</td>
-							<td>{d.delta}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
+			<CompareAllocation className="mt-8" pairedData={pairedData} />
 			<section className="mt-12">
 				<h2>Publish settings</h2>
 				<div className="flex flex-row gap-4">
@@ -264,8 +217,8 @@ function ShareInfo({ publicId }: { publicId: string }) {
 		<div>
 			{'Share this link with your friends to see how they compare to you: '}
 			<br />
-			<a href={`https://itsourmoney.org/s/${publicId}`}>
-				https://itsourmoney.org/s/{publicId}
+			<a href={`http://localhost:3000/s/${publicId}`}>
+				http://localhost:3000/s/{publicId}
 			</a>
 		</div>
 	)

@@ -3,6 +3,11 @@ import { Prisma } from '@prisma/client'
 
 import { MAX_PUBLIC_ID_RETRIES } from '@/constants'
 import { prisma } from '@/utils/db.server.ts'
+import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
+import { FUNCTIONS } from '@/constants/budget-functions.ts'
+import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
+import { invariant } from '@epic-web/invariant'
+import type { PairedAllocationData } from '@/components/compare-allocation.tsx'
 
 export namespace AllocationService {
 	export async function getAllocationByParticipantId(participantId: string) {
@@ -62,6 +67,39 @@ export namespace AllocationService {
 				publishedAt: null,
 				unpublishedAt: new Date(),
 			},
+		})
+	}
+
+	export async function zipAllocationWithUsFiscalBudget(
+		allocation: Awaited<ReturnType<typeof getAllocationByParticipantId>>,
+		year: number = 2025,
+	): Promise<PairedAllocationData[]> {
+		invariant(allocation, 'Missing allocation')
+
+		const usBudgetData = getOmbBudgetByCodeForYear(2025)
+
+		return FUNCTIONS.filter((f) => f.allocatable !== false).map((f) => {
+			const participantAllocation = allocation.items.find(
+				(a) => a.categoryCode === f.id,
+			)
+			const budgetEntry = usBudgetData[f.id]
+			const budgetPercent = budgetEntry ? budgetEntry.bps / 100 : null
+			const participantPercent =
+				participantAllocation?.weightBps != null
+					? participantAllocation.weightBps / 100
+					: null
+			const delta =
+				participantPercent != null && budgetPercent != null
+					? participantPercent - budgetPercent
+					: null
+
+			return {
+				code: f.code,
+				category: f.name,
+				participantPercent: formatPercent(participantPercent),
+				budgetPercent: formatPercent(budgetPercent),
+				delta: formatSignedPercent(delta),
+			}
 		})
 	}
 }
