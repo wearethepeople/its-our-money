@@ -9,11 +9,12 @@ datasource db {
 }
 
 model Participant {
-  id          String                  @id @default(cuid())
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
-  sessions    Session[]
-  allocations ParticipantAllocation[]
+  id            String                  @id @default(cuid())
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  sessions      Session[]
+  allocations   ParticipantAllocation[]
+  recoveryToken RecoveryToken?
 
   @@map("participant")
 }
@@ -60,4 +61,18 @@ model ParticipantAllocationItem {
   @@id([allocationId, categoryCode])
   @@index([categoryCode])
   @@map("participant_allocation_items")
+}
+
+model RecoveryToken {
+  id            String    @id @default(cuid())
+  participantId String    @unique
+  selector      String    @unique
+  verifierHash  String
+  createdAt     DateTime  @default(now())
+  lastUsedAt    DateTime?
+  revokedAt     DateTime?
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
 }
