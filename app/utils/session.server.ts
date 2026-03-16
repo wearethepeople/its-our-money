@@ -43,7 +43,7 @@ export async function getSessionId(request: Request) {
 	return typeof sessionId === 'string' && sessionId.length ? sessionId : null
 }
 
-export async function creatSessionRecord({
+export async function createSessionRecord({
 	participantId,
 	ttlMs = 1000 * 60 * 60 * 24 * 30, // 30 days
 }: {

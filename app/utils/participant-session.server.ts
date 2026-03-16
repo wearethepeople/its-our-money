@@ -1,6 +1,6 @@
 import {
 	commitSessionIdCookie,
-	creatSessionRecord,
+	createSessionRecord,
 	getSessionId,
 } from '@/utils/session.server'
 import { ParticipantService } from '@/services/participant-service.server.ts'
@@ -39,7 +39,7 @@ export async function getOrCreateParticipantSession(request: Request): Promise<{
 
 	// 2) Otherwise, create a new Participant + DB Session and set the session cookie
 	const newParticipant = await ParticipantService.createParticipant()
-	const dbSession = await creatSessionRecord({
+	const dbSession = await createSessionRecord({
 		participantId: newParticipant.id,
 	})
 

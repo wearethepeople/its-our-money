@@ -68,6 +68,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@tusbar/cache-control": "^2.0.0",
     "address": "^2.0.3",
+    "argon2": "^0.44.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "close-with-grace": "^2.4.0",
