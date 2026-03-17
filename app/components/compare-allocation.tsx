@@ -1,3 +1,5 @@
+import { sum } from '@/utils/normalize-weights.ts'
+
 export type PairedAllocationData = {
 	code: string
 	category: string
@@ -34,6 +36,15 @@ export default function CompareAllocation({
 						<td>{d.delta}</td>
 					</tr>
 				))}
+				<tr className="border-t text-center">
+					<td></td>
+					<td></td>
+					<td>
+						{sum(pairedData.map((d) => parseFloat(d.participantPercent)))}%
+					</td>
+					<td>{sum(pairedData.map((d) => parseFloat(d.budgetPercent)))}%</td>
+					<td></td>
+				</tr>
 			</tbody>
 		</table>
 	)
