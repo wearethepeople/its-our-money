@@ -29,6 +29,15 @@ type DocRequestArgs = Parameters<HandleDocumentRequestFunction>
 export default async function handleRequest(...args: DocRequestArgs) {
 	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
 		args
+
+	// Make the root the canonical URL
+	const url = new URL(request.url)
+
+	if (url.hostname === 'www.itsourmoney.org') {
+		url.hostname = 'itsourmoney.org'
+		return Response.redirect(url.toString(), 301)
+	}
+
 	const { currentInstance, primaryInstance } = await getInstanceInfo()
 	responseHeaders.set('fly-region', process.env.FLY_REGION ?? 'unknown')
 	responseHeaders.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
