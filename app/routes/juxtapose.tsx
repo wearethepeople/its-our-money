@@ -29,6 +29,10 @@ const inputFormSchema = manageAllocationSchema.omit({
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const participant = await getParticipantBySession(request)
+	const url =
+		process.env.NODE_ENV === 'production'
+			? 'https://itsourmoney.org'
+			: 'http://localhost:3000'
 
 	if (participant) {
 		const allocation = await AllocationService.getAllocationByParticipantId(
@@ -39,7 +43,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			const pairedData =
 				await AllocationService.zipAllocationWithUsFiscalBudget(allocation)
 
-			return { allocation, pairedData }
+			return { allocation, pairedData, url }
 		}
 	}
 
@@ -158,7 +162,7 @@ export default function JuxtaposeRoute({
 	actionData,
 	loaderData,
 }: Route.ComponentProps) {
-	const { allocation, pairedData } = loaderData
+	const { allocation, pairedData, url } = loaderData
 	const lastResult = actionData?.result
 	const publishState =
 		allocation.publicId && allocation.publishedAt ? 'Published' : 'Unpublished'
@@ -205,20 +209,20 @@ export default function JuxtaposeRoute({
 					</div>
 				</div>
 				{allocation.publicId && publishState === 'Published' && (
-					<ShareInfo publicId={allocation.publicId} />
+					<ShareInfo publicId={allocation.publicId} url={url} />
 				)}
 			</section>
 		</div>
 	)
 }
 
-function ShareInfo({ publicId }: { publicId: string }) {
+function ShareInfo({ publicId, url }: { publicId: string; url: string }) {
 	return (
 		<div>
 			{'Share this link with your friends to see how they compare to you: '}
 			<br />
-			<a href={`http://localhost:3000/s/${publicId}`}>
-				http://localhost:3000/s/{publicId}
+			<a href={`${url}/s/${publicId}`}>
+				{url}/s/{publicId}
 			</a>
 		</div>
 	)
