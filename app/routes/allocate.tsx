@@ -320,7 +320,7 @@ export default function AllocateRoute() {
 				>
 					<Dialog.Portal>
 						<Dialog.Backdrop className="fixed inset-0 min-h-dvh bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute dark:opacity-70" />
-						<Dialog.Popup className="fixed top-1/2 left-1/2 -mt-8 w-lg max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-gray-50 p-6 text-gray-900 outline outline-1 outline-gray-200 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 dark:outline-gray-300">
+						<Dialog.Popup className="fixed top-1/2 left-1/2 -mt-8 flex max-h-[calc(100dvh-2rem)] w-lg max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-gray-50 p-6 text-gray-900 outline outline-1 outline-gray-200 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 dark:outline-gray-300">
 							<Dialog.Title className="-mt-1.5 mb-1 text-lg font-medium">
 								Your allocations as percentages
 							</Dialog.Title>
@@ -330,12 +330,15 @@ export default function AllocateRoute() {
 								working" button otherwise click "Submit" to see how your budget
 								compares to the actual US budget.
 							</Dialog.Description>
-							<div>
+							<div className="min-h-0 overflow-y-auto pr-1">
 								{previewAllocations.map((allocation) => {
 									const data = getFunctionDetailsById(allocation.id)
 
 									return (
-										<div className="even:[&>div]:bg-muted" key={allocation.id}>
+										<div
+											className="even:[&>div]:bg-muted-foreground"
+											key={allocation.id}
+										>
 											<div className="flex items-center p-2">
 												<strong className="grow">{data?.name}</strong>
 												<span>{allocation.percent}%</span>
@@ -344,7 +347,7 @@ export default function AllocateRoute() {
 									)
 								})}
 							</div>
-							<div className="mt-8 flex justify-end gap-4">
+							<div className="mt-8 flex shrink-0 justify-end gap-4">
 								<Dialog.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
 									Keep Working
 								</Dialog.Close>

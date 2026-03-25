@@ -34,6 +34,7 @@ import { useNonce } from './utils/nonce-provider.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
+import { getParticipantBySession } from '@/utils/participant-session.server.ts'
 
 export const links: Route.LinksFunction = () => {
 	return [
@@ -57,8 +58,11 @@ export const links: Route.LinksFunction = () => {
 
 export const meta: Route.MetaFunction = ({ data }) => {
 	return [
-		{ title: data ? 'Epic Notes' : 'Error | Epic Notes' },
-		{ name: 'description', content: `Your own captain's log` },
+		{ title: data ? `It’s Our Money` : 'Error | It’s Our Money' },
+		{
+			name: 'description',
+			content: `It’s our money. A We (ARE) the People civic identity project.`,
+		},
 	]
 }
 
@@ -66,6 +70,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const timings = makeTimings('root loader')
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const honeyProps = await honeypot.getInputProps()
+	const participant = await getParticipantBySession(request)
 
 	return data(
 		{
@@ -78,6 +83,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 				},
 			},
 			ENV: getEnv(),
+			participant,
 			toast,
 			honeyProps,
 		},
@@ -161,14 +167,14 @@ function App() {
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<div>
 							<h1>
-								<Link to="/">It’s our money</Link>
+								<Link to="/">It’s Our Money</Link>
 							</h1>
 						</div>
-						<div>
-							<Link to={href('/allocate/:year', { year: '2026' })}>
-								Allocate 2026
-							</Link>
-						</div>
+						{data.participant && (
+							<div>
+								<Link to={href('/juxtapose')}>Your allocation</Link>
+							</div>
+						)}
 					</nav>
 				</header>
 

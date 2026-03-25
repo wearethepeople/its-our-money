@@ -2,6 +2,7 @@ import { type RouteConfig, index, route } from '@react-router/dev/routes'
 
 export default [
 	index('./routes/index.tsx'),
+	route('bridge', './routes/bridge.tsx'),
 	route('allocate/:year', './routes/allocate.tsx'),
 	route('juxtapose', './routes/juxtapose.tsx'),
 	route('s/:publicId', './routes/share-allocation.route.tsx'),
