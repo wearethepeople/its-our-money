@@ -1,13 +1,13 @@
-import { nanoid } from 'nanoid'
-import { Prisma } from '@prisma/client'
-
-import { MAX_PUBLIC_ID_RETRIES } from '@/constants'
-import { prisma } from '@/utils/db.server.ts'
-import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
-import { FUNCTIONS } from '@/constants/budget-functions.ts'
-import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
 import { invariant } from '@epic-web/invariant'
-import type { PairedAllocationData } from '@/components/compare-allocation.tsx'
+import { Prisma } from '@prisma/client'
+import { nanoid } from 'nanoid'
+
+import { type PairedAllocationData } from '@/components/compare-allocation.tsx'
+import { MAX_PUBLIC_ID_RETRIES } from '@/constants'
+import { FUNCTIONS } from '@/constants/budget-functions.ts'
+import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
+import { prisma } from '@/utils/db.server.ts'
+import { sum } from '@/utils/normalize-weights.ts'
 
 export namespace AllocationService {
 	export async function getAllocationByParticipantId(participantId: string) {
@@ -76,29 +76,32 @@ export namespace AllocationService {
 	): Promise<PairedAllocationData[]> {
 		invariant(allocation, 'Missing allocation')
 
-		const usBudgetData = getOmbBudgetByCodeForYear(2025)
+		const usBudgetData = getOmbBudgetByCodeForYear(year)
+		const allocatableFunctions = FUNCTIONS.filter((f) => f.allocatable !== false)
+		const allocatableBudgetBpsTotal = sum(
+			allocatableFunctions.map((f) => usBudgetData[f.id]?.bps ?? 0),
+		)
 
-		return FUNCTIONS.filter((f) => f.allocatable !== false).map((f) => {
+		invariant(
+			allocatableBudgetBpsTotal > 0,
+			'Allocatable budget total must be greater than zero',
+		)
+
+		return allocatableFunctions.map((f) => {
 			const participantAllocation = allocation.items.find(
 				(a) => a.categoryCode === f.id,
-			)
-			const budgetEntry = usBudgetData[f.id]
-			const budgetPercent = budgetEntry ? budgetEntry.bps / 100 : null
-			const participantPercent =
-				participantAllocation?.weightBps != null
-					? participantAllocation.weightBps / 100
-					: null
-			const delta =
-				participantPercent != null && budgetPercent != null
-					? participantPercent - budgetPercent
-					: null
+			) || { weightBps: 0 }
+			const budgetBps = usBudgetData[f.id]?.bps ?? 0
+			const budgetPercent = (budgetBps / allocatableBudgetBpsTotal) * 100
+			const participantPercent = participantAllocation.weightBps / 100
+			const delta = participantPercent - budgetPercent
 
 			return {
 				code: f.code,
 				category: f.name,
-				participantPercent: formatPercent(participantPercent),
-				budgetPercent: formatPercent(budgetPercent),
-				delta: formatSignedPercent(delta),
+				participantPercent,
+				budgetPercent,
+				delta,
 			}
 		})
 	}
