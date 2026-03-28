@@ -16,7 +16,10 @@ import {
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { checkHoneypot } from '@/utils/honeypot.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
-import CompareAllocation from '@/components/compare-allocation.tsx'
+import CompareAllocation, {
+	StackedVisualComparison,
+} from '@/components/compare-allocation.tsx'
+import { useMemo, useState } from 'react'
 
 const manageAllocationSchema = z.object({
 	intent: z.enum(['publish', 'unpublish']),
@@ -163,11 +166,35 @@ export default function JuxtaposeRoute({
 	loaderData,
 }: Route.ComponentProps) {
 	const { allocation, pairedData, url } = loaderData
+	const [sortMode, setSortMode] = useState<
+		'participantPercent' | 'budgetPercent' | 'delta' | 'category'
+	>('participantPercent')
+	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 	const lastResult = actionData?.result
 	const publishState =
 		allocation.publicId && allocation.publishedAt ? 'Published' : 'Unpublished'
 	const publishButtonText =
 		publishState === 'Published' ? 'Unpublish' : 'Publish'
+	const sortedPairedData = useMemo(() => {
+		const direction = sortDirection === 'asc' ? 1 : -1
+		return [...pairedData].sort((a, b) => {
+			if (sortMode === 'category') {
+				return a.category.localeCompare(b.category) * direction
+			}
+			return (a[sortMode] - b[sortMode]) * direction
+		})
+	}, [pairedData, sortDirection, sortMode])
+
+	function handleSortModeClick(
+		mode: 'participantPercent' | 'budgetPercent' | 'delta' | 'category',
+	) {
+		if (mode === sortMode) {
+			setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+			return
+		}
+		setSortMode(mode)
+		setSortDirection('desc')
+	}
 
 	const [form, fields] = useForm({
 		defaultValue: {
@@ -183,7 +210,38 @@ export default function JuxtaposeRoute({
 	return (
 		<div>
 			<h1>You & the US Fiscal Budget</h1>
-			<CompareAllocation className="mt-8" pairedData={pairedData} />
+			<div className="mt-4 flex flex-wrap gap-2">
+				<Button
+					type="button"
+					variant={sortMode === 'participantPercent' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('participantPercent')}
+				>
+					Me {sortMode === 'participantPercent' ? `(${sortDirection})` : ''}
+				</Button>
+				<Button
+					type="button"
+					variant={sortMode === 'budgetPercent' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('budgetPercent')}
+				>
+					Gov {sortMode === 'budgetPercent' ? `(${sortDirection})` : ''}
+				</Button>
+				<Button
+					type="button"
+					variant={sortMode === 'delta' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('delta')}
+				>
+					Delta {sortMode === 'delta' ? `(${sortDirection})` : ''}
+				</Button>
+				<Button
+					type="button"
+					variant={sortMode === 'category' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('category')}
+				>
+					Category {sortMode === 'category' ? `(${sortDirection})` : ''}
+				</Button>
+			</div>
+			<CompareAllocation className="mt-8" pairedData={sortedPairedData} />
+			{/*<StackedVisualComparison className="mt-8" pairedData={sortedPairedData} />*/}
 			<section className="mt-12">
 				<h2>Publish settings</h2>
 				<div className="flex flex-row gap-4">
