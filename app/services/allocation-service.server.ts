@@ -77,7 +77,9 @@ export namespace AllocationService {
 		invariant(allocation, 'Missing allocation')
 
 		const usBudgetData = getOmbBudgetByCodeForYear(year)
-		const allocatableFunctions = FUNCTIONS.filter((f) => f.allocatable !== false)
+		const allocatableFunctions = FUNCTIONS.filter(
+			(f) => f.allocatable !== false,
+		)
 		const allocatableBudgetBpsTotal = sum(
 			allocatableFunctions.map((f) => usBudgetData[f.id]?.bps ?? 0),
 		)
@@ -99,6 +101,7 @@ export namespace AllocationService {
 			return {
 				code: f.code,
 				category: f.name,
+				id: f.id,
 				participantPercent,
 				budgetPercent,
 				delta,
