@@ -1,6 +1,6 @@
 import { Route } from './+types/juxtapose'
 import { getParticipantBySession } from '@/utils/participant-session.server.ts'
-import { href, redirect, Form, data } from 'react-router'
+import { href, redirect, Form, data, Link } from 'react-router'
 import { FUNCTIONS } from '@/constants/budget-functions.ts'
 import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
 import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
@@ -210,6 +210,17 @@ export default function JuxtaposeRoute({
 	return (
 		<div>
 			<h1>You & the US Fiscal Budget</h1>
+			<p>
+				If you’d like to adjust your allocation you can{' '}
+				<Link
+					to={href('/allocate/:year', {
+						year: new Date().getFullYear().toString(),
+					})}
+				>
+					go here
+				</Link>
+				.
+			</p>
 			<div className="mt-4 flex flex-wrap gap-2">
 				<Button
 					type="button"

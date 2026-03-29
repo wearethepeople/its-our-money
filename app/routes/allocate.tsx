@@ -3,7 +3,7 @@ import { Dialog } from '@base-ui/react/dialog'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { type MouseEvent, useState } from 'react'
-import { data, href, redirect, useActionData } from 'react-router'
+import { data, href, redirect, useActionData, useLoaderData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 
@@ -55,17 +55,11 @@ const SUMMARY_TRIGGER_ID = 'summary'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const participant = await getParticipantBySession(request)
+	const existingAllocation = participant
+		? await AllocationService.getAllocationByParticipantId(participant.id)
+		: null
 
-	if (participant) {
-		const currentAllocation =
-			await AllocationService.getAllocationByParticipantId(participant.id)
-
-		if (currentAllocation) {
-			return redirect(href('/juxtapose'))
-		}
-	}
-
-	return data({})
+	return data({ existingAllocation })
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -143,15 +137,31 @@ const normalizedDialogHandle = Dialog.createHandle()
 
 export default function AllocateRoute() {
 	const actionData = useActionData<typeof action>()
+	const { existingAllocation } = useLoaderData<typeof loader>()
 	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
 	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
 	const [previewAllocations, setPreviewAllocations] = useState<
 		PreviewAllocation[]
 	>([])
+	const existingAllocationByCategoryId = new Map(
+		existingAllocation?.items.map((item) => [item.categoryCode, item.weightBps]) ??
+			[],
+	)
 
 	const [form, fields] = useForm<AllocationFormInput>({
 		defaultValue: {
-			allocations: allocatableCategories.map((c) => ({ id: c.id, weight: 0 })),
+			allocations: allocatableCategories.map((c) => {
+				const existingBps = existingAllocationByCategoryId.get(c.id)
+
+				if (existingBps === undefined) {
+					return { id: c.id, weight: 0 }
+				}
+
+				return {
+					id: c.id,
+					weight: Math.min(1000, Math.max(1, Math.round(existingBps / 10))),
+				}
+			}),
 		},
 		lastResult: actionData?.result,
 		shouldValidate: 'onSubmit',
