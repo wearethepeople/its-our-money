@@ -1,3 +1,4 @@
+import { ResponsiveBullet, type Datum } from '@nivo/bullet'
 import { sum } from '@/utils/normalize-weights.ts'
 import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
 import { cn } from '@/utils/misc.tsx'
@@ -95,6 +96,54 @@ export function StackedVisualComparison({
 				</div>
 			))}
 			<div></div>
+		</div>
+	)
+}
+
+export function BulletVisualization({
+	className,
+	theme,
+	pairedBulletData,
+}: {
+	className?: string
+	theme: 'light' | 'dark'
+	pairedBulletData: Datum[]
+}) {
+	const measureColors = theme === 'light' ? ['#a67d48'] : ['#7a7a5e']
+	const rangeColors =
+		theme === 'light' ? ['#231f20', '#e7e0d8'] : ['#e7e0d8', '#231f20']
+
+	return (
+		<div className={cn(className, 'min-h-150 w-full')}>
+			<ResponsiveBullet
+				data={pairedBulletData}
+				// defaultHeight={600}
+				minValue={1}
+				maxValue={100}
+				margin={{ top: 0, right: 0, bottom: 50, left: 140 }}
+				spacing={20}
+				titleAlign="start"
+				titleOffsetX={-140}
+				// rangeBorderColor={{ from: 'color', modifiers: [] }}
+				// measureSize={0.7}
+				// markerSize={0.7}
+				// rangeBorderWidth={2}
+				rangeColors={rangeColors}
+				// rangeColors="category10"
+				measureColors={measureColors}
+				// measureColors="seq:viridis"
+				// markerColors={['#15803d']}
+				theme={{
+					text: {
+						fill: theme === 'light' ? '#231f20' : '#e7e0d8',
+					},
+					tooltip: {
+						container: {
+							backgroundColor: theme === 'light' ? '#ae987e' : '#574c4f',
+						},
+					},
+				}}
+			/>
 		</div>
 	)
 }

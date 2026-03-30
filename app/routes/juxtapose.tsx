@@ -17,9 +17,11 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { checkHoneypot } from '@/utils/honeypot.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
 import CompareAllocation, {
+	BulletVisualization,
 	StackedVisualComparison,
 } from '@/components/compare-allocation.tsx'
 import { useMemo, useState } from 'react'
+import { useTheme } from '@/routes/resources/theme-switch.tsx'
 
 const manageAllocationSchema = z.object({
 	intent: z.enum(['publish', 'unpublish']),
@@ -29,6 +31,13 @@ const manageAllocationSchema = z.object({
 const inputFormSchema = manageAllocationSchema.omit({
 	allocationId: true,
 })
+
+type SortModes =
+	| 'participantPercent'
+	| 'budgetPercent'
+	| 'delta'
+	| 'category'
+	| 'code'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const participant = await getParticipantBySession(request)
@@ -166,9 +175,8 @@ export default function JuxtaposeRoute({
 	loaderData,
 }: Route.ComponentProps) {
 	const { allocation, pairedData, url } = loaderData
-	const [sortMode, setSortMode] = useState<
-		'participantPercent' | 'budgetPercent' | 'delta' | 'category'
-	>('participantPercent')
+	const theme = useTheme()
+	const [sortMode, setSortMode] = useState<SortModes>('participantPercent')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 	const lastResult = actionData?.result
 	const publishState =
@@ -184,10 +192,15 @@ export default function JuxtaposeRoute({
 			return (a[sortMode] - b[sortMode]) * direction
 		})
 	}, [pairedData, sortDirection, sortMode])
+	const bulletPairedData = sortedPairedData.map((item) => ({
+		id: item.id,
+		title: `${item.code}: ${item.category}}`,
+		ranges: [0, item.budgetPercent, 100],
+		measures: [item.participantPercent],
+		// markers: [],
+	}))
 
-	function handleSortModeClick(
-		mode: 'participantPercent' | 'budgetPercent' | 'delta' | 'category',
-	) {
+	function handleSortModeClick(mode: SortModes) {
 		if (mode === sortMode) {
 			setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
 			return
@@ -221,7 +234,7 @@ export default function JuxtaposeRoute({
 				</Link>
 				.
 			</p>
-			<div className="mt-4 flex flex-wrap gap-2">
+			<div className="my-4 flex flex-wrap gap-2 border">
 				<Button
 					type="button"
 					variant={sortMode === 'participantPercent' ? 'default' : 'outline'}
@@ -243,6 +256,14 @@ export default function JuxtaposeRoute({
 				>
 					Delta {sortMode === 'delta' ? `(${sortDirection})` : ''}
 				</Button>
+				<div>-</div>
+				<Button
+					type="button"
+					variant={sortMode === 'code' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('code')}
+				>
+					Code {sortMode === 'code' ? `(${sortDirection})` : ''}
+				</Button>
 				<Button
 					type="button"
 					variant={sortMode === 'category' ? 'default' : 'outline'}
@@ -251,7 +272,8 @@ export default function JuxtaposeRoute({
 					Category {sortMode === 'category' ? `(${sortDirection})` : ''}
 				</Button>
 			</div>
-			<CompareAllocation className="mt-8" pairedData={sortedPairedData} />
+			{/*<CompareAllocation className="mt-8" pairedData={sortedPairedData} />*/}
+			<BulletVisualization theme={theme} pairedBulletData={bulletPairedData} />
 			{/*<StackedVisualComparison className="mt-8" pairedData={sortedPairedData} />*/}
 			<section className="mt-12">
 				<h2>Publish settings</h2>
