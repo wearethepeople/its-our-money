@@ -25,7 +25,6 @@ import {
 
 import { type Route } from './+types/allocate'
 import { getFunctionDetailsById, getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
-import { formatPercent } from '@/utils/numbers.ts'
 import { AllocationService } from '@/services/allocation-service.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
 import type { FinalAllocationItem } from '@/services/participant-service.server.ts'
@@ -479,21 +478,14 @@ export default function AllocateRoute() {
 									)
 								})}
 								{netInterestBps > 0 && (
-									<div className="mt-2 border-t border-gray-300 pt-2">
-										<div className="flex items-center gap-2 p-2">
-											<Icon
-												name="lock-closed"
-												className="shrink-0 text-gray-400"
-											/>
-											<strong className="grow">Net Interest</strong>
-											<span>{formatPercent(netInterestBps / 100)}</span>
-										</div>
-										<p className="px-2 pb-1 text-xs text-gray-500 italic">
-											This mandatory cost is fixed regardless of your
-											priorities — it reduces the real-world share each of
-											your allocations represents.
-										</p>
-									</div>
+									<p className="mt-2 border-t border-gray-300 pt-3 text-sm text-gray-500 italic">
+										Before any of these priorities are funded,{' '}
+										{Math.round(netInterestBps / 100)} cents of every federal
+										dollar is already committed to Net Interest — mandatory
+										debt service on the national debt. Your allocations above
+										apply to the remaining{' '}
+										{100 - Math.round(netInterestBps / 100)} cents.
+									</p>
 								)}
 							</div>
 							<div className="mt-8 flex shrink-0 justify-end gap-4">

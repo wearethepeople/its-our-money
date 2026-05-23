@@ -15,6 +15,7 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { checkHoneypot } from '@/utils/honeypot.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
 import { BulletVisualization } from '@/components/compare-allocation.tsx'
+import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
 import { useMemo, useState } from 'react'
 import { useTheme } from '@/routes/resources/theme-switch.tsx'
 import { ViewSchemeToggle } from '@/components/view-scheme-toggle.tsx'
@@ -55,7 +56,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 			const pairedData =
 				await AllocationService.zipAllocationWithUsFiscalBudget(allocation)
 
-			return { allocation, pairedData, url }
+			const ombData = getOmbBudgetByCodeForYear(2025)
+			const netInterestBps = ombData['net_interest']?.bps ?? 0
+
+			return { allocation, pairedData, url, netInterestBps }
 		}
 	}
 
@@ -174,7 +178,7 @@ export default function JuxtaposeRoute({
 	actionData,
 	loaderData,
 }: Route.ComponentProps) {
-	const { allocation, pairedData, url } = loaderData
+	const { allocation, pairedData, url, netInterestBps } = loaderData
 	const theme = useTheme()
 	const [viewScheme, setViewScheme] = useState<ViewSchemeId>('flat')
 	const [sortMode, setSortMode] = useState<SortModes>('participantPercent')
@@ -190,6 +194,9 @@ export default function JuxtaposeRoute({
 			if (sortMode === 'category') {
 				return a.category.localeCompare(b.category) * direction
 			}
+			if (sortMode === 'code') {
+				return a.code.localeCompare(b.code) * direction
+			}
 			return (a[sortMode] - b[sortMode]) * direction
 		})
 	}, [pairedData, sortDirection, sortMode])
@@ -200,9 +207,6 @@ export default function JuxtaposeRoute({
 		ranges: [0, item.budgetPercent, 100],
 		measures: [item.participantPercent],
 	}))
-	const netInterestBullet = bulletPairedData.filter(
-		(d) => d.id === 'net_interest',
-	)
 
 	function handleSortModeClick(mode: SortModes) {
 		if (mode === sortMode) {
@@ -306,19 +310,16 @@ export default function JuxtaposeRoute({
 							</div>
 						)
 					})}
-					{netInterestBullet.length > 0 && (
-						<div>
-							<h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
-								Net Interest
-							</h3>
-							<BulletVisualization
-								theme={theme}
-								pairedBulletData={netInterestBullet}
-								style={{ minHeight: '110px' }}
-							/>
-						</div>
-					)}
 				</div>
+			)}
+			{netInterestBps > 0 && (
+				<p className="mt-4 text-sm text-gray-500 italic">
+					The priorities shown here — yours and the government's — each
+					apply to {100 - Math.round(netInterestBps / 100)} cents of every
+					federal dollar. The remaining {Math.round(netInterestBps / 100)}{' '}
+					cents is committed to Net Interest, mandatory debt service on the
+					national debt that cannot be redirected.
+				</p>
 			)}
 			<section className="mt-12">
 				<h2>Publish settings</h2>
