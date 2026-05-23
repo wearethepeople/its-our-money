@@ -172,7 +172,15 @@ function App() {
 						</div>
 						{data.participant && (
 							<div>
-								<Link to={href('/juxtapose')}>Your allocation</Link>
+								<Link
+									to={href('/allocate/:year', {
+										year: new Date().getFullYear().toString(),
+									})}
+								>
+									Your allocation
+								</Link>
+								&nbsp;&nbsp;
+								<Link to={href('/juxtapose')}>Comparison</Link>
 							</div>
 						)}
 					</nav>
