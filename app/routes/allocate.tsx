@@ -24,7 +24,8 @@ import {
 } from '@/utils/participant-session.server.ts'
 
 import { type Route } from './+types/allocate'
-import { getFunctionDetailsById } from '@/utils/budget-data.ts'
+import { getFunctionDetailsById, getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
+import { formatPercent } from '@/utils/numbers.ts'
 import { AllocationService } from '@/services/allocation-service.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
 import type { FinalAllocationItem } from '@/services/participant-service.server.ts'
@@ -64,7 +65,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 		? await AllocationService.getAllocationByParticipantId(participant.id)
 		: null
 
-	return data({ existingAllocation })
+	const ombData = getOmbBudgetByCodeForYear(2025)
+	const netInterestBps = ombData['net_interest']?.bps ?? 0
+
+	return data({ existingAllocation, netInterestBps })
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -142,7 +146,7 @@ const normalizedDialogHandle = Dialog.createHandle()
 
 export default function AllocateRoute() {
 	const actionData = useActionData<typeof action>()
-	const { existingAllocation } = useLoaderData<typeof loader>()
+	const { existingAllocation, netInterestBps } = useLoaderData<typeof loader>()
 	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
 	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
 	const [viewScheme, setViewScheme] = useState<ViewSchemeId>('flat')
@@ -311,6 +315,66 @@ export default function AllocateRoute() {
 		)
 	}
 
+	const renderNetInterestItem = () => {
+		const fnData = getFunctionDetailsById('net_interest')
+		if (!fnData) return null
+
+		return (
+			<article className="flex w-full flex-col">
+				<div className="bg-secondary flex border border-gray-600">
+					<h3 className="flex grow items-center gap-2 p-1 pl-2 font-extrabold">
+						<Icon name="lock-closed" className="shrink-0 text-gray-400" />
+						{fnData.name}
+					</h3>
+					<div className="pr-2">
+						<Drawer.Trigger
+							className="shrink"
+							handle={outlaysDrawer}
+							payload={{
+								code: fnData.code,
+								description: fnData.description,
+								commonUses: fnData.commonUses ?? [],
+								name: fnData.name,
+							}}
+							title={fnData.name}
+						>
+							<Icon
+								name="question-mark-circled"
+								className="cursor-pointer text-gray-400 hover:text-gray-500"
+							/>
+						</Drawer.Trigger>
+					</div>
+				</div>
+				<section className="ml-auto w-[95%] border-x border-b border-gray-600">
+					<div className="flex">
+						<div className="grow px-6 py-4">
+							<p className="text-muted-foreground mb-3 text-sm italic">
+								Mandatory obligation — this is not a priority you set. It
+								reflects the cost of existing national debt and cannot be
+								redirected.
+							</p>
+							<p className="text-sm">{fnData.description}</p>
+						</div>
+						<cite className="flex shrink flex-col border-gray-600">
+							<div>
+								<div className="border-b border-l border-gray-600">
+									<p className="px-2 text-center text-sm font-semibold">
+										Code
+									</p>
+								</div>
+								<div>
+									<p className="border-b border-l border-gray-600 py-1 text-center text-xs">
+										{fnData.code}
+									</p>
+								</div>
+							</div>
+						</cite>
+					</div>
+				</section>
+			</article>
+		)
+	}
+
 	return (
 		<section>
 			<form method="post" {...getFormProps(form)}>
@@ -319,9 +383,12 @@ export default function AllocateRoute() {
 					<ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
 				</div>
 				{viewScheme === 'flat' ? (
-					<div className="[&>article:last-child>section]:border-b">
-						{allocations.map((a, i) => renderAllocationItem(a, i))}
-					</div>
+					<>
+						<div className="[&>article:last-child>section]:border-b">
+							{allocations.map((a, i) => renderAllocationItem(a, i))}
+						</div>
+						<div className="mt-6">{renderNetInterestItem()}</div>
+					</>
 				) : (
 					<div className="flex flex-col gap-6">
 						{PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
@@ -354,6 +421,7 @@ export default function AllocateRoute() {
 								</div>
 							)
 						})}
+						{renderNetInterestItem()}
 					</div>
 				)}
 				<ErrorList id={form.errorId} errors={form.errors} />
@@ -410,6 +478,23 @@ export default function AllocateRoute() {
 										</div>
 									)
 								})}
+								{netInterestBps > 0 && (
+									<div className="mt-2 border-t border-gray-300 pt-2">
+										<div className="flex items-center gap-2 p-2">
+											<Icon
+												name="lock-closed"
+												className="shrink-0 text-gray-400"
+											/>
+											<strong className="grow">Net Interest</strong>
+											<span>{formatPercent(netInterestBps / 100)}</span>
+										</div>
+										<p className="px-2 pb-1 text-xs text-gray-500 italic">
+											This mandatory cost is fixed regardless of your
+											priorities — it reduces the real-world share each of
+											your allocations represents.
+										</p>
+									</div>
+								)}
 							</div>
 							<div className="mt-8 flex shrink-0 justify-end gap-4">
 								<Dialog.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">

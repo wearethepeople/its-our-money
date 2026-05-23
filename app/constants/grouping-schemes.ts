@@ -17,18 +17,14 @@ export const PUBLIC_DOMAIN_SCHEME: GroupingScheme = {
 	label: 'Public Domain',
 	groups: [
 		{
-			id: 'security_defense',
-			label: 'Security & Defense',
+			id: 'defense_veterans',
+			label: 'Defense & Veterans',
 			functionIds: [
 				'national_defense',
 				'international_affairs',
 				'administration_justice',
+				'veteran_benefits_services',
 			],
-		},
-		{
-			id: 'veterans',
-			label: 'Veterans',
-			functionIds: ['veteran_benefits_services'],
 		},
 		{
 			id: 'people_society',
@@ -57,14 +53,9 @@ export const PUBLIC_DOMAIN_SCHEME: GroupingScheme = {
 			functionIds: ['commerce_housing_credit', 'community_regional_development'],
 		},
 		{
-			id: 'innovation_research',
-			label: 'Innovation & Research',
-			functionIds: ['general_science_space_technology'],
-		},
-		{
-			id: 'government_operations',
-			label: 'Government Operations',
-			functionIds: ['general_government', 'net_interest'],
+			id: 'science_government',
+			label: 'Science & Government',
+			functionIds: ['general_science_space_technology', 'general_government'],
 		},
 	],
 }

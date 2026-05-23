@@ -80,6 +80,9 @@ export namespace AllocationService {
 		const allocatableFunctions = FUNCTIONS.filter(
 			(f) => f.allocatable !== false,
 		)
+		const comparisonOnlyFunctions = FUNCTIONS.filter(
+			(f) => f.allocatable === false && f.showInComparison === true,
+		)
 		const allocatableBudgetBpsTotal = sum(
 			allocatableFunctions.map((f) => usBudgetData[f.id]?.bps ?? 0),
 		)
@@ -89,7 +92,7 @@ export namespace AllocationService {
 			'Allocatable budget total must be greater than zero',
 		)
 
-		return allocatableFunctions.map((f) => {
+		const allocatableRows = allocatableFunctions.map((f) => {
 			const participantAllocation = allocation.items.find(
 				(a) => a.categoryCode === f.id,
 			) || { weightBps: 0 }
@@ -107,6 +110,22 @@ export namespace AllocationService {
 				delta,
 			}
 		})
+
+		const comparisonOnlyRows = comparisonOnlyFunctions.map((f) => {
+			const budgetBps = usBudgetData[f.id]?.bps ?? 0
+			const budgetPercent = (budgetBps / allocatableBudgetBpsTotal) * 100
+
+			return {
+				code: f.code,
+				category: f.name,
+				id: f.id,
+				participantPercent: 0,
+				budgetPercent,
+				delta: -budgetPercent,
+			}
+		})
+
+		return [...allocatableRows, ...comparisonOnlyRows]
 	}
 }
 

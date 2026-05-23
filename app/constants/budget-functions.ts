@@ -1,5 +1,6 @@
 type OutlayFunction = {
 	allocatable?: boolean
+	showInComparison?: boolean
 	code: string
 	commonUses: string[]
 	description: string
@@ -287,6 +288,7 @@ export const FUNCTIONS: OutlayFunction[] = [
 		name: 'Net Interest',
 		order: 97,
 		allocatable: false,
+		showInComparison: true,
 		description:
 			'Reflects the government’s interest costs on federal debt held by the public and intragovernmental holdings, net of interest received.',
 		commonUses: [

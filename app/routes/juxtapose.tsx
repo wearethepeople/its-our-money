@@ -1,9 +1,7 @@
 import { Route } from './+types/juxtapose'
 import { getParticipantBySession } from '@/utils/participant-session.server.ts'
 import { href, redirect, Form, data, Link } from 'react-router'
-import { FUNCTIONS } from '@/constants/budget-functions.ts'
-import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
-import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
+import { formatPercent } from '@/utils/numbers.ts'
 import { Button } from '@/ui/button.tsx'
 import { getFormProps, useForm } from '@conform-to/react'
 import { z } from 'zod'
@@ -16,10 +14,7 @@ import {
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { checkHoneypot } from '@/utils/honeypot.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
-import CompareAllocation, {
-	BulletVisualization,
-	StackedVisualComparison,
-} from '@/components/compare-allocation.tsx'
+import { BulletVisualization } from '@/components/compare-allocation.tsx'
 import { useMemo, useState } from 'react'
 import { useTheme } from '@/routes/resources/theme-switch.tsx'
 import { ViewSchemeToggle } from '@/components/view-scheme-toggle.tsx'
@@ -198,13 +193,16 @@ export default function JuxtaposeRoute({
 			return (a[sortMode] - b[sortMode]) * direction
 		})
 	}, [pairedData, sortDirection, sortMode])
+
 	const bulletPairedData = sortedPairedData.map((item) => ({
 		id: item.id,
-		title: `${item.code}: ${item.category}}`,
+		title: `${item.code}: ${item.category}`,
 		ranges: [0, item.budgetPercent, 100],
 		measures: [item.participantPercent],
-		// markers: [],
 	}))
+	const netInterestBullet = bulletPairedData.filter(
+		(d) => d.id === 'net_interest',
+	)
 
 	function handleSortModeClick(mode: SortModes) {
 		if (mode === sortMode) {
@@ -295,7 +293,7 @@ export default function JuxtaposeRoute({
 						if (!groupItems.length) return null
 						return (
 							<div key={group.id}>
-								<h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide uppercase text-gray-500 dark:border-gray-600 dark:text-gray-400">
+								<h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
 									{group.label}
 								</h3>
 								<BulletVisualization
@@ -308,6 +306,18 @@ export default function JuxtaposeRoute({
 							</div>
 						)
 					})}
+					{netInterestBullet.length > 0 && (
+						<div>
+							<h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
+								Net Interest
+							</h3>
+							<BulletVisualization
+								theme={theme}
+								pairedBulletData={netInterestBullet}
+								style={{ minHeight: '110px' }}
+							/>
+						</div>
+					)}
 				</div>
 			)}
 			<section className="mt-12">
