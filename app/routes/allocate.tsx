@@ -146,6 +146,19 @@ export default function AllocateRoute() {
 	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
 	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
 	const [viewScheme, setViewScheme] = useState<ViewSchemeId>('flat')
+	const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+
+	function toggleGroup(groupId: string) {
+		setCollapsedGroups((prev) => {
+			const next = new Set(prev)
+			if (next.has(groupId)) {
+				next.delete(groupId)
+			} else {
+				next.add(groupId)
+			}
+			return next
+		})
+	}
 	const [previewAllocations, setPreviewAllocations] = useState<
 		PreviewAllocation[]
 	>([])
@@ -311,23 +324,36 @@ export default function AllocateRoute() {
 					</div>
 				) : (
 					<div className="flex flex-col gap-6">
-						{PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
-							<div key={group.id}>
-								<h2 className="bg-muted border border-gray-600 px-3 py-2 text-base font-semibold">
-									{group.label}
-								</h2>
-								<div className="[&>article:last-child>section]:border-b">
-									{group.functionIds.map((fid) => {
-										const entry = allocationsByFunctionId.get(fid)
-										if (!entry) return null
-										return renderAllocationItem(
-											entry.field,
-											entry.globalIndex,
-										)
-									})}
+						{PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
+							const isCollapsed = collapsedGroups.has(group.id)
+							return (
+								<div key={group.id}>
+									<button
+										type="button"
+										onClick={() => toggleGroup(group.id)}
+										className="bg-muted flex w-full items-center gap-2 border border-gray-600 px-3 py-2 text-left text-base font-semibold"
+									>
+										<Icon
+											name="arrow-right"
+											className={`shrink-0 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}
+										/>
+										{group.label}
+									</button>
+									{!isCollapsed && (
+										<div className="[&>article:last-child>section]:border-b">
+											{group.functionIds.map((fid) => {
+												const entry = allocationsByFunctionId.get(fid)
+												if (!entry) return null
+												return renderAllocationItem(
+													entry.field,
+													entry.globalIndex,
+												)
+											})}
+										</div>
+									)}
 								</div>
-							</div>
-						))}
+							)
+						})}
 					</div>
 				)}
 				<ErrorList id={form.errorId} errors={form.errors} />
