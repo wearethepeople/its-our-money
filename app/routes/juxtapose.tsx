@@ -22,6 +22,11 @@ import CompareAllocation, {
 } from '@/components/compare-allocation.tsx'
 import { useMemo, useState } from 'react'
 import { useTheme } from '@/routes/resources/theme-switch.tsx'
+import { ViewSchemeToggle } from '@/components/view-scheme-toggle.tsx'
+import {
+	PUBLIC_DOMAIN_SCHEME,
+	type ViewSchemeId,
+} from '@/constants/grouping-schemes.ts'
 
 const manageAllocationSchema = z.object({
 	intent: z.enum(['publish', 'unpublish']),
@@ -176,6 +181,7 @@ export default function JuxtaposeRoute({
 }: Route.ComponentProps) {
 	const { allocation, pairedData, url } = loaderData
 	const theme = useTheme()
+	const [viewScheme, setViewScheme] = useState<ViewSchemeId>('flat')
 	const [sortMode, setSortMode] = useState<SortModes>('participantPercent')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 	const lastResult = actionData?.result
@@ -234,47 +240,76 @@ export default function JuxtaposeRoute({
 				</Link>
 				.
 			</p>
-			<div className="my-4 flex flex-wrap gap-2 border">
-				<Button
-					type="button"
-					variant={sortMode === 'participantPercent' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('participantPercent')}
-				>
-					Me {sortMode === 'participantPercent' ? `(${sortDirection})` : ''}
-				</Button>
-				<Button
-					type="button"
-					variant={sortMode === 'budgetPercent' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('budgetPercent')}
-				>
-					Gov {sortMode === 'budgetPercent' ? `(${sortDirection})` : ''}
-				</Button>
-				<Button
-					type="button"
-					variant={sortMode === 'delta' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('delta')}
-				>
-					Delta {sortMode === 'delta' ? `(${sortDirection})` : ''}
-				</Button>
-				<div>-</div>
-				<Button
-					type="button"
-					variant={sortMode === 'code' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('code')}
-				>
-					Code {sortMode === 'code' ? `(${sortDirection})` : ''}
-				</Button>
-				<Button
-					type="button"
-					variant={sortMode === 'category' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('category')}
-				>
-					Category {sortMode === 'category' ? `(${sortDirection})` : ''}
-				</Button>
+			<div className="my-4 flex flex-wrap items-center gap-4">
+				<ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
+				<div className="flex flex-wrap gap-2 border p-1">
+					<Button
+						type="button"
+						variant={sortMode === 'participantPercent' ? 'default' : 'outline'}
+						onClick={() => handleSortModeClick('participantPercent')}
+					>
+						Me {sortMode === 'participantPercent' ? `(${sortDirection})` : ''}
+					</Button>
+					<Button
+						type="button"
+						variant={sortMode === 'budgetPercent' ? 'default' : 'outline'}
+						onClick={() => handleSortModeClick('budgetPercent')}
+					>
+						Gov {sortMode === 'budgetPercent' ? `(${sortDirection})` : ''}
+					</Button>
+					<Button
+						type="button"
+						variant={sortMode === 'delta' ? 'default' : 'outline'}
+						onClick={() => handleSortModeClick('delta')}
+					>
+						Delta {sortMode === 'delta' ? `(${sortDirection})` : ''}
+					</Button>
+					<div>-</div>
+					<Button
+						type="button"
+						variant={sortMode === 'code' ? 'default' : 'outline'}
+						onClick={() => handleSortModeClick('code')}
+					>
+						Code {sortMode === 'code' ? `(${sortDirection})` : ''}
+					</Button>
+					<Button
+						type="button"
+						variant={sortMode === 'category' ? 'default' : 'outline'}
+						onClick={() => handleSortModeClick('category')}
+					>
+						Category {sortMode === 'category' ? `(${sortDirection})` : ''}
+					</Button>
+				</div>
 			</div>
-			{/*<CompareAllocation className="mt-8" pairedData={sortedPairedData} />*/}
-			<BulletVisualization theme={theme} pairedBulletData={bulletPairedData} />
-			{/*<StackedVisualComparison className="mt-8" pairedData={sortedPairedData} />*/}
+			{viewScheme === 'flat' ? (
+				<BulletVisualization
+					theme={theme}
+					pairedBulletData={bulletPairedData}
+				/>
+			) : (
+				<div className="flex flex-col gap-6">
+					{PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
+						const groupItems = bulletPairedData.filter((d) =>
+							group.functionIds.includes(String(d.id)),
+						)
+						if (!groupItems.length) return null
+						return (
+							<div key={group.id}>
+								<h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide uppercase text-gray-500 dark:border-gray-600 dark:text-gray-400">
+									{group.label}
+								</h3>
+								<BulletVisualization
+									theme={theme}
+									pairedBulletData={groupItems}
+									style={{
+										minHeight: `${groupItems.length * 50 + 60}px`,
+									}}
+								/>
+							</div>
+						)
+					})}
+				</div>
+			)}
 			<section className="mt-12">
 				<h2>Publish settings</h2>
 				<div className="flex flex-row gap-4">

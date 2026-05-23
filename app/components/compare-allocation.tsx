@@ -1,4 +1,5 @@
 import { ResponsiveBullet, type Datum } from '@nivo/bullet'
+import type React from 'react'
 import { sum } from '@/utils/normalize-weights.ts'
 import { formatPercent, formatSignedPercent } from '@/utils/numbers.ts'
 import { cn } from '@/utils/misc.tsx'
@@ -102,10 +103,12 @@ export function StackedVisualComparison({
 
 export function BulletVisualization({
 	className,
+	style,
 	theme,
 	pairedBulletData,
 }: {
 	className?: string
+	style?: React.CSSProperties
 	theme: 'light' | 'dark'
 	pairedBulletData: Datum[]
 }) {
@@ -114,7 +117,7 @@ export function BulletVisualization({
 		theme === 'light' ? ['#231f20', '#e7e0d8'] : ['#e7e0d8', '#231f20']
 
 	return (
-		<div className={cn(className, 'min-h-150 w-full')}>
+		<div className={cn(className, 'min-h-150 w-full')} style={style}>
 			<ResponsiveBullet
 				data={pairedBulletData}
 				// defaultHeight={600}
