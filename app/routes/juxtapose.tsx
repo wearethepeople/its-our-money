@@ -241,18 +241,69 @@ export default function JuxtaposeRoute({
 
 	return (
 		<div>
-			<h1>You & the US Fiscal Budget</h1>
-			<p>
-				If you'd like to adjust your allocation you can{' '}
-				<Link
-					to={href('/allocate/:year', {
-						year: new Date().getFullYear().toString(),
-					})}
-				>
-					go here
-				</Link>
-				.
-			</p>
+			<div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+				<div className="flex-1 space-y-3">
+					<h1>You & the US Fiscal Budget</h1>
+					<p>
+						When you moved the sliders, you distributed your priorities across
+						the 18 allocatable federal budget functions. Those choices were
+						converted into percentages, your personal allocation, and are shown
+						here alongside the government's actual spending from the most recent
+						OMB data.
+					</p>
+					<p>
+						Use the <strong>Comparison</strong> tab to see where you and the
+						federal government align or diverge — sort by difference to find
+						where your priorities diverge most. The{' '}
+						<strong>Tax Breakdown</strong> tab translates those percentages into
+						dollar amounts based on your federal tax payment, making the
+						abstract concrete.
+					</p>
+					<p>
+						If you decide to publish, this page is exactly what gets shared:
+						your percentage breakdown, nothing more. No name, no identifying
+						information — just your priorities.
+					</p>
+					<p className="text-sm text-gray-500">
+						Want to change your numbers?{' '}
+						<Link
+							to={href('/allocate/:year', {
+								year: new Date().getFullYear().toString(),
+							})}
+						>
+							Go back to the sliders
+						</Link>
+						.
+					</p>
+				</div>
+				<div className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
+					<div>
+						<Form method="post" {...getFormProps(form)}>
+							<HoneypotInputs />
+							<input
+								type="hidden"
+								name="intent"
+								value={publishButtonText.toLowerCase()}
+							/>
+							<Button>{publishButtonText}</Button>
+						</Form>
+						{allocation.publicId && publishState === 'Published' && (
+							<div className="mt-3">
+								<ShareInfo publicId={allocation.publicId} url={url} />
+							</div>
+						)}
+					</div>
+					<div>
+						<p className="mb-1 text-base">
+							Your allocation is{' '}
+							<strong className="font-semibold">{publishState}</strong>.
+						</p>
+						<div id={form.errorId} className="mb-2 text-sm text-red-500">
+							{form.errors}
+						</div>
+					</div>
+				</div>
+			</div>
 			<div className="my-4 flex flex-wrap items-center gap-3">
 				<span className="text-xs text-gray-500">Sort by:</span>
 				<div className="flex">
@@ -267,11 +318,11 @@ export default function JuxtaposeRoute({
 							key={mode}
 							type="button"
 							className={cn(
-								'border -ml-px rounded-none px-2.5 py-1 text-xs font-medium transition-colors',
+								'-ml-px rounded-none border px-2.5 py-1 text-xs font-medium transition-colors',
 								i === 0 && 'ml-0 rounded-l-md',
 								i === arr.length - 1 && 'rounded-r-md',
 								sortMode === mode
-									? 'relative z-10 border-primary bg-primary text-primary-foreground'
+									? 'border-primary bg-primary text-primary-foreground relative z-10'
 									: 'border-input bg-background hover:bg-accent hover:text-accent-foreground',
 							)}
 							onClick={() => handleSortModeClick(mode)}
@@ -292,11 +343,11 @@ export default function JuxtaposeRoute({
 							key={mode}
 							type="button"
 							className={cn(
-								'border -ml-px rounded-none px-2.5 py-1 text-xs font-medium transition-colors',
+								'-ml-px rounded-none border px-2.5 py-1 text-xs font-medium transition-colors',
 								i === 0 && 'ml-0 rounded-l-md',
 								i === arr.length - 1 && 'rounded-r-md',
 								sortMode === mode
-									? 'relative z-10 border-primary bg-primary text-primary-foreground'
+									? 'border-primary bg-primary text-primary-foreground relative z-10'
 									: 'border-input bg-background hover:bg-accent hover:text-accent-foreground',
 							)}
 							onClick={() => handleSortModeClick(mode)}
@@ -382,6 +433,12 @@ export default function JuxtaposeRoute({
 						Enter your total federal tax payment to see how the government spent
 						it versus how you would have.
 					</p>
+					<p className="mt-1 text-xs text-gray-400">
+						The figure you enter here is used only for this in-page calculation
+						and is never stored or transmitted. No personal financial
+						information is collected or retained — the math happens entirely in
+						your browser.
+					</p>
 					<div className="mt-4 flex items-center gap-2">
 						<label htmlFor="tax-amount" className="text-sm font-medium">
 							Federal taxes paid:
@@ -450,9 +507,7 @@ export default function JuxtaposeRoute({
 										<td className="py-1.5 text-right">
 											{formatCurrency(netInterestFraction * taxAmount)}
 										</td>
-										<td className="py-1.5 text-right">
-											{formatCurrency(0)}
-										</td>
+										<td className="py-1.5 text-right">{formatCurrency(0)}</td>
 									</tr>
 								)}
 							</tbody>
@@ -472,34 +527,6 @@ export default function JuxtaposeRoute({
 					)}
 				</div>
 			)}
-			<section className="mt-12">
-				<h2>Publish settings</h2>
-				<div className="flex flex-row gap-4">
-					<div className="flex grow flex-col gap-2">
-						<div>
-							Your budget allocation is currently:{' '}
-							<strong>{publishState}</strong>
-						</div>
-						<div id={form.errorId} className="text-red-500">
-							{form.errors}
-						</div>
-					</div>
-					<div>
-						<Form method="post" {...getFormProps(form)}>
-							<HoneypotInputs />
-							<input
-								type="hidden"
-								name="intent"
-								value={publishButtonText.toLowerCase()}
-							/>
-							<Button>{publishButtonText}</Button>
-						</Form>
-					</div>
-				</div>
-				{allocation.publicId && publishState === 'Published' && (
-					<ShareInfo publicId={allocation.publicId} url={url} />
-				)}
-			</section>
 		</div>
 	)
 }
