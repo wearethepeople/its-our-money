@@ -1,5 +1,5 @@
-import { Button } from '@/ui/button.tsx'
-import { SCHEMES, type ViewSchemeId } from '@/constants/grouping-schemes.ts'
+import { Switch } from '@/ui/switch.tsx'
+import { type ViewSchemeId } from '@/constants/grouping-schemes.ts'
 
 export function ViewSchemeToggle({
 	value,
@@ -8,19 +8,23 @@ export function ViewSchemeToggle({
 	value: ViewSchemeId
 	onChange: (id: ViewSchemeId) => void
 }) {
+	const isGrouped = value === 'public_domain'
+
 	return (
-		<div className="flex gap-2">
-			{SCHEMES.map((scheme) => (
-				<Button
-					key={scheme.id}
-					type="button"
-					size="sm"
-					variant={value === scheme.id ? 'default' : 'outline'}
-					onClick={() => onChange(scheme.id as ViewSchemeId)}
-				>
-					{scheme.label}
-				</Button>
-			))}
+		<div className="flex items-center gap-2">
+			<Switch
+				id="group-by-toggle"
+				checked={isGrouped}
+				onCheckedChange={(checked) =>
+					onChange(checked ? 'public_domain' : 'flat')
+				}
+			/>
+			<label
+				htmlFor="group-by-toggle"
+				className="cursor-pointer text-xs text-gray-500"
+			>
+				Group by public domain
+			</label>
 		</div>
 	)
 }
