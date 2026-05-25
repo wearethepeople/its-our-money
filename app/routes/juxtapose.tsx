@@ -191,6 +191,8 @@ export default function JuxtaposeRoute({
 	const [activeTab, setActiveTab] = useState<'comparison' | 'tax-breakdown'>(
 		'comparison',
 	)
+	const netInterestFraction = netInterestBps / 10000
+	const allocatableFraction = 1 - netInterestFraction
 	const lastResult = actionData?.result
 	const publishState =
 		allocation.publicId && allocation.publishedAt ? 'Published' : 'Unpublished'
@@ -401,8 +403,11 @@ export default function JuxtaposeRoute({
 							<tbody>
 								{sortedPairedData.map((item) => {
 									const yourDollars =
-										(item.participantPercent / 100) * taxAmount
-									const actualDollars = (item.budgetPercent / 100) * taxAmount
+										(item.participantPercent / 100) *
+										allocatableFraction *
+										taxAmount
+									const actualDollars =
+										(item.budgetPercent / 100) * allocatableFraction * taxAmount
 									const difference = yourDollars - actualDollars
 									return (
 										<tr key={item.code} className="border-b">
@@ -419,27 +424,29 @@ export default function JuxtaposeRoute({
 										</tr>
 									)
 								})}
+								{netInterestBps > 0 && (
+									<tr className="border-b text-gray-500 italic">
+										<td className="py-1.5">Net Interest (mandatory)</td>
+										<td className="py-1.5 text-right">
+											{formatCurrency(netInterestFraction * taxAmount)}
+										</td>
+										<td className="py-1.5 text-right">
+											{formatCurrency(netInterestFraction * taxAmount)}
+										</td>
+										<td className="py-1.5 text-right">
+											{formatCurrency(0)}
+										</td>
+									</tr>
+								)}
 							</tbody>
 							<tfoot>
 								<tr className="border-t font-semibold">
-									<td className="pt-2">Total (excl. Net Interest)</td>
+									<td className="pt-2">Total</td>
 									<td className="pt-2 text-right">
-										{formatCurrency(
-											sortedPairedData.reduce(
-												(acc, item) =>
-													acc + (item.participantPercent / 100) * taxAmount,
-												0,
-											),
-										)}
+										{formatCurrency(taxAmount)}
 									</td>
 									<td className="pt-2 text-right">
-										{formatCurrency(
-											sortedPairedData.reduce(
-												(acc, item) =>
-													acc + (item.budgetPercent / 100) * taxAmount,
-												0,
-											),
-										)}
+										{formatCurrency(taxAmount)}
 									</td>
 									<td />
 								</tr>
