@@ -645,8 +645,8 @@ function ShareInfo({ publicId, url }: { publicId: string; url: string }) {
 	const shareUrl = `${url}/s/${publicId}`
 	const [copied, setCopied] = useState(false)
 
-	function handleCopy() {
-		navigator.clipboard.writeText(shareUrl).then(() => {
+	async function handleCopy() {
+		await navigator.clipboard.writeText(shareUrl).then(() => {
 			setCopied(true)
 			setTimeout(() => setCopied(false), 2000)
 		})
