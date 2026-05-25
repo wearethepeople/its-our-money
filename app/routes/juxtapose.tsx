@@ -287,20 +287,20 @@ export default function JuxtaposeRoute({
 							/>
 							<Button>{publishButtonText}</Button>
 						</Form>
-						{allocation.publicId && publishState === 'Published' && (
-							<div className="mt-3">
-								<ShareInfo publicId={allocation.publicId} url={url} />
-							</div>
-						)}
+						<div id={form.errorId} className="mb-2 text-sm text-red-500">
+							{form.errors}
+						</div>
 					</div>
 					<div>
 						<p className="mb-1 text-base">
 							Your allocation is{' '}
 							<strong className="font-semibold">{publishState}</strong>.
 						</p>
-						<div id={form.errorId} className="mb-2 text-sm text-red-500">
-							{form.errors}
-						</div>
+						{allocation.publicId && publishState === 'Published' && (
+							<div className="mt-3">
+								<ShareInfo publicId={allocation.publicId} url={url} />
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
@@ -574,9 +574,7 @@ export default function JuxtaposeRoute({
 																key={item.code}
 																className="border-b border-gray-100 dark:border-gray-800"
 															>
-																<td className="py-1.5 pl-3">
-																	{item.category}
-																</td>
+																<td className="py-1.5 pl-3">{item.category}</td>
 																<td className="py-1.5 text-right">
 																	{formatCurrency(yourDollars)}
 																</td>
@@ -644,13 +642,33 @@ export default function JuxtaposeRoute({
 }
 
 function ShareInfo({ publicId, url }: { publicId: string; url: string }) {
+	const shareUrl = `${url}/s/${publicId}`
+	const [copied, setCopied] = useState(false)
+
+	function handleCopy() {
+		navigator.clipboard.writeText(shareUrl).then(() => {
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		})
+	}
+
 	return (
-		<div>
-			{'Share this link with your friends to see how they compare to you: '}
-			<br />
-			<a href={`${url}/s/${publicId}`}>
-				{url}/s/{publicId}
-			</a>
-		</div>
+		<>
+			<p className="mb-2">
+				Share this link with your friends to see how they compare to you:
+			</p>
+			<div className="flex items-center gap-2">
+				<input
+					readOnly
+					type="text"
+					value={shareUrl}
+					className="bg-muted min-w-0 flex-1 rounded border px-3 py-1.5 text-sm"
+					onFocus={(e) => e.currentTarget.select()}
+				/>
+				<Button type="button" variant="outline" size="sm" onClick={handleCopy}>
+					{copied ? 'Copied!' : 'Copy'}
+				</Button>
+			</div>
+		</>
 	)
 }
