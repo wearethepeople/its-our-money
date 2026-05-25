@@ -8,7 +8,7 @@ export type ViewSchemeId = 'flat' | 'public_domain'
 
 export const FLAT_LIST_SCHEME: GroupingScheme = {
 	id: 'flat',
-	label: 'Straight List',
+	label: 'None',
 	groups: [],
 }
 
