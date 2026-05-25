@@ -478,14 +478,16 @@ export default function JuxtaposeRoute({
 								{viewScheme === 'flat' ? (
 									<>
 										{sortedPairedData.map((item) => {
-											const yourDollars =
+											const yourDollars = Math.round(
 												(item.participantPercent / 100) *
-												allocatableFraction *
-												taxAmount
-											const actualDollars =
+													allocatableFraction *
+													taxAmount,
+											)
+											const actualDollars = Math.round(
 												(item.budgetPercent / 100) *
-												allocatableFraction *
-												taxAmount
+													allocatableFraction *
+													taxAmount,
+											)
 											const difference = yourDollars - actualDollars
 											return (
 												<tr key={item.code} className="border-b">
@@ -527,17 +529,21 @@ export default function JuxtaposeRoute({
 											const groupYours = groupItems.reduce(
 												(sum, item) =>
 													sum +
-													(item.participantPercent / 100) *
-														allocatableFraction *
-														taxAmount,
+													Math.round(
+														(item.participantPercent / 100) *
+															allocatableFraction *
+															taxAmount,
+													),
 												0,
 											)
 											const groupActual = groupItems.reduce(
 												(sum, item) =>
 													sum +
-													(item.budgetPercent / 100) *
-														allocatableFraction *
-														taxAmount,
+													Math.round(
+														(item.budgetPercent / 100) *
+															allocatableFraction *
+															taxAmount,
+													),
 												0,
 											)
 											const groupDiff = groupYours - groupActual
@@ -552,14 +558,16 @@ export default function JuxtaposeRoute({
 														</td>
 													</tr>
 													{groupItems.map((item) => {
-														const yourDollars =
+														const yourDollars = Math.round(
 															(item.participantPercent / 100) *
-															allocatableFraction *
-															taxAmount
-														const actualDollars =
+																allocatableFraction *
+																taxAmount,
+														)
+														const actualDollars = Math.round(
 															(item.budgetPercent / 100) *
-															allocatableFraction *
-															taxAmount
+																allocatableFraction *
+																taxAmount,
+														)
 														const difference = yourDollars - actualDollars
 														return (
 															<tr
