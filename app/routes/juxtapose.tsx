@@ -188,6 +188,9 @@ export default function JuxtaposeRoute({
 	const [sortMode, setSortMode] = useState<SortModes>('participantPercent')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 	const [taxAmount, setTaxAmount] = useState<number | ''>('')
+	const [activeTab, setActiveTab] = useState<'comparison' | 'tax-breakdown'>(
+		'comparison',
+	)
 	const lastResult = actionData?.result
 	const publishState =
 		allocation.publicId && allocation.publishedAt ? 'Published' : 'Unpublished'
@@ -237,7 +240,7 @@ export default function JuxtaposeRoute({
 		<div>
 			<h1>You & the US Fiscal Budget</h1>
 			<p>
-				If you’d like to adjust your allocation you can{' '}
+				If you'd like to adjust your allocation you can{' '}
 				<Link
 					to={href('/allocate/:year', {
 						year: new Date().getFullYear().toString(),
@@ -247,168 +250,204 @@ export default function JuxtaposeRoute({
 				</Link>
 				.
 			</p>
-			<div className="my-4 flex flex-wrap items-center gap-4">
-				<ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
-				<div className="flex flex-wrap gap-2 border p-1">
-					<Button
-						type="button"
-						variant={sortMode === 'participantPercent' ? 'default' : 'outline'}
-						onClick={() => handleSortModeClick('participantPercent')}
-					>
-						Me {sortMode === 'participantPercent' ? `(${sortDirection})` : ''}
-					</Button>
-					<Button
-						type="button"
-						variant={sortMode === 'budgetPercent' ? 'default' : 'outline'}
-						onClick={() => handleSortModeClick('budgetPercent')}
-					>
-						Gov {sortMode === 'budgetPercent' ? `(${sortDirection})` : ''}
-					</Button>
-					<Button
-						type="button"
-						variant={sortMode === 'delta' ? 'default' : 'outline'}
-						onClick={() => handleSortModeClick('delta')}
-					>
-						Delta {sortMode === 'delta' ? `(${sortDirection})` : ''}
-					</Button>
-					<div>-</div>
-					<Button
-						type="button"
-						variant={sortMode === 'code' ? 'default' : 'outline'}
-						onClick={() => handleSortModeClick('code')}
-					>
-						Code {sortMode === 'code' ? `(${sortDirection})` : ''}
-					</Button>
-					<Button
-						type="button"
-						variant={sortMode === 'category' ? 'default' : 'outline'}
-						onClick={() => handleSortModeClick('category')}
-					>
-						Category {sortMode === 'category' ? `(${sortDirection})` : ''}
-					</Button>
-				</div>
+			<div className="my-4 flex flex-wrap gap-2 border p-1">
+				<Button
+					type="button"
+					variant={sortMode === 'participantPercent' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('participantPercent')}
+				>
+					Me {sortMode === 'participantPercent' ? `(${sortDirection})` : ''}
+				</Button>
+				<Button
+					type="button"
+					variant={sortMode === 'budgetPercent' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('budgetPercent')}
+				>
+					Gov {sortMode === 'budgetPercent' ? `(${sortDirection})` : ''}
+				</Button>
+				<Button
+					type="button"
+					variant={sortMode === 'delta' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('delta')}
+				>
+					Delta {sortMode === 'delta' ? `(${sortDirection})` : ''}
+				</Button>
+				<div>-</div>
+				<Button
+					type="button"
+					variant={sortMode === 'code' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('code')}
+				>
+					Code {sortMode === 'code' ? `(${sortDirection})` : ''}
+				</Button>
+				<Button
+					type="button"
+					variant={sortMode === 'category' ? 'default' : 'outline'}
+					onClick={() => handleSortModeClick('category')}
+				>
+					Category {sortMode === 'category' ? `(${sortDirection})` : ''}
+				</Button>
 			</div>
-			{viewScheme === 'flat' ? (
-				<BulletVisualization
-					theme={theme}
-					pairedBulletData={bulletPairedData}
-				/>
-			) : (
-				<div className="flex flex-col gap-6">
-					{PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
-						const groupItems = bulletPairedData.filter((d) =>
-							group.functionIds.includes(String(d.id)),
-						)
-						if (!groupItems.length) return null
-						return (
-							<div key={group.id}>
-								<h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
-									{group.label}
-								</h3>
-								<BulletVisualization
-									theme={theme}
-									pairedBulletData={groupItems}
-									style={{
-										minHeight: `${groupItems.length * 50 + 60}px`,
-									}}
-								/>
-							</div>
-						)
-					})}
-				</div>
-			)}
-			{netInterestBps > 0 && (
-				<p className="mt-4 text-sm text-gray-500 italic">
-					The priorities shown here — yours and the government's — each
-					apply to {100 - Math.round(netInterestBps / 100)} cents of every
-					federal dollar. The remaining {Math.round(netInterestBps / 100)}{' '}
-					cents is committed to Net Interest, mandatory debt service on the
-					national debt that cannot be redirected.
-				</p>
-			)}
-			<section className="mt-12">
-				<h2>Your Tax Breakdown</h2>
-				<p className="mt-1 text-sm text-gray-500">
-					Enter your total federal tax payment to see how the government spent
-					it versus how you would have.
-				</p>
-				<div className="mt-4 flex items-center gap-2">
-					<label htmlFor="tax-amount" className="text-sm font-medium">
-						Federal taxes paid:
-					</label>
-					<div className="relative flex items-center">
-						<span className="absolute left-3 text-sm text-gray-500">$</span>
-						<input
-							id="tax-amount"
-							type="number"
-							min="0"
-							className="w-36 rounded border py-1.5 pr-3 pl-7 text-sm"
-							value={taxAmount}
-							onChange={(e) =>
-								setTaxAmount(e.target.value === '' ? '' : Number(e.target.value))
-							}
-							placeholder="0"
-						/>
+			<div className="flex border-b">
+				<button
+					type="button"
+					className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
+						activeTab === 'comparison'
+							? 'border-current'
+							: 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+					}`}
+					onClick={() => setActiveTab('comparison')}
+				>
+					Comparison
+				</button>
+				<button
+					type="button"
+					className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
+						activeTab === 'tax-breakdown'
+							? 'border-current'
+							: 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+					}`}
+					onClick={() => setActiveTab('tax-breakdown')}
+				>
+					Tax Breakdown
+				</button>
+			</div>
+			{activeTab === 'comparison' && (
+				<div>
+					<div className="my-4">
+						<ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
 					</div>
-				</div>
-				{taxAmount !== '' && taxAmount > 0 && (
-					<table className="mt-4 w-full text-sm">
-						<thead>
-							<tr className="border-b font-semibold">
-								<th className="pb-2 text-left font-semibold">Budget Function</th>
-								<th className="pb-2 text-right font-semibold">Your Budget</th>
-								<th className="pb-2 text-right font-semibold">Actual Budget</th>
-								<th className="pb-2 text-right font-semibold">Difference</th>
-							</tr>
-						</thead>
-						<tbody>
-							{sortedPairedData.map((item) => {
-								const yourDollars = (item.participantPercent / 100) * taxAmount
-								const actualDollars = (item.budgetPercent / 100) * taxAmount
-								const difference = yourDollars - actualDollars
+					{viewScheme === 'flat' ? (
+						<BulletVisualization
+							theme={theme}
+							pairedBulletData={bulletPairedData}
+						/>
+					) : (
+						<div className="flex flex-col gap-6">
+							{PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
+								const groupItems = bulletPairedData.filter((d) =>
+									group.functionIds.includes(String(d.id)),
+								)
+								if (!groupItems.length) return null
 								return (
-									<tr key={item.code} className="border-b">
-										<td className="py-1.5">{item.category}</td>
-										<td className="py-1.5 text-right">
-											{formatCurrency(yourDollars)}
-										</td>
-										<td className="py-1.5 text-right">
-											{formatCurrency(actualDollars)}
-										</td>
-										<td className="py-1.5 text-right">
-											{formatSignedCurrency(difference)}
-										</td>
-									</tr>
+									<div key={group.id}>
+										<h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
+											{group.label}
+										</h3>
+										<BulletVisualization
+											theme={theme}
+											pairedBulletData={groupItems}
+											style={{
+												minHeight: `${groupItems.length * 50 + 60}px`,
+											}}
+										/>
+									</div>
 								)
 							})}
-						</tbody>
-						<tfoot>
-							<tr className="border-t font-semibold">
-								<td className="pt-2">Total (excl. Net Interest)</td>
-								<td className="pt-2 text-right">
-									{formatCurrency(
-										sortedPairedData.reduce(
-											(acc, item) =>
-												acc + (item.participantPercent / 100) * taxAmount,
-											0,
-										),
-									)}
-								</td>
-								<td className="pt-2 text-right">
-									{formatCurrency(
-										sortedPairedData.reduce(
-											(acc, item) =>
-												acc + (item.budgetPercent / 100) * taxAmount,
-											0,
-										),
-									)}
-								</td>
-								<td />
-							</tr>
-						</tfoot>
-					</table>
-				)}
-			</section>
+						</div>
+					)}
+					{netInterestBps > 0 && (
+						<p className="mt-4 text-sm text-gray-500 italic">
+							The priorities shown here — yours and the government's — each
+							apply to {100 - Math.round(netInterestBps / 100)} cents of every
+							federal dollar. The remaining {Math.round(netInterestBps / 100)}{' '}
+							cents is committed to Net Interest, mandatory debt service on the
+							national debt that cannot be redirected.
+						</p>
+					)}
+				</div>
+			)}
+			{activeTab === 'tax-breakdown' && (
+				<div className="mt-6">
+					<p className="text-sm text-gray-500">
+						Enter your total federal tax payment to see how the government spent
+						it versus how you would have.
+					</p>
+					<div className="mt-4 flex items-center gap-2">
+						<label htmlFor="tax-amount" className="text-sm font-medium">
+							Federal taxes paid:
+						</label>
+						<div className="relative flex items-center">
+							<span className="absolute left-3 text-sm text-gray-500">$</span>
+							<input
+								id="tax-amount"
+								type="number"
+								min="0"
+								className="w-36 rounded border py-1.5 pr-3 pl-7 text-sm"
+								value={taxAmount}
+								onChange={(e) =>
+									setTaxAmount(
+										e.target.value === '' ? '' : Number(e.target.value),
+									)
+								}
+								placeholder="0"
+							/>
+						</div>
+					</div>
+					{taxAmount !== '' && taxAmount > 0 && (
+						<table className="mt-4 w-full text-sm">
+							<thead>
+								<tr className="border-b">
+									<th className="pb-2 text-left font-semibold">
+										Budget Function
+									</th>
+									<th className="pb-2 text-right font-semibold">Your Budget</th>
+									<th className="pb-2 text-right font-semibold">
+										Actual Budget
+									</th>
+									<th className="pb-2 text-right font-semibold">Difference</th>
+								</tr>
+							</thead>
+							<tbody>
+								{sortedPairedData.map((item) => {
+									const yourDollars =
+										(item.participantPercent / 100) * taxAmount
+									const actualDollars = (item.budgetPercent / 100) * taxAmount
+									const difference = yourDollars - actualDollars
+									return (
+										<tr key={item.code} className="border-b">
+											<td className="py-1.5">{item.category}</td>
+											<td className="py-1.5 text-right">
+												{formatCurrency(yourDollars)}
+											</td>
+											<td className="py-1.5 text-right">
+												{formatCurrency(actualDollars)}
+											</td>
+											<td className="py-1.5 text-right">
+												{formatSignedCurrency(difference)}
+											</td>
+										</tr>
+									)
+								})}
+							</tbody>
+							<tfoot>
+								<tr className="border-t font-semibold">
+									<td className="pt-2">Total (excl. Net Interest)</td>
+									<td className="pt-2 text-right">
+										{formatCurrency(
+											sortedPairedData.reduce(
+												(acc, item) =>
+													acc + (item.participantPercent / 100) * taxAmount,
+												0,
+											),
+										)}
+									</td>
+									<td className="pt-2 text-right">
+										{formatCurrency(
+											sortedPairedData.reduce(
+												(acc, item) =>
+													acc + (item.budgetPercent / 100) * taxAmount,
+												0,
+											),
+										)}
+									</td>
+									<td />
+								</tr>
+							</tfoot>
+						</table>
+					)}
+				</div>
+			)}
 			<section className="mt-12">
 				<h2>Publish settings</h2>
 				<div className="flex flex-row gap-4">
