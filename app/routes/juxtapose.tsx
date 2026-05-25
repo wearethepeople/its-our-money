@@ -1,7 +1,11 @@
 import { Route } from './+types/juxtapose'
 import { getParticipantBySession } from '@/utils/participant-session.server.ts'
 import { href, redirect, Form, data, Link } from 'react-router'
-import { formatPercent } from '@/utils/numbers.ts'
+import {
+	formatCurrency,
+	formatPercent,
+	formatSignedCurrency,
+} from '@/utils/numbers.ts'
 import { Button } from '@/ui/button.tsx'
 import { getFormProps, useForm } from '@conform-to/react'
 import { z } from 'zod'
@@ -183,6 +187,7 @@ export default function JuxtaposeRoute({
 	const [viewScheme, setViewScheme] = useState<ViewSchemeId>('flat')
 	const [sortMode, setSortMode] = useState<SortModes>('participantPercent')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+	const [taxAmount, setTaxAmount] = useState<number | ''>('')
 	const lastResult = actionData?.result
 	const publishState =
 		allocation.publicId && allocation.publishedAt ? 'Published' : 'Unpublished'
@@ -321,6 +326,89 @@ export default function JuxtaposeRoute({
 					national debt that cannot be redirected.
 				</p>
 			)}
+			<section className="mt-12">
+				<h2>Your Tax Breakdown</h2>
+				<p className="mt-1 text-sm text-gray-500">
+					Enter your total federal tax payment to see how the government spent
+					it versus how you would have.
+				</p>
+				<div className="mt-4 flex items-center gap-2">
+					<label htmlFor="tax-amount" className="text-sm font-medium">
+						Federal taxes paid:
+					</label>
+					<div className="relative flex items-center">
+						<span className="absolute left-3 text-sm text-gray-500">$</span>
+						<input
+							id="tax-amount"
+							type="number"
+							min="0"
+							className="w-36 rounded border py-1.5 pr-3 pl-7 text-sm"
+							value={taxAmount}
+							onChange={(e) =>
+								setTaxAmount(e.target.value === '' ? '' : Number(e.target.value))
+							}
+							placeholder="0"
+						/>
+					</div>
+				</div>
+				{taxAmount !== '' && taxAmount > 0 && (
+					<table className="mt-4 w-full text-sm">
+						<thead>
+							<tr className="border-b font-semibold">
+								<th className="pb-2 text-left font-semibold">Budget Function</th>
+								<th className="pb-2 text-right font-semibold">Your Budget</th>
+								<th className="pb-2 text-right font-semibold">Actual Budget</th>
+								<th className="pb-2 text-right font-semibold">Difference</th>
+							</tr>
+						</thead>
+						<tbody>
+							{sortedPairedData.map((item) => {
+								const yourDollars = (item.participantPercent / 100) * taxAmount
+								const actualDollars = (item.budgetPercent / 100) * taxAmount
+								const difference = yourDollars - actualDollars
+								return (
+									<tr key={item.code} className="border-b">
+										<td className="py-1.5">{item.category}</td>
+										<td className="py-1.5 text-right">
+											{formatCurrency(yourDollars)}
+										</td>
+										<td className="py-1.5 text-right">
+											{formatCurrency(actualDollars)}
+										</td>
+										<td className="py-1.5 text-right">
+											{formatSignedCurrency(difference)}
+										</td>
+									</tr>
+								)
+							})}
+						</tbody>
+						<tfoot>
+							<tr className="border-t font-semibold">
+								<td className="pt-2">Total (excl. Net Interest)</td>
+								<td className="pt-2 text-right">
+									{formatCurrency(
+										sortedPairedData.reduce(
+											(acc, item) =>
+												acc + (item.participantPercent / 100) * taxAmount,
+											0,
+										),
+									)}
+								</td>
+								<td className="pt-2 text-right">
+									{formatCurrency(
+										sortedPairedData.reduce(
+											(acc, item) =>
+												acc + (item.budgetPercent / 100) * taxAmount,
+											0,
+										),
+									)}
+								</td>
+								<td />
+							</tr>
+						</tfoot>
+					</table>
+				)}
+			</section>
 			<section className="mt-12">
 				<h2>Publish settings</h2>
 				<div className="flex flex-row gap-4">
