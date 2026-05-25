@@ -21,6 +21,7 @@ import { ParticipantService } from '@/services/participant-service.server.ts'
 import { BulletVisualization } from '@/components/compare-allocation.tsx'
 import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
 import { useMemo, useState } from 'react'
+import { cn } from '@/utils/misc.tsx'
 import { useTheme } from '@/routes/resources/theme-switch.tsx'
 import { ViewSchemeToggle } from '@/components/view-scheme-toggle.tsx'
 import {
@@ -252,43 +253,59 @@ export default function JuxtaposeRoute({
 				</Link>
 				.
 			</p>
-			<div className="my-4 flex flex-wrap gap-2 border p-1">
-				<Button
-					type="button"
-					variant={sortMode === 'participantPercent' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('participantPercent')}
-				>
-					Me {sortMode === 'participantPercent' ? `(${sortDirection})` : ''}
-				</Button>
-				<Button
-					type="button"
-					variant={sortMode === 'budgetPercent' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('budgetPercent')}
-				>
-					Gov {sortMode === 'budgetPercent' ? `(${sortDirection})` : ''}
-				</Button>
-				<Button
-					type="button"
-					variant={sortMode === 'delta' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('delta')}
-				>
-					Delta {sortMode === 'delta' ? `(${sortDirection})` : ''}
-				</Button>
-				<div>-</div>
-				<Button
-					type="button"
-					variant={sortMode === 'code' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('code')}
-				>
-					Code {sortMode === 'code' ? `(${sortDirection})` : ''}
-				</Button>
-				<Button
-					type="button"
-					variant={sortMode === 'category' ? 'default' : 'outline'}
-					onClick={() => handleSortModeClick('category')}
-				>
-					Category {sortMode === 'category' ? `(${sortDirection})` : ''}
-				</Button>
+			<div className="my-4 flex flex-wrap items-center gap-3">
+				<span className="text-xs text-gray-500">Sort by:</span>
+				<div className="flex">
+					{(
+						[
+							{ mode: 'participantPercent', label: 'Yours' },
+							{ mode: 'budgetPercent', label: 'Federal' },
+							{ mode: 'delta', label: 'Difference' },
+						] as const
+					).map(({ mode, label }, i, arr) => (
+						<button
+							key={mode}
+							type="button"
+							className={cn(
+								'border -ml-px rounded-none px-2.5 py-1 text-xs font-medium transition-colors',
+								i === 0 && 'ml-0 rounded-l-md',
+								i === arr.length - 1 && 'rounded-r-md',
+								sortMode === mode
+									? 'relative z-10 border-primary bg-primary text-primary-foreground'
+									: 'border-input bg-background hover:bg-accent hover:text-accent-foreground',
+							)}
+							onClick={() => handleSortModeClick(mode)}
+						>
+							{label}
+							{sortMode === mode ? ` (${sortDirection})` : ''}
+						</button>
+					))}
+				</div>
+				<div className="flex">
+					{(
+						[
+							{ mode: 'code', label: 'Code' },
+							{ mode: 'category', label: 'Category' },
+						] as const
+					).map(({ mode, label }, i, arr) => (
+						<button
+							key={mode}
+							type="button"
+							className={cn(
+								'border -ml-px rounded-none px-2.5 py-1 text-xs font-medium transition-colors',
+								i === 0 && 'ml-0 rounded-l-md',
+								i === arr.length - 1 && 'rounded-r-md',
+								sortMode === mode
+									? 'relative z-10 border-primary bg-primary text-primary-foreground'
+									: 'border-input bg-background hover:bg-accent hover:text-accent-foreground',
+							)}
+							onClick={() => handleSortModeClick(mode)}
+						>
+							{label}
+							{sortMode === mode ? ` (${sortDirection})` : ''}
+						</button>
+					))}
+				</div>
 			</div>
 			<div className="flex border-b">
 				<button
