@@ -20,7 +20,7 @@ import { checkHoneypot } from '@/utils/honeypot.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
 import { BulletVisualization } from '@/components/compare-allocation.tsx'
 import { getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { cn } from '@/utils/misc.tsx'
 import { useTheme } from '@/routes/resources/theme-switch.tsx'
 import { ViewSchemeToggle } from '@/components/view-scheme-toggle.tsx'
@@ -357,6 +357,9 @@ export default function JuxtaposeRoute({
 						</button>
 					))}
 				</div>
+				<div className="ml-auto">
+					<ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
+				</div>
 			</div>
 			<div className="flex border-b">
 				<button
@@ -384,9 +387,6 @@ export default function JuxtaposeRoute({
 			</div>
 			{activeTab === 'comparison' && (
 				<div>
-					<div className="my-4">
-						<ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
-					</div>
 					{viewScheme === 'flat' ? (
 						<BulletVisualization
 							theme={theme}
@@ -475,40 +475,144 @@ export default function JuxtaposeRoute({
 								</tr>
 							</thead>
 							<tbody>
-								{sortedPairedData.map((item) => {
-									const yourDollars =
-										(item.participantPercent / 100) *
-										allocatableFraction *
-										taxAmount
-									const actualDollars =
-										(item.budgetPercent / 100) * allocatableFraction * taxAmount
-									const difference = yourDollars - actualDollars
-									return (
-										<tr key={item.code} className="border-b">
-											<td className="py-1.5">{item.category}</td>
-											<td className="py-1.5 text-right">
-												{formatCurrency(yourDollars)}
-											</td>
-											<td className="py-1.5 text-right">
-												{formatCurrency(actualDollars)}
-											</td>
-											<td className="py-1.5 text-right">
-												{formatSignedCurrency(difference)}
-											</td>
-										</tr>
-									)
-								})}
-								{netInterestBps > 0 && (
-									<tr className="border-b text-gray-500 italic">
-										<td className="py-1.5">Net Interest (mandatory)</td>
-										<td className="py-1.5 text-right">
-											{formatCurrency(netInterestFraction * taxAmount)}
-										</td>
-										<td className="py-1.5 text-right">
-											{formatCurrency(netInterestFraction * taxAmount)}
-										</td>
-										<td className="py-1.5 text-right">{formatCurrency(0)}</td>
-									</tr>
+								{viewScheme === 'flat' ? (
+									<>
+										{sortedPairedData.map((item) => {
+											const yourDollars =
+												(item.participantPercent / 100) *
+												allocatableFraction *
+												taxAmount
+											const actualDollars =
+												(item.budgetPercent / 100) *
+												allocatableFraction *
+												taxAmount
+											const difference = yourDollars - actualDollars
+											return (
+												<tr key={item.code} className="border-b">
+													<td className="py-1.5">{item.category}</td>
+													<td className="py-1.5 text-right">
+														{formatCurrency(yourDollars)}
+													</td>
+													<td className="py-1.5 text-right">
+														{formatCurrency(actualDollars)}
+													</td>
+													<td className="py-1.5 text-right">
+														{formatSignedCurrency(difference)}
+													</td>
+												</tr>
+											)
+										})}
+										{netInterestBps > 0 && (
+											<tr className="border-b text-gray-500 italic">
+												<td className="py-1.5">Net Interest (mandatory)</td>
+												<td className="py-1.5 text-right">
+													{formatCurrency(netInterestFraction * taxAmount)}
+												</td>
+												<td className="py-1.5 text-right">
+													{formatCurrency(netInterestFraction * taxAmount)}
+												</td>
+												<td className="py-1.5 text-right">
+													{formatCurrency(0)}
+												</td>
+											</tr>
+										)}
+									</>
+								) : (
+									<>
+										{PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
+											const groupItems = sortedPairedData.filter((item) =>
+												group.functionIds.includes(String(item.id)),
+											)
+											if (!groupItems.length) return null
+											const groupYours = groupItems.reduce(
+												(sum, item) =>
+													sum +
+													(item.participantPercent / 100) *
+														allocatableFraction *
+														taxAmount,
+												0,
+											)
+											const groupActual = groupItems.reduce(
+												(sum, item) =>
+													sum +
+													(item.budgetPercent / 100) *
+														allocatableFraction *
+														taxAmount,
+												0,
+											)
+											const groupDiff = groupYours - groupActual
+											return (
+												<Fragment key={group.id}>
+													<tr>
+														<td
+															colSpan={4}
+															className="border-b border-gray-300 pt-4 pb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400"
+														>
+															{group.label}
+														</td>
+													</tr>
+													{groupItems.map((item) => {
+														const yourDollars =
+															(item.participantPercent / 100) *
+															allocatableFraction *
+															taxAmount
+														const actualDollars =
+															(item.budgetPercent / 100) *
+															allocatableFraction *
+															taxAmount
+														const difference = yourDollars - actualDollars
+														return (
+															<tr
+																key={item.code}
+																className="border-b border-gray-100 dark:border-gray-800"
+															>
+																<td className="py-1.5 pl-3">
+																	{item.category}
+																</td>
+																<td className="py-1.5 text-right">
+																	{formatCurrency(yourDollars)}
+																</td>
+																<td className="py-1.5 text-right">
+																	{formatCurrency(actualDollars)}
+																</td>
+																<td className="py-1.5 text-right">
+																	{formatSignedCurrency(difference)}
+																</td>
+															</tr>
+														)
+													})}
+													<tr className="border-b border-gray-300 dark:border-gray-600">
+														<td className="py-1.5 pl-3 text-xs font-semibold text-gray-500">
+															Subtotal
+														</td>
+														<td className="py-1.5 text-right font-semibold">
+															{formatCurrency(groupYours)}
+														</td>
+														<td className="py-1.5 text-right font-semibold">
+															{formatCurrency(groupActual)}
+														</td>
+														<td className="py-1.5 text-right font-semibold">
+															{formatSignedCurrency(groupDiff)}
+														</td>
+													</tr>
+												</Fragment>
+											)
+										})}
+										{netInterestBps > 0 && (
+											<tr className="border-b text-gray-500 italic">
+												<td className="py-1.5">Net Interest (mandatory)</td>
+												<td className="py-1.5 text-right">
+													{formatCurrency(netInterestFraction * taxAmount)}
+												</td>
+												<td className="py-1.5 text-right">
+													{formatCurrency(netInterestFraction * taxAmount)}
+												</td>
+												<td className="py-1.5 text-right">
+													{formatCurrency(0)}
+												</td>
+											</tr>
+										)}
+									</>
 								)}
 							</tbody>
 							<tfoot>
