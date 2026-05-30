@@ -19,18 +19,15 @@ Here are some examples to give you an idea:
 
 ```ts
 // server-side only utilities
-const userCanDeleteAnyUser = await requireUserWithPermission(
-	request,
-	'delete:user:any',
-)
-const userIsAdmin = await requireUserWithRole(request, 'admin')
+const userCanDeleteAnyUser = await requireUserWithPermission(request, "delete:user:any");
+const userIsAdmin = await requireUserWithRole(request, "admin");
 ```
 
 ```ts
 // UI utilities
-const user = useUser()
-const userCanCreateTheirOwnNotes = userHasPermission(user, 'create:note:own')
-const userIsUser = userHasRole(user, 'user')
+const user = useUser();
+const userCanCreateTheirOwnNotes = userHasPermission(user, "create:note:own");
+const userIsUser = userHasRole(user, "user");
 ```
 
 There is currently no UI for managing permissions, but you can use prisma studio

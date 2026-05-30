@@ -11,9 +11,9 @@ If you wish to change the Node.js version, you can do so by updating the
 
 ```json
 {
-	"engines": {
-		"node": "^22.18.0"
-	}
+  "engines": {
+    "node": "^22.18.0"
+  }
 }
 ```
 

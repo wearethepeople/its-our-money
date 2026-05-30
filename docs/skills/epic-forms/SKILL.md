@@ -43,23 +43,23 @@ frustration.
 ```typescript
 // ✅ Good - Explicit validation with clear error messages
 const SignupSchema = z.object({
-	email: z
-		.string({ required_error: 'Email is required' })
-		.email({ message: 'Please enter a valid email address' })
-		.min(3, { message: 'Email must be at least 3 characters' })
-		.max(100, { message: 'Email must be less than 100 characters' })
-		.transform((val) => val.toLowerCase().trim()),
-	password: z
-		.string({ required_error: 'Password is required' })
-		.min(6, { message: 'Password must be at least 6 characters' })
-		.max(72, { message: 'Password must be less than 72 characters' }),
-})
+  email: z
+    .string({ required_error: "Email is required" })
+    .email({ message: "Please enter a valid email address" })
+    .min(3, { message: "Email must be at least 3 characters" })
+    .max(100, { message: "Email must be less than 100 characters" })
+    .transform((val) => val.toLowerCase().trim()),
+  password: z
+    .string({ required_error: "Password is required" })
+    .min(6, { message: "Password must be at least 6 characters" })
+    .max(72, { message: "Password must be less than 72 characters" }),
+});
 
 // ❌ Avoid - Implicit validation
 const SignupSchema = z.object({
-	email: z.string().email(), // No clear error messages
-	password: z.string().min(6), // Generic error
-})
+  email: z.string().email(), // No clear error messages
+  password: z.string().min(6), // Generic error
+});
 ```
 
 **Example - Fail fast validation:**
@@ -67,38 +67,38 @@ const SignupSchema = z.object({
 ```typescript
 // ✅ Good - Validate early and return specific errors immediately
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+  const formData = await request.formData();
 
-	// Validate immediately - fail fast
-	const submission = await parseWithZod(formData, {
-		schema: SignupSchema,
-	})
+  // Validate immediately - fail fast
+  const submission = await parseWithZod(formData, {
+    schema: SignupSchema,
+  });
 
-	// Return errors immediately if validation fails
-	if (submission.status !== 'success') {
-		return data(
-			{ result: submission.reply() },
-			{ status: 400 }, // Clear error status
-		)
-	}
+  // Return errors immediately if validation fails
+  if (submission.status !== "success") {
+    return data(
+      { result: submission.reply() },
+      { status: 400 }, // Clear error status
+    );
+  }
 
-	// Only proceed if validation passed
-	const { email, password } = submission.value
-	// ... continue with signup
+  // Only proceed if validation passed
+  const { email, password } = submission.value;
+  // ... continue with signup
 }
 
 // ❌ Avoid - Delayed or unclear validation
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
-	const email = formData.get('email')
-	const password = formData.get('password')
+  const formData = await request.formData();
+  const email = formData.get("email");
+  const password = formData.get("password");
 
-	// Validation scattered throughout the function
-	if (!email) {
-		// Generic error, not specific
-		return json({ error: 'Invalid' }, { status: 400 })
-	}
-	// ... more scattered validation
+  // Validation scattered throughout the function
+  if (!email) {
+    // Generic error, not specific
+    return json({ error: "Invalid" }, { status: 400 });
+  }
+  // ... more scattered validation
 }
 ```
 
@@ -146,47 +146,47 @@ Conform integrates seamlessly with Zod for validation.
 **Define schema:**
 
 ```typescript
-import { z } from 'zod'
+import { z } from "zod";
 
 const SignupSchema = z
-	.object({
-		email: z.string().email('Invalid email'),
-		password: z.string().min(6, 'Password must be at least 6 characters'),
-		confirmPassword: z.string(),
-	})
-	.superRefine(({ confirmPassword, password }, ctx) => {
-		if (confirmPassword !== password) {
-			ctx.addIssue({
-				path: ['confirmPassword'],
-				code: 'custom',
-				message: 'Passwords must match',
-			})
-		}
-	})
+  .object({
+    email: z.string().email("Invalid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+  })
+  .superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+      ctx.addIssue({
+        path: ["confirmPassword"],
+        code: "custom",
+        message: "Passwords must match",
+      });
+    }
+  });
 ```
 
 **Validation in action (fail fast):**
 
 ```typescript
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+  const formData = await request.formData();
 
-	// Validate immediately - explicit and fail fast
-	const submission = await parseWithZod(formData, {
-		schema: SignupSchema,
-	})
+  // Validate immediately - explicit and fail fast
+  const submission = await parseWithZod(formData, {
+    schema: SignupSchema,
+  });
 
-	// Return explicit errors immediately if validation fails
-	if (submission.status !== 'success') {
-		return data(
-			{ result: submission.reply() },
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
-	}
+  // Return explicit errors immediately if validation fails
+  if (submission.status !== "success") {
+    return data(
+      { result: submission.reply() },
+      { status: submission.status === "error" ? 400 : 200 },
+    );
+  }
 
-	// Only proceed if validation passed - submission.value is type-safe
-	const { email, password } = submission.value
-	// ... process with validated data
+  // Only proceed if validation passed - submission.value is type-safe
+  const { email, password } = submission.value;
+  // ... process with validated data
 }
 ```
 
@@ -196,33 +196,33 @@ For validations that require querying the database:
 
 ```typescript
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+  const formData = await request.formData();
 
-	const submission = await parseWithZod(formData, {
-		schema: SignupSchema.superRefine(async (data, ctx) => {
-			const existingUser = await prisma.user.findUnique({
-				where: { email: data.email },
-				select: { id: true },
-			})
-			if (existingUser) {
-				ctx.addIssue({
-					path: ['email'],
-					code: z.ZodIssueCode.custom,
-					message: 'A user already exists with this email',
-				})
-			}
-		}),
-		async: true, // Important: enable async validation
-	})
+  const submission = await parseWithZod(formData, {
+    schema: SignupSchema.superRefine(async (data, ctx) => {
+      const existingUser = await prisma.user.findUnique({
+        where: { email: data.email },
+        select: { id: true },
+      });
+      if (existingUser) {
+        ctx.addIssue({
+          path: ["email"],
+          code: z.ZodIssueCode.custom,
+          message: "A user already exists with this email",
+        });
+      }
+    }),
+    async: true, // Important: enable async validation
+  });
 
-	if (submission.status !== 'success') {
-		return data(
-			{ result: submission.reply() },
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
-	}
+  if (submission.status !== "success") {
+    return data(
+      { result: submission.reply() },
+      { status: submission.status === "error" ? 400 : 200 },
+    );
+  }
 
-	// ...
+  // ...
 }
 ```
 
@@ -345,14 +345,14 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 **In the action:**
 
 ```typescript
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { checkHoneypot } from "#app/utils/honeypot.server.ts";
 
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+  const formData = await request.formData();
 
-	await checkHoneypot(formData) // Throws error if spam
+  await checkHoneypot(formData); // Throws error if spam
 
-	// ... rest of code
+  // ... rest of code
 }
 ```
 
@@ -363,24 +363,24 @@ For forms with file uploads, use `encType="multipart/form-data"`.
 **Schema for files:**
 
 ```typescript
-const MAX_UPLOAD_SIZE = 1024 * 1024 * 3 // 3MB
+const MAX_UPLOAD_SIZE = 1024 * 1024 * 3; // 3MB
 
 const ImageFieldsetSchema = z.object({
-	id: z.string().optional(),
-	file: z
-		.instanceof(File)
-		.optional()
-		.refine((file) => {
-			return !file || file.size <= MAX_UPLOAD_SIZE
-		}, 'File must be less than 3MB'),
-	altText: z.string().optional(),
-})
+  id: z.string().optional(),
+  file: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => {
+      return !file || file.size <= MAX_UPLOAD_SIZE;
+    }, "File must be less than 3MB"),
+  altText: z.string().optional(),
+});
 
 const NoteEditorSchema = z.object({
-	title: z.string().min(1).max(100),
-	content: z.string().min(1).max(10000),
-	images: z.array(ImageFieldsetSchema).max(5).optional(),
-})
+  title: z.string().min(1).max(100),
+  content: z.string().min(1).max(10000),
+  images: z.array(ImageFieldsetSchema).max(5).optional(),
+});
 ```
 
 **Form with file upload:**
@@ -399,26 +399,26 @@ const NoteEditorSchema = z.object({
 
 ```typescript
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+  const formData = await request.formData();
 
-	const submission = await parseWithZod(formData, {
-		schema: NoteEditorSchema,
-	})
+  const submission = await parseWithZod(formData, {
+    schema: NoteEditorSchema,
+  });
 
-	if (submission.status !== 'success') {
-		return data({ result: submission.reply() }, { status: 400 })
-	}
+  if (submission.status !== "success") {
+    return data({ result: submission.reply() }, { status: 400 });
+  }
 
-	const { images } = submission.value
+  const { images } = submission.value;
 
-	// Process files
-	for (const image of images ?? []) {
-		if (image.file) {
-			// Upload file, save to storage, etc.
-		}
-	}
+  // Process files
+  for (const image of images ?? []) {
+    if (image.file) {
+      // Upload file, save to storage, etc.
+    }
+  }
 
-	// ...
+  // ...
 }
 ```
 
@@ -430,14 +430,14 @@ For forms with repetitive fields (like multiple images):
 
 ```typescript
 const ImageFieldsetSchema = z.object({
-	id: z.string().optional(),
-	file: z.instanceof(File).optional(),
-	altText: z.string().optional(),
-})
+  id: z.string().optional(),
+  file: z.instanceof(File).optional(),
+  altText: z.string().optional(),
+});
 
 const FormSchema = z.object({
-	images: z.array(ImageFieldsetSchema).max(5).optional(),
-})
+  images: z.array(ImageFieldsetSchema).max(5).optional(),
+});
 ```
 
 **In the component:**
@@ -519,49 +519,46 @@ Create reusable schemas in `app/utils/user-validation.ts`:
 
 ```typescript
 // app/utils/user-validation.ts
-import { z } from 'zod'
+import { z } from "zod";
 
 export const EmailSchema = z
-	.string({ required_error: 'Email is required' })
-	.email({ message: 'Email is invalid' })
-	.min(3, { message: 'Email is too short' })
-	.max(100, { message: 'Email is too long' })
-	.transform((value) => value.toLowerCase())
+  .string({ required_error: "Email is required" })
+  .email({ message: "Email is invalid" })
+  .min(3, { message: "Email is too short" })
+  .max(100, { message: "Email is too long" })
+  .transform((value) => value.toLowerCase());
 
 export const PasswordSchema = z
-	.string({ required_error: 'Password is required' })
-	.min(6, { message: 'Password is too short' })
-	.refine((val) => new TextEncoder().encode(val).length <= 72, {
-		message: 'Password is too long',
-	})
+  .string({ required_error: "Password is required" })
+  .min(6, { message: "Password is too short" })
+  .refine((val) => new TextEncoder().encode(val).length <= 72, {
+    message: "Password is too long",
+  });
 
 export const PasswordAndConfirmPasswordSchema = z
-	.object({ password: PasswordSchema, confirmPassword: PasswordSchema })
-	.superRefine(({ confirmPassword, password }, ctx) => {
-		if (confirmPassword !== password) {
-			ctx.addIssue({
-				path: ['confirmPassword'],
-				code: 'custom',
-				message: 'The passwords must match',
-			})
-		}
-	})
+  .object({ password: PasswordSchema, confirmPassword: PasswordSchema })
+  .superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+      ctx.addIssue({
+        path: ["confirmPassword"],
+        code: "custom",
+        message: "The passwords must match",
+      });
+    }
+  });
 ```
 
 **Use in forms:**
 
 ```typescript
-import {
-	EmailSchema,
-	PasswordAndConfirmPasswordSchema,
-} from '#app/utils/user-validation.ts'
+import { EmailSchema, PasswordAndConfirmPasswordSchema } from "#app/utils/user-validation.ts";
 
 const SignupSchema = z
-	.object({
-		email: EmailSchema,
-		username: UsernameSchema,
-	})
-	.and(PasswordAndConfirmPasswordSchema)
+  .object({
+    email: EmailSchema,
+    username: UsernameSchema,
+  })
+  .and(PasswordAndConfirmPasswordSchema);
 ```
 
 ## Common examples
@@ -630,34 +627,34 @@ export default function LoginRoute({ actionData }: Route.ComponentProps) {
 ```typescript
 // app/routes/_auth/signup.tsx
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
-	await checkHoneypot(formData)
+  const formData = await request.formData();
+  await checkHoneypot(formData);
 
-	const submission = await parseWithZod(formData, {
-		schema: SignupSchema.superRefine(async (data, ctx) => {
-			const existingUser = await prisma.user.findUnique({
-				where: { email: data.email },
-				select: { id: true },
-			})
-			if (existingUser) {
-				ctx.addIssue({
-					path: ['email'],
-					code: z.ZodIssueCode.custom,
-					message: 'A user already exists with this email',
-				})
-			}
-		}),
-		async: true,
-	})
+  const submission = await parseWithZod(formData, {
+    schema: SignupSchema.superRefine(async (data, ctx) => {
+      const existingUser = await prisma.user.findUnique({
+        where: { email: data.email },
+        select: { id: true },
+      });
+      if (existingUser) {
+        ctx.addIssue({
+          path: ["email"],
+          code: z.ZodIssueCode.custom,
+          message: "A user already exists with this email",
+        });
+      }
+    }),
+    async: true,
+  });
 
-	if (submission.status !== 'success') {
-		return data(
-			{ result: submission.reply() },
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
-	}
+  if (submission.status !== "success") {
+    return data(
+      { result: submission.reply() },
+      { status: submission.status === "error" ? 400 : 200 },
+    );
+  }
 
-	// Procesar signup...
+  // Procesar signup...
 }
 ```
 

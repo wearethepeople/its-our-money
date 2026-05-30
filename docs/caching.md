@@ -34,36 +34,36 @@ up by caching them and utilizing the stale-while-revalidate features in
 cachified. Here's how you would use cachified to do this:
 
 ```tsx
-import { cachified, cache } from '#app/utils/cache.server.ts'
-import { type Timings } from '#app/utils/timing.server.ts'
+import { cachified, cache } from "#app/utils/cache.server.ts";
+import { type Timings } from "#app/utils/timing.server.ts";
 
 const eventSchema = z.object({
-	/* the schema for events */
-})
+  /* the schema for events */
+});
 
 export async function getScheduledEvents({
-	timings,
+  timings,
 }: {
-	timings?: Timings
+  timings?: Timings;
 } = {}) {
-	const scheduledEvents = await cachified({
-		key: 'tito:scheduled-events',
-		cache,
-		timings,
-		getFreshValue: () => {
-			// do a fetch request to the tito API and stuff here
-			return [
-				/* the events you got from tito */
-			]
-		},
-		checkValue: eventSchema.array(),
-		// Time To Live (ttl) in milliseconds: the cached value is considered valid for 24 hours
-		ttl: 1000 * 60 * 60 * 24,
-		// Stale While Revalidate (swr) in milliseconds: if the cached value is less than 30 days
-		// expired, return it while fetching a fresh value in the background
-		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 30,
-	})
-	return scheduledEvents
+  const scheduledEvents = await cachified({
+    key: "tito:scheduled-events",
+    cache,
+    timings,
+    getFreshValue: () => {
+      // do a fetch request to the tito API and stuff here
+      return [
+        /* the events you got from tito */
+      ];
+    },
+    checkValue: eventSchema.array(),
+    // Time To Live (ttl) in milliseconds: the cached value is considered valid for 24 hours
+    ttl: 1000 * 60 * 60 * 24,
+    // Stale While Revalidate (swr) in milliseconds: if the cached value is less than 30 days
+    // expired, return it while fetching a fresh value in the background
+    staleWhileRevalidate: 1000 * 60 * 60 * 24 * 30,
+  });
+  return scheduledEvents;
 }
 ```
 

@@ -34,25 +34,25 @@ permission check should be visible and clear in the code.
 ```typescript
 // ✅ Good - Explicit permission check
 export async function action({ request }: Route.ActionArgs) {
-	const userId = await requireUserId(request)
+  const userId = await requireUserId(request);
 
-	// Explicitly check permission - clear and visible
-	await requireUserWithPermission(request, 'delete:note:own')
+  // Explicitly check permission - clear and visible
+  await requireUserWithPermission(request, "delete:note:own");
 
-	// Permission check is explicit and obvious
-	await prisma.note.delete({ where: { id: noteId } })
+  // Permission check is explicit and obvious
+  await prisma.note.delete({ where: { id: noteId } });
 }
 
 // ❌ Avoid - Implicit permission check
 export async function action({ request }: Route.ActionArgs) {
-	const userId = await requireUserId(request)
-	const note = await prisma.note.findUnique({ where: { id: noteId } })
+  const userId = await requireUserId(request);
+  const note = await prisma.note.findUnique({ where: { id: noteId } });
 
-	// Implicit check - not clear what permission is being checked
-	if (note.ownerId !== userId) {
-		throw new Response('Forbidden', { status: 403 })
-	}
-	// What permission does this represent? Not explicit
+  // Implicit check - not clear what permission is being checked
+  if (note.ownerId !== userId) {
+    throw new Response("Forbidden", { status: 403 });
+  }
+  // What permission does this represent? Not explicit
 }
 ```
 
@@ -60,13 +60,13 @@ export async function action({ request }: Route.ActionArgs) {
 
 ```typescript
 // ✅ Good - Explicit permission string
-const permission: PermissionString = 'delete:note:own'
+const permission: PermissionString = "delete:note:own";
 // Clear: action (delete), entity (note), access (own)
 
-await requireUserWithPermission(request, permission)
+await requireUserWithPermission(request, permission);
 
 // ❌ Avoid - Implicit or unclear permissions
-const canDelete = checkUserCanDelete(user, note)
+const canDelete = checkUserCanDelete(user, note);
 // What permission is this checking? Not explicit
 ```
 
@@ -133,27 +133,27 @@ model User {
 **Require specific permission:**
 
 ```typescript
-import { requireUserWithPermission } from '#app/utils/permissions.server.ts'
+import { requireUserWithPermission } from "#app/utils/permissions.server.ts";
 
 export async function action({ request }: Route.ActionArgs) {
-	const userId = await requireUserWithPermission(
-		request,
-		'delete:note:own', // Throws 403 error if doesn't have permission
-	)
+  const userId = await requireUserWithPermission(
+    request,
+    "delete:note:own", // Throws 403 error if doesn't have permission
+  );
 
-	// User has the permission, continue...
+  // User has the permission, continue...
 }
 ```
 
 **Require specific role:**
 
 ```typescript
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { requireUserWithRole } from "#app/utils/permissions.server.ts";
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const userId = await requireUserWithRole(request, 'admin')
+  const userId = await requireUserWithRole(request, "admin");
 
-	// User has admin role, continue...
+  // User has admin role, continue...
 }
 ```
 
@@ -161,24 +161,24 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 ```typescript
 export async function action({ request }: Route.ActionArgs) {
-	const userId = await requireUserId(request)
+  const userId = await requireUserId(request);
 
-	// Explicitly determine ownership
-	const note = await prisma.note.findUnique({
-		where: { id: noteId },
-		select: { ownerId: true },
-	})
+  // Explicitly determine ownership
+  const note = await prisma.note.findUnique({
+    where: { id: noteId },
+    select: { ownerId: true },
+  });
 
-	const isOwner = note.ownerId === userId
+  const isOwner = note.ownerId === userId;
 
-	// Explicitly check the appropriate permission based on ownership
-	await requireUserWithPermission(
-		request,
-		isOwner ? 'delete:note:own' : 'delete:note:any', // Explicit permission string
-	)
+  // Explicitly check the appropriate permission based on ownership
+  await requireUserWithPermission(
+    request,
+    isOwner ? "delete:note:own" : "delete:note:any", // Explicit permission string
+  );
 
-	// Permission check is explicit and clear
-	// Proceed with deletion...
+  // Permission check is explicit and clear
+  // Proceed with deletion...
 }
 ```
 
@@ -232,37 +232,37 @@ export default function AdminRoute() {
 ```typescript
 // prisma/seed.ts
 await prisma.permission.create({
-	data: {
-		action: 'create',
-		entity: 'post',
-		access: 'own',
-		description: 'Can create their own posts',
-		roles: {
-			connect: { name: 'user' },
-		},
-	},
-})
+  data: {
+    action: "create",
+    entity: "post",
+    access: "own",
+    description: "Can create their own posts",
+    roles: {
+      connect: { name: "user" },
+    },
+  },
+});
 ```
 
 **Permiso con múltiples niveles de acceso:**
 
 ```typescript
 await prisma.permission.createMany({
-	data: [
-		{
-			action: 'read',
-			entity: 'post',
-			access: 'own',
-			description: 'Can read own posts',
-		},
-		{
-			action: 'read',
-			entity: 'post',
-			access: 'any',
-			description: 'Can read any post',
-		},
-	],
-})
+  data: [
+    {
+      action: "read",
+      entity: "post",
+      access: "own",
+      description: "Can read own posts",
+    },
+    {
+      action: "read",
+      entity: "post",
+      access: "any",
+      description: "Can read any post",
+    },
+  ],
+});
 ```
 
 ### Assign Roles to Users
@@ -271,27 +271,27 @@ await prisma.permission.createMany({
 
 ```typescript
 const user = await prisma.user.create({
-	data: {
-		email,
-		username,
-		roles: {
-			connect: { name: 'user' }, // Assign 'user' role
-		},
-	},
-})
+  data: {
+    email,
+    username,
+    roles: {
+      connect: { name: "user" }, // Assign 'user' role
+    },
+  },
+});
 ```
 
 **Assign multiple roles:**
 
 ```typescript
 await prisma.user.update({
-	where: { id: userId },
-	data: {
-		roles: {
-			connect: [{ name: 'user' }, { name: 'moderator' }],
-		},
-	},
-})
+  where: { id: userId },
+  data: {
+    roles: {
+      connect: [{ name: "user" }, { name: "moderator" }],
+    },
+  },
+});
 ```
 
 ### Permissions and Roles Seed
@@ -303,70 +303,70 @@ await prisma.user.update({
 
 // Create permissions
 const permissions = await Promise.all([
-	// User permissions
-	prisma.permission.create({
-		data: {
-			action: 'create',
-			entity: 'note',
-			access: 'own',
-			description: 'Can create own notes',
-		},
-	}),
-	prisma.permission.create({
-		data: {
-			action: 'read',
-			entity: 'note',
-			access: 'own',
-			description: 'Can read own notes',
-		},
-	}),
-	prisma.permission.create({
-		data: {
-			action: 'update',
-			entity: 'note',
-			access: 'own',
-			description: 'Can update own notes',
-		},
-	}),
-	prisma.permission.create({
-		data: {
-			action: 'delete',
-			entity: 'note',
-			access: 'own',
-			description: 'Can delete own notes',
-		},
-	}),
-	// Admin permissions
-	prisma.permission.create({
-		data: {
-			action: 'delete',
-			entity: 'user',
-			access: 'any',
-			description: 'Can delete any user',
-		},
-	}),
-])
+  // User permissions
+  prisma.permission.create({
+    data: {
+      action: "create",
+      entity: "note",
+      access: "own",
+      description: "Can create own notes",
+    },
+  }),
+  prisma.permission.create({
+    data: {
+      action: "read",
+      entity: "note",
+      access: "own",
+      description: "Can read own notes",
+    },
+  }),
+  prisma.permission.create({
+    data: {
+      action: "update",
+      entity: "note",
+      access: "own",
+      description: "Can update own notes",
+    },
+  }),
+  prisma.permission.create({
+    data: {
+      action: "delete",
+      entity: "note",
+      access: "own",
+      description: "Can delete own notes",
+    },
+  }),
+  // Admin permissions
+  prisma.permission.create({
+    data: {
+      action: "delete",
+      entity: "user",
+      access: "any",
+      description: "Can delete any user",
+    },
+  }),
+]);
 
 // Create roles
 const userRole = await prisma.role.create({
-	data: {
-		name: 'user',
-		description: 'Standard user',
-		permissions: {
-			connect: permissions.slice(0, 4).map((p) => ({ id: p.id })),
-		},
-	},
-})
+  data: {
+    name: "user",
+    description: "Standard user",
+    permissions: {
+      connect: permissions.slice(0, 4).map((p) => ({ id: p.id })),
+    },
+  },
+});
 
 const adminRole = await prisma.role.create({
-	data: {
-		name: 'admin',
-		description: 'Administrator',
-		permissions: {
-			connect: permissions.map((p) => ({ id: p.id })),
-		},
-	},
-})
+  data: {
+    name: "admin",
+    description: "Administrator",
+    permissions: {
+      connect: permissions.map((p) => ({ id: p.id })),
+    },
+  },
+});
 ```
 
 ### Permission Type
@@ -374,18 +374,18 @@ const adminRole = await prisma.role.create({
 **Type-safe permission strings:**
 
 ```typescript
-import { type PermissionString } from '#app/utils/user.ts'
+import { type PermissionString } from "#app/utils/user.ts";
 
 // Tipo: 'create:note:own' | 'read:note:own' | etc.
-const permission: PermissionString = 'delete:note:own'
+const permission: PermissionString = "delete:note:own";
 ```
 
 **Parsear permission string:**
 
 ```typescript
-import { parsePermissionString } from '#app/utils/user.ts'
+import { parsePermissionString } from "#app/utils/user.ts";
 
-const { action, entity, access } = parsePermissionString('delete:note:own')
+const { action, entity, access } = parsePermissionString("delete:note:own");
 // action: 'delete'
 // entity: 'note'
 // access: ['own']
@@ -398,30 +398,27 @@ const { action, entity, access } = parsePermissionString('delete:note:own')
 ```typescript
 // app/routes/users/$username/notes/$noteId.tsx
 export async function action({ request }: Route.ActionArgs) {
-	const userId = await requireUserId(request)
-	const formData = await request.formData()
-	const { noteId } = Object.fromEntries(formData)
+  const userId = await requireUserId(request);
+  const formData = await request.formData();
+  const { noteId } = Object.fromEntries(formData);
 
-	const note = await prisma.note.findFirst({
-		select: { id: true, ownerId: true, owner: { select: { username: true } } },
-		where: { id: noteId },
-	})
+  const note = await prisma.note.findFirst({
+    select: { id: true, ownerId: true, owner: { select: { username: true } } },
+    where: { id: noteId },
+  });
 
-	if (!note) {
-		throw new Response('Not found', { status: 404 })
-	}
+  if (!note) {
+    throw new Response("Not found", { status: 404 });
+  }
 
-	const isOwner = note.ownerId === userId
+  const isOwner = note.ownerId === userId;
 
-	// Validate permiso según si es propietario o no
-	await requireUserWithPermission(
-		request,
-		isOwner ? 'delete:note:own' : 'delete:note:any',
-	)
+  // Validate permiso según si es propietario o no
+  await requireUserWithPermission(request, isOwner ? "delete:note:own" : "delete:note:any");
 
-	await prisma.note.delete({ where: { id: note.id } })
+  await prisma.note.delete({ where: { id: note.id } });
 
-	return redirect(`/users/${note.owner.username}/notes`)
+  return redirect(`/users/${note.owner.username}/notes`);
 }
 ```
 
@@ -498,34 +495,34 @@ export default function AdminUsersRoute({ loaderData }: Route.ComponentProps) {
 ```typescript
 // Migración o seed
 async function setupPostPermissions() {
-	// Create post permissions
-	const createOwn = await prisma.permission.create({
-		data: {
-			action: 'create',
-			entity: 'post',
-			access: 'own',
-			description: 'Can create own posts',
-		},
-	})
+  // Create post permissions
+  const createOwn = await prisma.permission.create({
+    data: {
+      action: "create",
+      entity: "post",
+      access: "own",
+      description: "Can create own posts",
+    },
+  });
 
-	const readAny = await prisma.permission.create({
-		data: {
-			action: 'read',
-			entity: 'post',
-			access: 'any',
-			description: 'Can read any post',
-		},
-	})
+  const readAny = await prisma.permission.create({
+    data: {
+      action: "read",
+      entity: "post",
+      access: "any",
+      description: "Can read any post",
+    },
+  });
 
-	// Assign to user role
-	await prisma.role.update({
-		where: { name: 'user' },
-		data: {
-			permissions: {
-				connect: [{ id: createOwn.id }, { id: readAny.id }],
-			},
-		},
-	})
+  // Assign to user role
+  await prisma.role.update({
+    where: { name: "user" },
+    data: {
+      permissions: {
+        connect: [{ id: createOwn.id }, { id: readAny.id }],
+      },
+    },
+  });
 }
 ```
 

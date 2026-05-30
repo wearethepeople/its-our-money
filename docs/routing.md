@@ -88,116 +88,60 @@ app/routes
 
 ```tsx
 <Routes>
-	<Route file="root.tsx">
-		<Route path="*" file="routes/$.tsx" />
-		<Route
-			path="auth/:provider/callback"
-			file="routes/_auth/auth.$provider/callback.ts"
-		/>
-		<Route
-			path="auth/:provider"
-			index
-			file="routes/_auth/auth.$provider/index.ts"
-		/>
-		<Route path="forgot-password" file="routes/_auth/forgot-password.tsx" />
-		<Route path="login" file="routes/_auth/login.tsx" />
-		<Route path="logout" file="routes/_auth/logout.tsx" />
-		<Route
-			path="onboarding/:provider"
-			file="routes/_auth/onboarding/$provider.tsx"
-		/>
-		<Route path="onboarding" index file="routes/_auth/onboarding/index.tsx" />
-		<Route path="reset-password" file="routes/_auth/reset-password.tsx" />
-		<Route path="signup" file="routes/_auth/signup.tsx" />
-		<Route path="verify" file="routes/_auth/verify.tsx" />
-		<Route
-			path="webauthn/authentication"
-			file="routes/_auth/webauthn/authentication.ts"
-		/>
-		<Route
-			path="webauthn/registration"
-			file="routes/_auth/webauthn/registration.ts"
-		/>
-		<Route path="about" file="routes/_marketing/about.tsx" />
-		<Route index file="routes/_marketing/index.tsx" />
-		<Route path="privacy" file="routes/_marketing/privacy.tsx" />
-		<Route path="support" file="routes/_marketing/support.tsx" />
-		<Route path="tos" file="routes/_marketing/tos.tsx" />
-		<Route path="robots.txt" file="routes/_seo/robots[.]txt.ts" />
-		<Route path="sitemap.xml" file="routes/_seo/sitemap[.]xml.ts" />
-		<Route path="admin/cache" index file="routes/admin/cache/index.tsx" />
-		<Route
-			path="admin/cache/lru/:cacheKey"
-			file="routes/admin/cache/lru.$cacheKey.ts"
-		/>
-		<Route path="admin/cache/sqlite" file="routes/admin/cache/sqlite.tsx">
-			<Route path=":cacheKey" file="routes/admin/cache/sqlite.$cacheKey.ts" />
-		</Route>
-		<Route path="me" file="routes/me.tsx" />
-		<Route
-			path="resources/download-user-data"
-			file="routes/resources/download-user-data.tsx"
-		/>
-		<Route
-			path="resources/healthcheck"
-			file="routes/resources/healthcheck.tsx"
-		/>
-		<Route path="resources/images" file="routes/resources/images.tsx" />
-		<Route
-			path="resources/theme-switch"
-			file="routes/resources/theme-switch.tsx"
-		/>
-		<Route path="settings/profile" file="routes/settings/profile/_layout.tsx">
-			<Route
-				path="change-email"
-				file="routes/settings/profile/change-email.tsx"
-			/>
-			<Route
-				path="connections"
-				file="routes/settings/profile/connections.tsx"
-			/>
-			<Route index file="routes/settings/profile/index.tsx" />
-			<Route path="passkeys" file="routes/settings/profile/passkeys.tsx" />
-			<Route path="password" file="routes/settings/profile/password.tsx" />
-			<Route
-				path="password/create"
-				file="routes/settings/profile/password_.create.tsx"
-			/>
-			<Route path="photo" file="routes/settings/profile/photo.tsx" />
-			<Route
-				path="two-factor"
-				file="routes/settings/profile/two-factor/_layout.tsx"
-			>
-				<Route
-					path="disable"
-					file="routes/settings/profile/two-factor/disable.tsx"
-				/>
-				<Route index file="routes/settings/profile/two-factor/index.tsx" />
-				<Route
-					path="verify"
-					file="routes/settings/profile/two-factor/verify.tsx"
-				/>
-			</Route>
-		</Route>
-		<Route
-			path="users/:username"
-			index
-			file="routes/users/$username/index.tsx"
-		/>
-		<Route
-			path="users/:username/notes"
-			file="routes/users/$username/notes/_layout.tsx"
-		>
-			<Route path=":noteId" file="routes/users/$username/notes/$noteId.tsx" />
-			<Route
-				path=":noteId/edit"
-				file="routes/users/$username/notes/$noteId_.edit.tsx"
-			/>
-			<Route index file="routes/users/$username/notes/index.tsx" />
-			<Route path="new" file="routes/users/$username/notes/new.tsx" />
-		</Route>
-		<Route path="users" index file="routes/users/index.tsx" />
-	</Route>
+  <Route file="root.tsx">
+    <Route path="*" file="routes/$.tsx" />
+    <Route path="auth/:provider/callback" file="routes/_auth/auth.$provider/callback.ts" />
+    <Route path="auth/:provider" index file="routes/_auth/auth.$provider/index.ts" />
+    <Route path="forgot-password" file="routes/_auth/forgot-password.tsx" />
+    <Route path="login" file="routes/_auth/login.tsx" />
+    <Route path="logout" file="routes/_auth/logout.tsx" />
+    <Route path="onboarding/:provider" file="routes/_auth/onboarding/$provider.tsx" />
+    <Route path="onboarding" index file="routes/_auth/onboarding/index.tsx" />
+    <Route path="reset-password" file="routes/_auth/reset-password.tsx" />
+    <Route path="signup" file="routes/_auth/signup.tsx" />
+    <Route path="verify" file="routes/_auth/verify.tsx" />
+    <Route path="webauthn/authentication" file="routes/_auth/webauthn/authentication.ts" />
+    <Route path="webauthn/registration" file="routes/_auth/webauthn/registration.ts" />
+    <Route path="about" file="routes/_marketing/about.tsx" />
+    <Route index file="routes/_marketing/index.tsx" />
+    <Route path="privacy" file="routes/_marketing/privacy.tsx" />
+    <Route path="support" file="routes/_marketing/support.tsx" />
+    <Route path="tos" file="routes/_marketing/tos.tsx" />
+    <Route path="robots.txt" file="routes/_seo/robots[.]txt.ts" />
+    <Route path="sitemap.xml" file="routes/_seo/sitemap[.]xml.ts" />
+    <Route path="admin/cache" index file="routes/admin/cache/index.tsx" />
+    <Route path="admin/cache/lru/:cacheKey" file="routes/admin/cache/lru.$cacheKey.ts" />
+    <Route path="admin/cache/sqlite" file="routes/admin/cache/sqlite.tsx">
+      <Route path=":cacheKey" file="routes/admin/cache/sqlite.$cacheKey.ts" />
+    </Route>
+    <Route path="me" file="routes/me.tsx" />
+    <Route path="resources/download-user-data" file="routes/resources/download-user-data.tsx" />
+    <Route path="resources/healthcheck" file="routes/resources/healthcheck.tsx" />
+    <Route path="resources/images" file="routes/resources/images.tsx" />
+    <Route path="resources/theme-switch" file="routes/resources/theme-switch.tsx" />
+    <Route path="settings/profile" file="routes/settings/profile/_layout.tsx">
+      <Route path="change-email" file="routes/settings/profile/change-email.tsx" />
+      <Route path="connections" file="routes/settings/profile/connections.tsx" />
+      <Route index file="routes/settings/profile/index.tsx" />
+      <Route path="passkeys" file="routes/settings/profile/passkeys.tsx" />
+      <Route path="password" file="routes/settings/profile/password.tsx" />
+      <Route path="password/create" file="routes/settings/profile/password_.create.tsx" />
+      <Route path="photo" file="routes/settings/profile/photo.tsx" />
+      <Route path="two-factor" file="routes/settings/profile/two-factor/_layout.tsx">
+        <Route path="disable" file="routes/settings/profile/two-factor/disable.tsx" />
+        <Route index file="routes/settings/profile/two-factor/index.tsx" />
+        <Route path="verify" file="routes/settings/profile/two-factor/verify.tsx" />
+      </Route>
+    </Route>
+    <Route path="users/:username" index file="routes/users/$username/index.tsx" />
+    <Route path="users/:username/notes" file="routes/users/$username/notes/_layout.tsx">
+      <Route path=":noteId" file="routes/users/$username/notes/$noteId.tsx" />
+      <Route path=":noteId/edit" file="routes/users/$username/notes/$noteId_.edit.tsx" />
+      <Route index file="routes/users/$username/notes/index.tsx" />
+      <Route path="new" file="routes/users/$username/notes/new.tsx" />
+    </Route>
+    <Route path="users" index file="routes/users/index.tsx" />
+  </Route>
 </Routes>
 ```
 

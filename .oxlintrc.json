@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/crates/oxc_linter/src/utils/schema.json",
+  "plugins": ["react", "react-hooks", "typescript"],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts", "app/**/*.test.ts", "app/**/*.test.tsx"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [".react-router", "build", "public/build", "playwright-report", "node_modules"]
+}

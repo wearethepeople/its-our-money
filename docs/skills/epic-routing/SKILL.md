@@ -1,7 +1,6 @@
 ---
 name: epic-routing
-description:
-  Guide on routing with React Router and react-router-auto-routes for Epic Stack
+description: Guide on routing with React Router and react-router-auto-routes for Epic Stack
 categories:
   - routing
   - react-router
@@ -95,19 +94,19 @@ app/routes/
 **Configuration in `app/routes.ts`:**
 
 ```typescript
-import { type RouteConfig } from '@react-router/dev/routes'
-import { autoRoutes } from 'react-router-auto-routes'
+import { type RouteConfig } from "@react-router/dev/routes";
+import { autoRoutes } from "react-router-auto-routes";
 
 export default autoRoutes({
-	ignoredRouteFiles: [
-		'.*',
-		'**/*.css',
-		'**/*.test.{js,jsx,ts,tsx}',
-		'**/__*.*',
-		'**/*.server.*', // Co-located server utilities
-		'**/*.client.*', // Co-located client utilities
-	],
-}) satisfies RouteConfig
+  ignoredRouteFiles: [
+    ".*",
+    "**/*.css",
+    "**/*.test.{js,jsx,ts,tsx}",
+    "**/__*.*",
+    "**/*.server.*", // Co-located server utilities
+    "**/*.client.*", // Co-located client utilities
+  ],
+}) satisfies RouteConfig;
 ```
 
 ### Route Groups
@@ -148,13 +147,13 @@ Use `$` to indicate route parameters:
 ```typescript
 // app/routes/users/$username/index.tsx
 export async function loader({ params }: Route.LoaderArgs) {
-	const username = params.username // Type-safe!
+  const username = params.username; // Type-safe!
 
-	const user = await prisma.user.findUnique({
-		where: { username },
-	})
+  const user = await prisma.user.findUnique({
+    where: { username },
+  });
 
-	return { user }
+  return { user };
 }
 ```
 
@@ -201,22 +200,21 @@ Resource routes don't render UI; they only return data or perform actions.
 ```typescript
 // app/routes/resources/healthcheck.tsx
 export async function loader({ request }: Route.LoaderArgs) {
-	// Check application health
-	const host =
-		request.headers.get('X-Forwarded-Host') ?? request.headers.get('host')
+  // Check application health
+  const host = request.headers.get("X-Forwarded-Host") ?? request.headers.get("host");
 
-	try {
-		await Promise.all([
-			prisma.user.count(), // Check DB
-			fetch(`${new URL(request.url).protocol}${host}`, {
-				method: 'HEAD',
-				headers: { 'X-Healthcheck': 'true' },
-			}),
-		])
-		return new Response('OK')
-	} catch (error) {
-		return new Response('ERROR', { status: 500 })
-	}
+  try {
+    await Promise.all([
+      prisma.user.count(), // Check DB
+      fetch(`${new URL(request.url).protocol}${host}`, {
+        method: "HEAD",
+        headers: { "X-Healthcheck": "true" },
+      }),
+    ]);
+    return new Response("OK");
+  } catch (error) {
+    return new Response("ERROR", { status: 500 });
+  }
 }
 ```
 
@@ -393,16 +391,16 @@ export function ErrorBoundary() {
 ```typescript
 // app/routes/resources/download-report.tsx
 export async function loader({ request }: Route.LoaderArgs) {
-	const userId = await requireUserId(request)
+  const userId = await requireUserId(request);
 
-	const report = await generateReport(userId)
+  const report = await generateReport(userId);
 
-	return new Response(report, {
-		headers: {
-			'Content-Type': 'application/pdf',
-			'Content-Disposition': 'attachment; filename="report.pdf"',
-		},
-	})
+  return new Response(report, {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": 'attachment; filename="report.pdf"',
+    },
+  });
 }
 ```
 
@@ -411,17 +409,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 ```typescript
 // app/routes/users/$username/posts/$postId/comments/$commentId.tsx
 export async function loader({ params }: Route.LoaderArgs) {
-	// params contains: { username, postId, commentId }
-	const comment = await prisma.comment.findUnique({
-		where: { id: params.commentId },
-		include: {
-			post: {
-				include: { author: true },
-			},
-		},
-	})
+  // params contains: { username, postId, commentId }
+  const comment = await prisma.comment.findUnique({
+    where: { id: params.commentId },
+    include: {
+      post: {
+        include: { author: true },
+      },
+    },
+  });
 
-	return { comment }
+  return { comment };
 }
 ```
 

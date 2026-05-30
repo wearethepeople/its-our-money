@@ -16,17 +16,17 @@ from the `@nasa-gcn/remix-seo` docs:
 
 ```tsx
 // routes/blog/_layout.tsx
-import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { serverOnly$ } from 'vite-env-only/macros'
+import { type SEOHandle } from "@nasa-gcn/remix-seo";
+import { serverOnly$ } from "vite-env-only/macros";
 
 export const handle: SEOHandle = {
-	getSitemapEntries: serverOnly$(async (request) => {
-		const blogs = await db.blog.findMany()
-		return blogs.map((blog) => {
-			return { route: `/blog/${blog.slug}`, priority: 0.7 }
-		})
-	}),
-}
+  getSitemapEntries: serverOnly$(async (request) => {
+    const blogs = await db.blog.findMany();
+    return blogs.map((blog) => {
+      return { route: `/blog/${blog.slug}`, priority: 0.7 };
+    });
+  }),
+};
 ```
 
 Note the use of
@@ -38,14 +38,14 @@ build. Support for this is pre-configured in the `vite.config.ts` file.
 
 ```tsx
 // in your routes/url-that-doesnt-need-sitemap
-import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { type Route } from './+types/sitemap[.]xml.ts'
+import { type SEOHandle } from "@nasa-gcn/remix-seo";
+import { type Route } from "./+types/sitemap[.]xml.ts";
 
 export async function loader({ request }: Route.LoaderArgs) {
-	/**/
+  /**/
 }
 
 export const handle: SEOHandle = {
-	getSitemapEntries: () => null,
-}
+  getSitemapEntries: () => null,
+};
 ```

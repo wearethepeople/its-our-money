@@ -1,7 +1,6 @@
 ---
 name: epic-react-patterns
-description:
-  Guide on React patterns, performance optimization, and code quality for Epic
+description: Guide on React patterns, performance optimization, and code quality for Epic
   Stack
 categories:
   - react
@@ -115,17 +114,17 @@ function ProductPage({ product, addToCart }: Route.ComponentProps) {
 ```typescript
 // ❌ Don't do this
 function ProductPage({ product, addToCart }: Route.ComponentProps) {
-	useEffect(() => {
-		if (product.isInCart) {
-			showNotification(`Added ${product.name} to cart!`)
-		}
-	}, [product])
+  useEffect(() => {
+    if (product.isInCart) {
+      showNotification(`Added ${product.name} to cart!`);
+    }
+  }, [product]);
 
-	function handleBuyClick() {
-		addToCart(product)
-	}
+  function handleBuyClick() {
+    addToCart(product);
+  }
 
-	// ...
+  // ...
 }
 ```
 
@@ -134,21 +133,21 @@ function ProductPage({ product, addToCart }: Route.ComponentProps) {
 ```typescript
 // ✅ Good - Event listeners are appropriate
 useEffect(() => {
-	const controller = new AbortController()
+  const controller = new AbortController();
 
-	window.addEventListener(
-		'keydown',
-		(event: KeyboardEvent) => {
-			if (event.key !== 'Escape') return
-			// handle escape key
-		},
-		{ signal: controller.signal },
-	)
+  window.addEventListener(
+    "keydown",
+    (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      // handle escape key
+    },
+    { signal: controller.signal },
+  );
 
-	return () => {
-		controller.abort()
-	}
-}, [])
+  return () => {
+    controller.abort();
+  };
+}, []);
 ```
 
 ### Code Splitting with React Router
@@ -213,12 +212,12 @@ function NoteEditor({ noteId, onSave }: { noteId: string; onSave: (note: Note) =
 
 ```typescript
 // ❌ Don't memoize simple values
-const count = useMemo(() => items.length, [items]) // Just use items.length directly
+const count = useMemo(() => items.length, [items]); // Just use items.length directly
 
 // ❌ Don't memoize simple callbacks
 const handleClick = useCallback(() => {
-	console.log('clicked')
-}, []) // Just define the function normally if it doesn't need memoization
+  console.log("clicked");
+}, []); // Just define the function normally if it doesn't need memoization
 ```
 
 ### Bundle Size Optimization
@@ -227,16 +226,16 @@ const handleClick = useCallback(() => {
 
 ```typescript
 // ✅ Import specific functions
-import { useSearchParams } from 'react-router'
-import { parseWithZod } from '@conform-to/zod'
+import { useSearchParams } from "react-router";
+import { parseWithZod } from "@conform-to/zod";
 ```
 
 **❌ Avoid - Barrel imports:**
 
 ```typescript
 // ❌ Don't import entire libraries if you only need one thing
-import * as ReactRouter from 'react-router'
-import * as Conform from '@conform-to/zod'
+import * as ReactRouter from "react-router";
+import * as Conform from "@conform-to/zod";
 ```
 
 ### Form Handling with Conform
@@ -403,14 +402,14 @@ React Router loaders can prevent waterfalls by fetching data in parallel.
 ```typescript
 // ❌ Don't do this - creates a waterfall
 export async function loader({ params }: Route.LoaderArgs) {
-	const user = await prisma.user.findUnique({
-		where: { username: params.username },
-	})
-	// Second fetch waits for first to complete
-	const notes = await prisma.note.findMany({
-		where: { ownerId: user.id },
-	})
-	return { user, notes }
+  const user = await prisma.user.findUnique({
+    where: { username: params.username },
+  });
+  // Second fetch waits for first to complete
+  const notes = await prisma.note.findMany({
+    where: { ownerId: user.id },
+  });
+  return { user, notes };
 }
 ```
 
@@ -419,25 +418,23 @@ export async function loader({ params }: Route.LoaderArgs) {
 ```typescript
 // ✅ Fetch data in parallel
 export async function loader({ params }: Route.LoaderArgs) {
-	const user = await prisma.user.findUnique({
-		where: { username: params.username },
-		select: { id: true, username: true, name: true },
-	})
+  const user = await prisma.user.findUnique({
+    where: { username: params.username },
+    select: { id: true, username: true, name: true },
+  });
 
-	// Fetch notes in parallel with user data
-	const [notes, stats] = await Promise.all([
-		user
-			? prisma.note.findMany({
-					where: { ownerId: user.id },
-					select: { id: true, title: true, updatedAt: true },
-				})
-			: Promise.resolve([]),
-		user
-			? prisma.note.count({ where: { ownerId: user.id } })
-			: Promise.resolve(0),
-	])
+  // Fetch notes in parallel with user data
+  const [notes, stats] = await Promise.all([
+    user
+      ? prisma.note.findMany({
+          where: { ownerId: user.id },
+          select: { id: true, title: true, updatedAt: true },
+        })
+      : Promise.resolve([]),
+    user ? prisma.note.count({ where: { ownerId: user.id } }) : Promise.resolve(0),
+  ]);
 
-	return { user, notes, stats }
+  return { user, notes, stats };
 }
 ```
 
@@ -447,31 +444,31 @@ export async function loader({ params }: Route.LoaderArgs) {
 // Parent route loader
 // app/routes/users/$username.tsx
 export async function loader({ params }: Route.LoaderArgs) {
-	const user = await prisma.user.findUnique({
-		where: { username: params.username },
-		select: { id: true, username: true, name: true },
-	})
-	return { user }
+  const user = await prisma.user.findUnique({
+    where: { username: params.username },
+    select: { id: true, username: true, name: true },
+  });
+  return { user };
 }
 
 // Child route loader runs in parallel
 // app/routes/users/$username/notes.tsx
 export async function loader({ params }: Route.LoaderArgs) {
-	const user = await prisma.user.findUnique({
-		where: { username: params.username },
-		select: { id: true },
-	})
+  const user = await prisma.user.findUnique({
+    where: { username: params.username },
+    select: { id: true },
+  });
 
-	if (!user) {
-		throw new Response('Not Found', { status: 404 })
-	}
+  if (!user) {
+    throw new Response("Not Found", { status: 404 });
+  }
 
-	const notes = await prisma.note.findMany({
-		where: { ownerId: user.id },
-		select: { id: true, title: true, updatedAt: true },
-	})
+  const notes = await prisma.note.findMany({
+    where: { ownerId: user.id },
+    select: { id: true, title: true, updatedAt: true },
+  });
 
-	return { notes }
+  return { notes };
 }
 ```
 
@@ -483,45 +480,45 @@ React Router provides SSR by default. Optimize by:
 
 ```typescript
 export async function loader({ request }: Route.LoaderArgs) {
-	// Only fetch what's needed for initial render
-	const searchParams = new URL(request.url).searchParams
-	const page = Number(searchParams.get('page') || '1')
+  // Only fetch what's needed for initial render
+  const searchParams = new URL(request.url).searchParams;
+  const page = Number(searchParams.get("page") || "1");
 
-	const [items, total] = await Promise.all([
-		prisma.item.findMany({
-			take: 20,
-			skip: (page - 1) * 20,
-			select: { id: true, title: true }, // Only needed fields
-		}),
-		prisma.item.count(),
-	])
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      take: 20,
+      skip: (page - 1) * 20,
+      select: { id: true, title: true }, // Only needed fields
+    }),
+    prisma.item.count(),
+  ]);
 
-	return { items, total, page }
+  return { items, total, page };
 }
 ```
 
 **✅ Good - Use caching for expensive operations:**
 
 ```typescript
-import { cachified, cache } from '#app/utils/cache.server.ts'
+import { cachified, cache } from "#app/utils/cache.server.ts";
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const timings: Timings = {}
+  const timings: Timings = {};
 
-	// Cache expensive database queries
-	const stats = await cachified({
-		key: 'user-stats',
-		cache,
-		timings,
-		getFreshValue: async () => {
-			return await prisma.user.aggregate({
-				_count: { id: true },
-			})
-		},
-		ttl: 1000 * 60 * 5, // 5 minutes
-	})
+  // Cache expensive database queries
+  const stats = await cachified({
+    key: "user-stats",
+    cache,
+    timings,
+    getFreshValue: async () => {
+      return await prisma.user.aggregate({
+        _count: { id: true },
+      });
+    },
+    ttl: 1000 * 60 * 5, // 5 minutes
+  });
 
-	return { stats }
+  return { stats };
 }
 ```
 
@@ -600,7 +597,7 @@ by route. Leverage this:
 ```typescript
 // Heavy dependencies are automatically split by route
 // app/routes/admin/dashboard.tsx
-import { Chart } from 'chart.js' // Only loaded on /admin/dashboard route
+import { Chart } from "chart.js"; // Only loaded on /admin/dashboard route
 ```
 
 **✅ Good - Dynamic imports for heavy components:**
@@ -623,11 +620,11 @@ export default function Route() {
 
 ```typescript
 // ✅ Tree-shakeable - only imports what you use
-import { format } from 'date-fns/format'
-import { addDays } from 'date-fns/addDays'
+import { format } from "date-fns/format";
+import { addDays } from "date-fns/addDays";
 
 // ❌ Avoid - imports entire library
-import * as dateFns from 'date-fns'
+import * as dateFns from "date-fns";
 ```
 
 ### React 18+ Features for Performance

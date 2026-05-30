@@ -1,7 +1,6 @@
 ---
 name: epic-caching
-description:
-  Guide on caching with cachified, SQLite cache, and LRU cache for Epic Stack
+description: Guide on caching with cachified, SQLite cache, and LRU cache for Epic Stack
 categories:
   - caching
   - performance
@@ -45,44 +44,42 @@ solves.
 ```typescript
 // ✅ Good - Cache expensive external API call
 export async function getGitHubEvents({
-	username,
-	timings,
+  username,
+  timings,
 }: {
-	username: string
-	timings?: Timings
+  username: string;
+  timings?: Timings;
 }) {
-	return await cachified({
-		key: `github:${username}:events`,
-		cache,
-		timings,
-		getFreshValue: async () => {
-			// Expensive: External API call, rate limits, network latency
-			const response = await fetch(
-				`https://api.github.com/users/${username}/events/public`,
-			)
-			return await response.json()
-		},
-		checkValue: GitHubEventSchema.array(),
-		ttl: 1000 * 60 * 60, // 1 hour - reasonable for external data
-	})
+  return await cachified({
+    key: `github:${username}:events`,
+    cache,
+    timings,
+    getFreshValue: async () => {
+      // Expensive: External API call, rate limits, network latency
+      const response = await fetch(`https://api.github.com/users/${username}/events/public`);
+      return await response.json();
+    },
+    checkValue: GitHubEventSchema.array(),
+    ttl: 1000 * 60 * 60, // 1 hour - reasonable for external data
+  });
 }
 
 // ❌ Avoid - Caching simple, fast database query
 export async function getUser({ userId }: { userId: string }) {
-	// This query is already fast - caching adds complexity without benefit
-	return await cachified({
-		key: `user:${userId}`,
-		cache,
-		getFreshValue: async () => {
-			// Simple query, already fast
-			return await prisma.user.findUnique({
-				where: { id: userId },
-				select: { id: true, username: true },
-			})
-		},
-		ttl: 1000 * 60 * 5,
-	})
-	// Better: Just query directly without cache
+  // This query is already fast - caching adds complexity without benefit
+  return await cachified({
+    key: `user:${userId}`,
+    cache,
+    getFreshValue: async () => {
+      // Simple query, already fast
+      return await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, username: true },
+      });
+    },
+    ttl: 1000 * 60 * 5,
+  });
+  // Better: Just query directly without cache
 }
 ```
 
@@ -107,32 +104,32 @@ Epic Stack uses `@epic-web/cachified` as an abstraction for cache management.
 **Basic import:**
 
 ```typescript
-import { cachified, cache } from '#app/utils/cache.server.ts'
-import { type Timings } from '#app/utils/timing.server.ts'
+import { cachified, cache } from "#app/utils/cache.server.ts";
+import { type Timings } from "#app/utils/timing.server.ts";
 ```
 
 **Basic structure:**
 
 ```typescript
 export async function getCachedData({
-	timings,
+  timings,
 }: {
-	timings?: Timings
+  timings?: Timings;
 } = {}) {
-	return await cachified({
-		key: 'my-cache-key',
-		cache,
-		timings,
-		getFreshValue: async () => {
-			// Get fresh data
-			return await fetchDataFromAPI()
-		},
-		checkValue: z.object({
-			/* schema */
-		}), // Validation with Zod
-		ttl: 1000 * 60 * 60 * 24, // 24 hours
-		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 30, // 30 days
-	})
+  return await cachified({
+    key: "my-cache-key",
+    cache,
+    timings,
+    getFreshValue: async () => {
+      // Get fresh data
+      return await fetchDataFromAPI();
+    },
+    checkValue: z.object({
+      /* schema */
+    }), // Validation with Zod
+    ttl: 1000 * 60 * 60 * 24, // 24 hours
+    staleWhileRevalidate: 1000 * 60 * 60 * 24 * 30, // 30 days
+  });
 }
 ```
 
@@ -159,11 +156,11 @@ export async function getCachedData({
 
 ```typescript
 await cachified({
-	key: 'my-key',
-	cache,
-	getFreshValue: () => fetchData(),
-	ttl: 1000 * 60 * 60 * 24, // 24 hours in milliseconds
-})
+  key: "my-key",
+  cache,
+  getFreshValue: () => fetchData(),
+  ttl: 1000 * 60 * 60 * 24, // 24 hours in milliseconds
+});
 ```
 
 **Null TTL to never expire:**
@@ -180,12 +177,12 @@ SWR allows returning stale data while fresh data is fetched in the background.
 
 ```typescript
 await cachified({
-	key: 'my-key',
-	cache,
-	getFreshValue: () => fetchData(),
-	ttl: 1000 * 60 * 60 * 24, // 24 hours - after this it's considered stale
-	staleWhileRevalidate: 1000 * 60 * 60 * 24 * 30, // 30 days - up to here returns stale while revalidating
-})
+  key: "my-key",
+  cache,
+  getFreshValue: () => fetchData(),
+  ttl: 1000 * 60 * 60 * 24, // 24 hours - after this it's considered stale
+  staleWhileRevalidate: 1000 * 60 * 60 * 24 * 30, // 30 days - up to here returns stale while revalidating
+});
 ```
 
 **Behavior:**
@@ -199,26 +196,26 @@ await cachified({
 Always validate cached data with Zod:
 
 ```typescript
-import { z } from 'zod'
+import { z } from "zod";
 
 const EventSchema = z.object({
-	id: z.string(),
-	title: z.string(),
-	date: z.string(),
-})
+  id: z.string(),
+  title: z.string(),
+  date: z.string(),
+});
 
 export async function getEvents({ timings }: { timings?: Timings } = {}) {
-	return await cachified({
-		key: 'events:all',
-		cache,
-		timings,
-		getFreshValue: async () => {
-			const response = await fetch('https://api.example.com/events')
-			return await response.json()
-		},
-		checkValue: EventSchema.array(), // Validates it's an array of events
-		ttl: 1000 * 60 * 60 * 24, // 24 hours
-	})
+  return await cachified({
+    key: "events:all",
+    cache,
+    timings,
+    getFreshValue: async () => {
+      const response = await fetch("https://api.example.com/events");
+      return await response.json();
+    },
+    checkValue: EventSchema.array(), // Validates it's an array of events
+    ttl: 1000 * 60 * 60 * 24, // 24 hours
+  });
 }
 ```
 
@@ -229,20 +226,20 @@ If cached data doesn't pass validation, fresh data is fetched.
 Integrate cache with server timing for monitoring:
 
 ```typescript
-import { type Timings } from '#app/utils/timing.server.ts'
+import { type Timings } from "#app/utils/timing.server.ts";
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const timings: Timings = {}
+  const timings: Timings = {};
 
-	const events = await getEvents({ timings })
+  const events = await getEvents({ timings });
 
-	// Timings are automatically added to headers
-	return json(
-		{ events },
-		{
-			headers: combineServerTimings(timings),
-		},
-	)
+  // Timings are automatically added to headers
+  return json(
+    { events },
+    {
+      headers: combineServerTimings(timings),
+    },
+  );
 }
 ```
 
@@ -251,26 +248,26 @@ export async function loader({ request }: Route.LoaderArgs) {
 **Invalidate by key:**
 
 ```typescript
-import { cache } from '#app/utils/cache.server.ts'
+import { cache } from "#app/utils/cache.server.ts";
 
-await cache.delete('user:123:profile')
+await cache.delete("user:123:profile");
 ```
 
 **Invalidate multiple keys:**
 
 ```typescript
 // Search and delete matching keys
-import { searchCacheKeys } from '#app/utils/cache.server.ts'
+import { searchCacheKeys } from "#app/utils/cache.server.ts";
 
-const keys = await searchCacheKeys('user:123', 100)
-await Promise.all(keys.map((key) => cache.delete(key)))
+const keys = await searchCacheKeys("user:123", 100);
+await Promise.all(keys.map((key) => cache.delete(key)));
 ```
 
 **Invalidate entire SQLite cache:**
 
 ```typescript
 // Use admin dashboard or
-await cache.clear() // If available
+await cache.clear(); // If available
 ```
 
 ### Using LRU Cache
@@ -278,20 +275,20 @@ await cache.clear() // If available
 For temporary data, use LRU cache directly:
 
 ```typescript
-import { lru } from '#app/utils/cache.server.ts'
+import { lru } from "#app/utils/cache.server.ts";
 
 // LRU cache is useful for:
 // - Request deduplication
 // - Very temporary cache (< 5 minutes)
 // - Data that doesn't need to persist
 
-const cachedValue = lru.get('temp-key')
+const cachedValue = lru.get("temp-key");
 if (!cachedValue) {
-	const freshValue = await computeExpensiveValue()
-	lru.set('temp-key', freshValue, { ttl: 1000 * 60 * 5 }) // 5 minutes
-	return freshValue
+  const freshValue = await computeExpensiveValue();
+  lru.set("temp-key", freshValue, { ttl: 1000 * 60 * 5 }); // 5 minutes
+  return freshValue;
 }
-return cachedValue
+return cachedValue;
 ```
 
 ### Multi-Region Cache
@@ -310,15 +307,15 @@ With LiteFS, SQLite cache is automatically replicated:
 - Use `ensurePrimary()` if you need to guarantee writes
 
 ```typescript
-import { ensurePrimary } from '#app/utils/litefs.server.ts'
+import { ensurePrimary } from "#app/utils/litefs.server.ts";
 
 export async function action({ request }: Route.ActionArgs) {
-	await ensurePrimary() // Ensure we're on primary instance
+  await ensurePrimary(); // Ensure we're on primary instance
 
-	// Invalidate cache
-	await cache.delete('my-key')
+  // Invalidate cache
+  await cache.delete("my-key");
 
-	// ...
+  // ...
 }
 ```
 
@@ -328,19 +325,19 @@ export async function action({ request }: Route.ActionArgs) {
 
 ```typescript
 await cachified({
-	key: 'my-key',
-	cache,
-	getFreshValue: async () => {
-		try {
-			return await fetchData()
-		} catch (error) {
-			console.error('Failed to fetch fresh data:', error)
-			throw error // Re-throw so cachified handles it
-		}
-	},
-	// If getFreshValue fails and there's stale cache, it returns it
-	fallbackToCache: true, // Default: true
-})
+  key: "my-key",
+  cache,
+  getFreshValue: async () => {
+    try {
+      return await fetchData();
+    } catch (error) {
+      console.error("Failed to fetch fresh data:", error);
+      throw error; // Re-throw so cachified handles it
+    }
+  },
+  // If getFreshValue fails and there's stale cache, it returns it
+  fallbackToCache: true, // Default: true
+});
 ```
 
 ### Cache Admin Dashboard
@@ -363,44 +360,42 @@ Epic Stack includes a dashboard to manage cache:
 
 ```typescript
 // app/utils/api.server.ts
-import { cachified, cache } from '#app/utils/cache.server.ts'
-import { type Timings } from '#app/utils/timing.server.ts'
-import { z } from 'zod'
+import { cachified, cache } from "#app/utils/cache.server.ts";
+import { type Timings } from "#app/utils/timing.server.ts";
+import { z } from "zod";
 
 const GitHubEventSchema = z.object({
-	id: z.string(),
-	type: z.string(),
-	actor: z.object({
-		login: z.string(),
-	}),
-	created_at: z.string(),
-})
+  id: z.string(),
+  type: z.string(),
+  actor: z.object({
+    login: z.string(),
+  }),
+  created_at: z.string(),
+});
 
 export async function getGitHubEvents({
-	username,
-	timings,
+  username,
+  timings,
 }: {
-	username: string
-	timings?: Timings
+  username: string;
+  timings?: Timings;
 }) {
-	return await cachified({
-		key: `github:${username}:events`,
-		cache,
-		timings,
-		getFreshValue: async () => {
-			const response = await fetch(
-				`https://api.github.com/users/${username}/events/public`,
-			)
-			if (!response.ok) {
-				throw new Error(`GitHub API error: ${response.statusText}`)
-			}
-			const data = await response.json()
-			return data
-		},
-		checkValue: GitHubEventSchema.array(),
-		ttl: 1000 * 60 * 60, // 1 hour
-		staleWhileRevalidate: 1000 * 60 * 60 * 24, // 24 hours
-	})
+  return await cachified({
+    key: `github:${username}:events`,
+    cache,
+    timings,
+    getFreshValue: async () => {
+      const response = await fetch(`https://api.github.com/users/${username}/events/public`);
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
+    },
+    checkValue: GitHubEventSchema.array(),
+    ttl: 1000 * 60 * 60, // 1 hour
+    staleWhileRevalidate: 1000 * 60 * 60 * 24, // 24 hours
+  });
 }
 ```
 
@@ -408,47 +403,41 @@ export async function getGitHubEvents({
 
 ```typescript
 // app/utils/user.server.ts
-import { cachified, cache } from '#app/utils/cache.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
-import { z } from 'zod'
+import { cachified, cache } from "#app/utils/cache.server.ts";
+import { prisma } from "#app/utils/db.server.ts";
+import { z } from "zod";
 
 const UserStatsSchema = z.object({
-	totalNotes: z.number(),
-	totalLikes: z.number(),
-	joinDate: z.string(),
-})
+  totalNotes: z.number(),
+  totalLikes: z.number(),
+  joinDate: z.string(),
+});
 
-export async function getUserStats({
-	userId,
-	timings,
-}: {
-	userId: string
-	timings?: Timings
-}) {
-	return await cachified({
-		key: `user:${userId}:stats`,
-		cache,
-		timings,
-		getFreshValue: async () => {
-			const [totalNotes, totalLikes, user] = await Promise.all([
-				prisma.note.count({ where: { ownerId: userId } }),
-				prisma.like.count({ where: { userId } }),
-				prisma.user.findUnique({
-					where: { id: userId },
-					select: { createdAt: true },
-				}),
-			])
+export async function getUserStats({ userId, timings }: { userId: string; timings?: Timings }) {
+  return await cachified({
+    key: `user:${userId}:stats`,
+    cache,
+    timings,
+    getFreshValue: async () => {
+      const [totalNotes, totalLikes, user] = await Promise.all([
+        prisma.note.count({ where: { ownerId: userId } }),
+        prisma.like.count({ where: { userId } }),
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { createdAt: true },
+        }),
+      ]);
 
-			return {
-				totalNotes,
-				totalLikes,
-				joinDate: user?.createdAt.toISOString() ?? '',
-			}
-		},
-		checkValue: UserStatsSchema,
-		ttl: 1000 * 60 * 5, // 5 minutes
-		staleWhileRevalidate: 1000 * 60 * 60, // 1 hour
-	})
+      return {
+        totalNotes,
+        totalLikes,
+        joinDate: user?.createdAt.toISOString() ?? "",
+      };
+    },
+    checkValue: UserStatsSchema,
+    ttl: 1000 * 60 * 5, // 5 minutes
+    staleWhileRevalidate: 1000 * 60 * 60, // 1 hour
+  });
 }
 ```
 
@@ -457,91 +446,85 @@ export async function getUserStats({
 ```typescript
 // app/routes/users/$username/notes/new.tsx
 export async function action({ request }: Route.ActionArgs) {
-	const userId = await requireUserId(request)
-	const formData = await request.formData()
+  const userId = await requireUserId(request);
+  const formData = await request.formData();
 
-	// ... validate and create note
+  // ... validate and create note
 
-	const note = await prisma.note.create({
-		data: {
-			title,
-			content,
-			ownerId: userId,
-		},
-		include: { owner: true },
-	})
+  const note = await prisma.note.create({
+    data: {
+      title,
+      content,
+      ownerId: userId,
+    },
+    include: { owner: true },
+  });
 
-	// Invalidate related cache
-	await Promise.all([
-		cache.delete(`user:${userId}:notes`),
-		cache.delete(`user:${userId}:stats`),
-		cache.delete(`note:${note.id}:full`),
-	])
+  // Invalidate related cache
+  await Promise.all([
+    cache.delete(`user:${userId}:notes`),
+    cache.delete(`user:${userId}:stats`),
+    cache.delete(`note:${note.id}:full`),
+  ]);
 
-	return redirect(`/users/${note.owner.username}/notes/${note.id}`)
+  return redirect(`/users/${note.owner.username}/notes/${note.id}`);
 }
 ```
 
 ### Example 4: Cache with dependencies
 
 ```typescript
-export async function getUserWithNotes({
-	userId,
-	timings,
-}: {
-	userId: string
-	timings?: Timings
-}) {
-	const user = await cachified({
-		key: `user:${userId}:profile`,
-		cache,
-		timings,
-		getFreshValue: async () => {
-			return await prisma.user.findUnique({
-				where: { id: userId },
-				select: {
-					id: true,
-					username: true,
-					name: true,
-				},
-			})
-		},
-		checkValue: z
-			.object({
-				id: z.string(),
-				username: z.string(),
-				name: z.string().nullable(),
-			})
-			.nullable(),
-		ttl: 1000 * 60 * 30, // 30 minutes
-	})
+export async function getUserWithNotes({ userId, timings }: { userId: string; timings?: Timings }) {
+  const user = await cachified({
+    key: `user:${userId}:profile`,
+    cache,
+    timings,
+    getFreshValue: async () => {
+      return await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+        },
+      });
+    },
+    checkValue: z
+      .object({
+        id: z.string(),
+        username: z.string(),
+        name: z.string().nullable(),
+      })
+      .nullable(),
+    ttl: 1000 * 60 * 30, // 30 minutes
+  });
 
-	const notes = await cachified({
-		key: `user:${userId}:notes`,
-		cache,
-		timings,
-		getFreshValue: async () => {
-			return await prisma.note.findMany({
-				where: { ownerId: userId },
-				select: {
-					id: true,
-					title: true,
-					updatedAt: true,
-				},
-				orderBy: { updatedAt: 'desc' },
-			})
-		},
-		checkValue: z.array(
-			z.object({
-				id: z.string(),
-				title: z.string(),
-				updatedAt: z.date(),
-			}),
-		),
-		ttl: 1000 * 60 * 10, // 10 minutes
-	})
+  const notes = await cachified({
+    key: `user:${userId}:notes`,
+    cache,
+    timings,
+    getFreshValue: async () => {
+      return await prisma.note.findMany({
+        where: { ownerId: userId },
+        select: {
+          id: true,
+          title: true,
+          updatedAt: true,
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+    },
+    checkValue: z.array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        updatedAt: z.date(),
+      }),
+    ),
+    ttl: 1000 * 60 * 10, // 10 minutes
+  });
 
-	return { user, notes }
+  return { user, notes };
 }
 ```
 
@@ -549,22 +532,22 @@ export async function getUserWithNotes({
 
 ```typescript
 // Avoid multiple simultaneous requests to the same URL
-const requestCache = new Map<string, Promise<any>>()
+const requestCache = new Map<string, Promise<any>>();
 
 export async function fetchWithDedup(url: string) {
-	if (requestCache.has(url)) {
-		return requestCache.get(url)
-	}
+  if (requestCache.has(url)) {
+    return requestCache.get(url);
+  }
 
-	const promise = fetch(url).then((res) => res.json())
-	requestCache.set(url, promise)
+  const promise = fetch(url).then((res) => res.json());
+  requestCache.set(url, promise);
 
-	// Clean up after 1 second
-	setTimeout(() => {
-		requestCache.delete(url)
-	}, 1000)
+  // Clean up after 1 second
+  setTimeout(() => {
+    requestCache.delete(url);
+  }, 1000);
 
-	return promise
+  return promise;
 }
 ```
 

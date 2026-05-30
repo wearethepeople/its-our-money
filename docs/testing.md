@@ -22,10 +22,10 @@ We have a fixture for testing authenticated features without having to go
 through the login flow:
 
 ```ts
-test('my test', async ({ page, login }) => {
-	const user = await login()
-	// you are now logged in
-})
+test("my test", async ({ page, login }) => {
+  const user = await login();
+  // you are now logged in
+});
 ```
 
 We also auto-delete the user at the end of your test. That way, we can keep your

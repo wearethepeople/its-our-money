@@ -1,0 +1,59 @@
+// Requires the "Oxc" extension (search "Oxc" in Zed's extension marketplace).
+// Both oxlint and oxfmt must be installed locally (they are in devDependencies).
+{
+  "languages": {
+    "TypeScript": {
+      "language_servers": ["oxlint", "..."],
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } },
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    "TSX": {
+      "language_servers": ["oxlint", "..."],
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } },
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    "JavaScript": {
+      "language_servers": ["oxlint", "..."],
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } },
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    "JSX": {
+      "language_servers": ["oxlint", "..."],
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } },
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } }
+    },
+    "JSONC": {
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } }
+    },
+    "CSS": {
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } }
+    },
+    "Markdown": {
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } }
+    },
+    "YAML": {
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "oxfmt" } }
+    }
+  },
+  "lsp": {
+    "oxlint": {
+      "initialization_options": {
+        "settings": {
+          "run": "onType"
+        }
+      }
+    }
+  }
+}
