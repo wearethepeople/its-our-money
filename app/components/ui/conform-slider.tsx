@@ -3,6 +3,8 @@ import { useInputControl } from "@conform-to/react";
 
 type ConformSliderProps = {
   meta: any; // field metadata for categoryField.weight
+  value: number;
+  onValueChange: (value: number) => void;
   min?: number;
   max?: number;
   step?: number;
@@ -11,22 +13,14 @@ type ConformSliderProps = {
 
 export function ConformSlider({
   meta,
+  value,
+  onValueChange,
   min = 0,
   max = 1000,
   step = 5,
   ariaLabel,
 }: ConformSliderProps) {
   const control = useInputControl(meta);
-
-  // Conform stores values as strings; Base UI wants numbers
-  const valueNumber =
-    control.value === "" || control.value == null
-      ? Number(meta.initialValue ?? 0)
-      : Number(control.value);
-  const hiddenValue =
-    control.value == null || control.value === ""
-      ? String(meta.initialValue ?? min)
-      : String(control.value);
 
   return (
     <>
@@ -35,21 +29,21 @@ export function ConformSlider({
         type="hidden"
         name={meta.name}
         form={meta.formId}
-        value={hiddenValue}
+        value={String(value)}
         onChange={() => {}}
       />
 
       <Slider.Root<number>
-        defaultValue={Number(meta.initialValue ?? min)}
         min={min}
         max={max}
         step={step}
-        value={Number.isFinite(valueNumber) ? valueNumber : min}
+        value={Number.isFinite(value) ? value : min}
         onValueChange={(nextValue) => {
+          onValueChange(nextValue);
           control.change(String(nextValue));
         }}
         onValueCommitted={() => {
-          // marks “touched” semantics in a way Conform understands
+          // marks "touched" semantics in a way Conform understands
           control.blur();
         }}
       >

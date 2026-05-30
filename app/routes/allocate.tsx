@@ -154,6 +154,19 @@ export default function AllocateRoute() {
     existingAllocation?.items.map((item) => [item.categoryCode, item.weightBps]) ?? [],
   );
 
+  const [sliderWeights, setSliderWeights] = useState<Record<string, number>>(() =>
+    Object.fromEntries(
+      allocatableCategories.map((c) => {
+        const existingBps = existingAllocationByCategoryId.get(c.id);
+        const weight =
+          existingBps === undefined
+            ? 0
+            : Math.min(1000, Math.max(1, Math.round(existingBps / 10)));
+        return [c.id, weight];
+      }),
+    ),
+  );
+
   const [form, fields] = useForm<AllocationFormInput>({
     defaultValue: {
       allocations: allocatableCategories.map((c) => {
@@ -219,14 +232,15 @@ export default function AllocateRoute() {
 
   const renderAllocationItem = (a: (typeof allocations)[number]) => {
     const categoryField = a.getFieldset();
-    if (categoryField.id.initialValue === undefined) return null;
-    const fnData = getFunctionDetailsById(categoryField.id.initialValue);
+    const fnId = categoryField.id.initialValue;
+    if (fnId === undefined) return null;
+    const fnData = getFunctionDetailsById(fnId);
 
     // className="even:[&>section]:bg-muted flex w-full flex-col"
     return (
       <article
         className="even:[&>section]:bg-muted flex w-full flex-col p-4"
-        key={categoryField.id.initialValue}
+        key={fnId}
       >
         <div className="flex">
           <h3 className="grow">{fnData?.name}</h3>
@@ -235,6 +249,8 @@ export default function AllocateRoute() {
         <div className="flex flex-col">
           <ConformSlider
             meta={categoryField.weight}
+            value={sliderWeights[fnId] ?? 0}
+            onValueChange={(v) => setSliderWeights((prev) => ({ ...prev, [fnId]: v }))}
             min={0}
             max={1000}
             step={5}
@@ -335,7 +351,7 @@ export default function AllocateRoute() {
         {/* Allocations */}
         {viewScheme === "flat" ? (
           <>
-            <AllocationCard>{allocations.map((a, i) => renderAllocationItem(a, i))}</AllocationCard>
+            <AllocationCard>{allocations.map((a) => renderAllocationItem(a))}</AllocationCard>
             <div className="mt-6">{renderNetInterestItem()}</div>
           </>
         ) : (
@@ -347,7 +363,7 @@ export default function AllocateRoute() {
                   {group.functionIds.map((fid) => {
                     const entry = allocationsByFunctionId.get(fid);
                     if (!entry) return null;
-                    return renderAllocationItem(entry.field, entry.globalIndex);
+                    return renderAllocationItem(entry.field);
                   })}
                 </AllocationCard>
               </div>
