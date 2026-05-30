@@ -1,7 +1,7 @@
 export type GroupingScheme = {
 	id: string
 	label: string
-	groups: { id: string; label: string; functionIds: string[] }[]
+	groups: { color: string; id: string; label: string; functionIds: string[] }[]
 }
 
 export type ViewSchemeId = 'flat' | 'public_domain'
@@ -17,6 +17,7 @@ export const PUBLIC_DOMAIN_SCHEME: GroupingScheme = {
 	label: 'Public Domain',
 	groups: [
 		{
+			color: 'text-chart-1',
 			id: 'defense_veterans',
 			label: 'Defense & Veterans',
 			functionIds: [
@@ -27,6 +28,7 @@ export const PUBLIC_DOMAIN_SCHEME: GroupingScheme = {
 			],
 		},
 		{
+			color: 'text-chart-2',
 			id: 'people_society',
 			label: 'People & Society',
 			functionIds: [
@@ -38,6 +40,7 @@ export const PUBLIC_DOMAIN_SCHEME: GroupingScheme = {
 			],
 		},
 		{
+			color: 'text-chart-3',
 			id: 'infrastructure_environment',
 			label: 'Infrastructure & Environment',
 			functionIds: [
@@ -48,11 +51,16 @@ export const PUBLIC_DOMAIN_SCHEME: GroupingScheme = {
 			],
 		},
 		{
+			color: 'text-chart-4',
 			id: 'economy_development',
 			label: 'Economy & Development',
-			functionIds: ['commerce_housing_credit', 'community_regional_development'],
+			functionIds: [
+				'commerce_housing_credit',
+				'community_regional_development',
+			],
 		},
 		{
+			color: 'text-chart-5',
 			id: 'science_government',
 			label: 'Science & Government',
 			functionIds: ['general_science_space_technology', 'general_government'],

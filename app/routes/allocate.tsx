@@ -3,7 +3,13 @@ import { Dialog } from '@base-ui/react/dialog'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { type MouseEvent, useState } from 'react'
-import { data, href, redirect, useActionData, useLoaderData } from 'react-router'
+import {
+	data,
+	href,
+	redirect,
+	useActionData,
+	useLoaderData,
+} from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 
@@ -24,10 +30,16 @@ import {
 } from '@/utils/participant-session.server.ts'
 
 import { type Route } from './+types/allocate'
-import { getFunctionDetailsById, getOmbBudgetByCodeForYear } from '@/utils/budget-data.ts'
+import {
+	getFunctionDetailsById,
+	getOmbBudgetByCodeForYear,
+} from '@/utils/budget-data.ts'
 import { AllocationService } from '@/services/allocation-service.server.ts'
 import { ParticipantService } from '@/services/participant-service.server.ts'
 import type { FinalAllocationItem } from '@/services/participant-service.server.ts'
+import { Card } from '#app/components/ui/card.tsx'
+import { Progress } from '#app/components/ui/progress.tsx'
+import { cn } from '#app/utils/misc.tsx'
 
 type OutlayDrawerPayload = {
 	code: string
@@ -149,25 +161,15 @@ export default function AllocateRoute() {
 	const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>()
 	const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false)
 	const [viewScheme, setViewScheme] = useState<ViewSchemeId>('flat')
-	const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
 
-	function toggleGroup(groupId: string) {
-		setCollapsedGroups((prev) => {
-			const next = new Set(prev)
-			if (next.has(groupId)) {
-				next.delete(groupId)
-			} else {
-				next.add(groupId)
-			}
-			return next
-		})
-	}
 	const [previewAllocations, setPreviewAllocations] = useState<
 		PreviewAllocation[]
 	>([])
 	const existingAllocationByCategoryId = new Map(
-		existingAllocation?.items.map((item) => [item.categoryCode, item.weightBps]) ??
-			[],
+		existingAllocation?.items.map((item) => [
+			item.categoryCode,
+			item.weightBps,
+		]) ?? [],
 	)
 
 	const [form, fields] = useForm<AllocationFormInput>({
@@ -233,83 +235,42 @@ export default function AllocateRoute() {
 		}
 	}
 
-	const renderAllocationItem = (
-		a: (typeof allocations)[number],
-		globalIndex: number,
-	) => {
+	const renderAllocationItem = (a: (typeof allocations)[number]) => {
 		const categoryField = a.getFieldset()
 		if (categoryField.id.initialValue === undefined) return null
 		const fnData = getFunctionDetailsById(categoryField.id.initialValue)
 
+		// className="even:[&>section]:bg-muted flex w-full flex-col"
 		return (
 			<article
-				className="even:[&>section]:bg-muted flex w-full flex-col"
+				className="even:[&>section]:bg-muted flex w-full flex-col p-4"
 				key={categoryField.id.initialValue}
 			>
-				<div className="bg-secondary flex border border-gray-600">
-					<h3 className="grow p-1 pl-2 font-extrabold">
-						{globalIndex + 1}. {fnData?.name}
-					</h3>
-					<div className="pr-2">
-						<Drawer.Trigger
-							className="shrink"
-							handle={outlaysDrawer}
-							payload={{
-								code: fnData?.code,
-								description: fnData?.description,
-								commonUses: fnData?.commonUses,
-								name: fnData?.name,
-							}}
-							title={fnData?.name}
-						>
-							<Icon
-								name="question-mark-circled"
-								className="cursor-pointer text-gray-400 hover:text-gray-500"
-							/>
-						</Drawer.Trigger>
+				<div className="flex">
+					<h3 className="grow">{fnData?.name}</h3>
+					<div className="pr-2">Dots</div>
+				</div>
+				<div className="flex flex-col">
+					<ConformSlider
+						meta={categoryField.weight}
+						min={0}
+						max={1000}
+						step={5}
+						ariaLabel="Category weight"
+					/>
+					<input
+						{...getInputProps(categoryField.id, {
+							type: 'hidden',
+						})}
+					/>
+					<ErrorList
+						id={categoryField.weight.errorId}
+						errors={categoryField.weight.errors}
+					/>
+					<div className="px-2 py-4">
+						<p className="text-sm">{fnData?.description}</p>
 					</div>
 				</div>
-				<section className="ml-auto w-[95%] border-x border-gray-600">
-					<div className="flex">
-						<div className="mt-auto mb-auto grow px-6 py-2">
-							<div className="flex flex-col">
-								<ConformSlider
-									meta={categoryField.weight}
-									min={0}
-									max={1000}
-									step={5}
-									ariaLabel="Category weight"
-								/>
-								<input
-									{...getInputProps(categoryField.id, {
-										type: 'hidden',
-									})}
-								/>
-								<ErrorList
-									id={categoryField.weight.errorId}
-									errors={categoryField.weight.errors}
-								/>
-								<div className="px-2 py-4">
-									<p className="text-sm">{fnData?.description}</p>
-								</div>
-							</div>
-						</div>
-						<cite className="flex shrink flex-col border-gray-600">
-							<div>
-								<div className="border-b border-l border-gray-600">
-									<p className="px-2 text-center text-sm font-semibold">
-										Code
-									</p>
-								</div>
-								<div>
-									<p className="border-b border-l border-gray-600 py-1 text-center text-xs">
-										{fnData?.code}
-									</p>
-								</div>
-							</div>
-						</cite>
-					</div>
-				</section>
 			</article>
 		)
 	}
@@ -357,9 +318,7 @@ export default function AllocateRoute() {
 						<cite className="flex shrink flex-col border-gray-600">
 							<div>
 								<div className="border-b border-l border-gray-600">
-									<p className="px-2 text-center text-sm font-semibold">
-										Code
-									</p>
+									<p className="px-2 text-center text-sm font-semibold">Code</p>
 								</div>
 								<div>
 									<p className="border-b border-l border-gray-600 py-1 text-center text-xs">
@@ -378,48 +337,47 @@ export default function AllocateRoute() {
 		<section>
 			<form method="post" {...getFormProps(form)}>
 				<HoneypotInputs />
-				<div className="mt-4 mb-4">
+				{/* Legend + toggle */}
+				<div className="my-4 flex flex-row gap-8">
+					<div className="flex grow">
+						<div>Less</div>
+						<div className="bg-accent grow"></div>
+						<div>More</div>
+					</div>
 					<ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
 				</div>
+				{/* Sticky header */}
+				<div className="my-4 flex flex-col">
+					<div className="flex flex-row justify-between">
+						<span>Section / All</span>
+						<span> 1 of 17</span>
+					</div>
+					<Progress value={40} />
+				</div>
+				{/* Allocations */}
 				{viewScheme === 'flat' ? (
 					<>
-						<div className="[&>article:last-child>section]:border-b">
+						<AllocationCard>
 							{allocations.map((a, i) => renderAllocationItem(a, i))}
-						</div>
+						</AllocationCard>
 						<div className="mt-6">{renderNetInterestItem()}</div>
 					</>
 				) : (
 					<div className="flex flex-col gap-6">
-						{PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
-							const isCollapsed = collapsedGroups.has(group.id)
-							return (
-								<div key={group.id}>
-									<button
-										type="button"
-										onClick={() => toggleGroup(group.id)}
-										className="bg-muted flex w-full items-center gap-2 border border-gray-600 px-3 py-2 text-left text-base font-semibold"
-									>
-										<Icon
-											name="arrow-right"
-											className={`shrink-0 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}
-										/>
-										{group.label}
-									</button>
-									{!isCollapsed && (
-										<div className="[&>article:last-child>section]:border-b">
-											{group.functionIds.map((fid) => {
-												const entry = allocationsByFunctionId.get(fid)
-												if (!entry) return null
-												return renderAllocationItem(
-													entry.field,
-													entry.globalIndex,
-												)
-											})}
-										</div>
-									)}
+						{PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
+							<div key={group.id}>
+								<div className={cn('uppercase', group.color)}>
+									{group.label}
 								</div>
-							)
-						})}
+								<AllocationCard>
+									{group.functionIds.map((fid) => {
+										const entry = allocationsByFunctionId.get(fid)
+										if (!entry) return null
+										return renderAllocationItem(entry.field, entry.globalIndex)
+									})}
+								</AllocationCard>
+							</div>
+						))}
 						{renderNetInterestItem()}
 					</div>
 				)}
@@ -481,10 +439,10 @@ export default function AllocateRoute() {
 									<p className="mt-2 border-t border-gray-300 pt-3 text-sm text-gray-500 italic">
 										Before any of these priorities are funded,{' '}
 										{Math.round(netInterestBps / 100)} cents of every federal
-										dollar is already committed to Net Interest — mandatory
-										debt service on the national debt. Your allocations above
-										apply to the remaining{' '}
-										{100 - Math.round(netInterestBps / 100)} cents.
+										dollar is already committed to Net Interest — mandatory debt
+										service on the national debt. Your allocations above apply
+										to the remaining {100 - Math.round(netInterestBps / 100)}{' '}
+										cents.
 									</p>
 								)}
 							</div>
@@ -540,4 +498,8 @@ export default function AllocateRoute() {
 			</Drawer.Root>
 		</section>
 	)
+}
+
+function AllocationCard({ children }: React.PropsWithChildren) {
+	return <Card className="bg-surface-2 border">{children}</Card>
 }

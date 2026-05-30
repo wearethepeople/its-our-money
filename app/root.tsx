@@ -162,9 +162,9 @@ function App() {
 			optimizerEndpoint="/resources/images"
 			getSrc={getImgSrc}
 		>
-			<div className="mx-auto flex min-h-screen max-w-4xl flex-col justify-between">
-				<header className="container py-2">
-					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+			<div className="mx-auto flex min-h-screen flex-col justify-between">
+				<header className="bg-surface-2 text-ink-2 border-b py-2">
+					<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<div>
 							<h1>
 								<Link to="/">It’s Our Money</Link>
