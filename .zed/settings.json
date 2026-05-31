@@ -1,52 +1,61 @@
-// Requires the "Oxc" extension (search "Oxc" in Zed's extension marketplace).
-// Both oxlint and oxfmt must be installed locally (they are in devDependencies).
+// Project-level Zed settings.
+// Requires the "Oxc" extension — open Zed, cmd+shift+p → "zed: extensions", search "Oxc".
+// oxlint and oxfmt are resolved from the local node_modules/.bin (devDependencies).
 {
   "languages": {
+    // JS/TS: oxfmt formats, oxlint fixes on save via code action
     "TypeScript": {
-      "language_servers": ["oxlint", "..."],
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
       "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } },
       "code_actions_on_format": { "source.fixAll.oxc": true }
     },
     "TSX": {
-      "language_servers": ["oxlint", "..."],
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
       "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } },
       "code_actions_on_format": { "source.fixAll.oxc": true }
     },
     "JavaScript": {
-      "language_servers": ["oxlint", "..."],
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
       "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } },
       "code_actions_on_format": { "source.fixAll.oxc": true }
     },
     "JSX": {
-      "language_servers": ["oxlint", "..."],
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
       "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } },
       "code_actions_on_format": { "source.fixAll.oxc": true }
     },
+    // oxfmt also handles these file types — format only, no lint
     "JSON": {
-      "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } }
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
     },
     "JSONC": {
-      "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } }
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
     },
     "CSS": {
-      "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } }
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
     },
     "Markdown": {
-      "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } }
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
     },
     "YAML": {
-      "format_on_save": "on",
-      "formatter": { "language_server": { "name": "oxfmt" } }
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
     }
   },
+  // Show oxlint diagnostics as you type (inline squiggles, not just on save)
   "lsp": {
     "oxlint": {
       "initialization_options": {
