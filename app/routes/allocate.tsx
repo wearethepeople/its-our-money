@@ -252,7 +252,9 @@ export default function AllocateRoute() {
                 </Button>
               </CollapsibleTrigger>
             </h3>
-            <div className="pr-2">Dots</div>
+            <div className="pr-2">
+              <AllocationDots />
+            </div>
           </div>
           <div className="flex flex-col">
             <ConformSlider
@@ -490,4 +492,27 @@ export default function AllocateRoute() {
 
 function AllocationCard({ children }: React.PropsWithChildren) {
   return <Card className="bg-surface-2 border">{children}</Card>;
+}
+
+function AllocationDots({ filled = 0.5, max = 5 }: { filled?: number; max?: number }) {
+  return (
+    <div className="flex gap-1">
+      {Array.from({ length: max }, (_, i) => {
+        const position = i + 1;
+        const state: "full" | "half" | "empty" =
+          filled >= position ? "full" : filled >= position - 0.5 ? "half" : "empty";
+        return (
+          <div
+            key={i}
+            className={cn(
+              "size-3 rounded-full border-2 border-accent",
+              state === "full" && "bg-accent",
+              state === "half" &&
+                "bg-[linear-gradient(to_right,var(--color-accent)_50%,transparent_50%)]",
+            )}
+          />
+        );
+      })}
+    </div>
+  );
 }
