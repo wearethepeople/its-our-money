@@ -159,9 +159,7 @@ export default function AllocateRoute() {
       allocatableCategories.map((c) => {
         const existingBps = existingAllocationByCategoryId.get(c.id);
         const weight =
-          existingBps === undefined
-            ? 0
-            : Math.min(1000, Math.max(1, Math.round(existingBps / 10)));
+          existingBps === undefined ? 0 : Math.min(1000, Math.max(1, Math.round(existingBps / 10)));
         return [c.id, weight];
       }),
     ),
@@ -238,10 +236,7 @@ export default function AllocateRoute() {
 
     // className="even:[&>section]:bg-muted flex w-full flex-col"
     return (
-      <article
-        className="even:[&>section]:bg-muted flex w-full flex-col p-4"
-        key={fnId}
-      >
+      <article className="even:[&>section]:bg-muted flex w-full flex-col p-4" key={fnId}>
         <div className="flex">
           <h3 className="grow">{fnData?.name}</h3>
           <div className="pr-2">Dots</div>
