@@ -28,6 +28,12 @@ import type { FinalAllocationItem } from "@/services/participant-service.server.
 import { Card } from "#app/components/ui/card.tsx";
 import { Progress } from "#app/components/ui/progress.tsx";
 import { cn } from "#app/utils/misc.tsx";
+import { Button } from "#app/components/ui/button.tsx";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "#app/components/ui/collapsible.tsx";
 
 type OutlayDrawerPayload = {
   code: string;
@@ -236,31 +242,39 @@ export default function AllocateRoute() {
 
     // className="even:[&>section]:bg-muted flex w-full flex-col"
     return (
-      <article className="even:[&>section]:bg-muted flex w-full flex-col p-4" key={fnId}>
-        <div className="flex">
-          <h3 className="grow">{fnData?.name}</h3>
-          <div className="pr-2">Dots</div>
-        </div>
-        <div className="flex flex-col">
-          <ConformSlider
-            meta={categoryField.weight}
-            value={sliderWeights[fnId] ?? 0}
-            onValueChange={(v) => setSliderWeights((prev) => ({ ...prev, [fnId]: v }))}
-            min={0}
-            max={1000}
-            step={5}
-            ariaLabel="Category weight"
-          />
-          <input
-            {...getInputProps(categoryField.id, {
-              type: "hidden",
-            })}
-          />
-          <ErrorList id={categoryField.weight.errorId} errors={categoryField.weight.errors} />
-          <div className="px-2 py-4">
-            <p className="text-sm">{fnData?.description}</p>
+      <article className="" key={fnId}>
+        <Collapsible className="flex flex-col">
+          <div className="flex">
+            <h3 className="grow">
+              <CollapsibleTrigger>
+                <Button variant="link" className="text-ink-2">
+                  {fnData?.name}
+                </Button>
+              </CollapsibleTrigger>
+            </h3>
+            <div className="pr-2">Dots</div>
           </div>
-        </div>
+          <div className="flex flex-col">
+            <ConformSlider
+              meta={categoryField.weight}
+              value={sliderWeights[fnId] ?? 0}
+              onValueChange={(v) => setSliderWeights((prev) => ({ ...prev, [fnId]: v }))}
+              min={0}
+              max={1000}
+              step={5}
+              ariaLabel="Category weight"
+            />
+            <input
+              {...getInputProps(categoryField.id, {
+                type: "hidden",
+              })}
+            />
+            <ErrorList id={categoryField.weight.errorId} errors={categoryField.weight.errors} />
+          </div>
+          <CollapsibleContent>
+            <div>{fnData?.description}</div>
+          </CollapsibleContent>
+        </Collapsible>
       </article>
     );
   };
