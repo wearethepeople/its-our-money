@@ -18,7 +18,7 @@ export function ViewSchemeToggle({
         onCheckedChange={(checked) => onChange(checked ? "public_domain" : "flat")}
       />
       <label htmlFor="group-by-toggle" className="cursor-pointer text-xs text-gray-500">
-        Group by public domain
+        Group
       </label>
     </div>
   );

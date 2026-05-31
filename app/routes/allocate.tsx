@@ -25,7 +25,7 @@ import { getFunctionDetailsById, getOmbBudgetByCodeForYear } from "@/utils/budge
 import { AllocationService } from "@/services/allocation-service.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
 import type { FinalAllocationItem } from "@/services/participant-service.server.ts";
-import { Card } from "#app/components/ui/card.tsx";
+import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { Progress } from "#app/components/ui/progress.tsx";
 import { cn } from "#app/utils/misc.tsx";
 import { Button } from "#app/components/ui/button.tsx";
@@ -242,20 +242,13 @@ export default function AllocateRoute() {
 
     // className="even:[&>section]:bg-muted flex w-full flex-col"
     return (
-      <article className="" key={fnId}>
+      <article key={fnId}>
         <Collapsible className="flex flex-col">
-          <div className="flex">
-            <h3 className="grow">
-              <CollapsibleTrigger>
-                <Button variant="link" className="text-ink-2">
-                  {fnData?.name}
-                </Button>
-              </CollapsibleTrigger>
-            </h3>
-            <div className="pr-2">
-              <AllocationDots />
-            </div>
-          </div>
+          <h3 className="">
+            <CollapsibleTrigger className="text-left text-ink-2 data-panel-open:text-you underline decoration-dotted decoration-you underline-offset-2 hover:cursor-pointer">
+              {fnData?.name}
+            </CollapsibleTrigger>
+          </h3>
           <div className="flex flex-col">
             <ConformSlider
               meta={categoryField.weight}
@@ -274,7 +267,10 @@ export default function AllocateRoute() {
             <ErrorList id={categoryField.weight.errorId} errors={categoryField.weight.errors} />
           </div>
           <CollapsibleContent>
-            <div>{fnData?.description}</div>
+            <Card className="bg-surface-3 border-accent">
+              <CardTitle className="uppercase">What this pays for</CardTitle>
+              <CardContent className="text-ink-faint">{fnData?.description}</CardContent>
+            </Card>
           </CollapsibleContent>
         </Collapsible>
       </article>
@@ -352,7 +348,7 @@ export default function AllocateRoute() {
           <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
         </div>
         {/* Sticky header */}
-        <div className="my-4 flex flex-col">
+        <div className="py-4 flex flex-col sticky top-(--header-height) bg-background z-10">
           <div className="flex flex-row justify-between">
             <span>Section / All</span>
             <span> 1 of 17</span>
@@ -360,28 +356,30 @@ export default function AllocateRoute() {
           <Progress value={40} />
         </div>
         {/* Allocations */}
-        {viewScheme === "flat" ? (
-          <>
-            <AllocationCard>{allocations.map((a) => renderAllocationItem(a))}</AllocationCard>
-            <div className="mt-6">{renderNetInterestItem()}</div>
-          </>
-        ) : (
-          <div className="flex flex-col gap-6">
-            {PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
-              <div key={group.id}>
-                <div className={cn("uppercase", group.color)}>{group.label}</div>
-                <AllocationCard>
-                  {group.functionIds.map((fid) => {
-                    const entry = allocationsByFunctionId.get(fid);
-                    if (!entry) return null;
-                    return renderAllocationItem(entry.field);
-                  })}
-                </AllocationCard>
-              </div>
-            ))}
-            {renderNetInterestItem()}
-          </div>
-        )}
+        <div className="mx-0.5">
+          {viewScheme === "flat" ? (
+            <>
+              <AllocationCard>{allocations.map((a) => renderAllocationItem(a))}</AllocationCard>
+              <div className="mt-6">{renderNetInterestItem()}</div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
+                <div key={group.id}>
+                  <div className={cn("uppercase", group.color)}>{group.label}</div>
+                  <AllocationCard>
+                    {group.functionIds.map((fid) => {
+                      const entry = allocationsByFunctionId.get(fid);
+                      if (!entry) return null;
+                      return renderAllocationItem(entry.field);
+                    })}
+                  </AllocationCard>
+                </div>
+              ))}
+              {renderNetInterestItem()}
+            </div>
+          )}
+        </div>
         <ErrorList id={form.errorId} errors={form.errors} />
         <div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
           <div>
@@ -491,7 +489,7 @@ export default function AllocateRoute() {
 }
 
 function AllocationCard({ children }: React.PropsWithChildren) {
-  return <Card className="bg-surface-2 border">{children}</Card>;
+  return <Card className="bg-surface-2 border p-4">{children}</Card>;
 }
 
 function AllocationDots({ filled = 0.5, max = 5 }: { filled?: number; max?: number }) {
@@ -505,10 +503,10 @@ function AllocationDots({ filled = 0.5, max = 5 }: { filled?: number; max?: numb
           <div
             key={i}
             className={cn(
-              "size-3 rounded-full border-2 border-accent",
-              state === "full" && "bg-accent",
+              "size-3 rounded-full border-2 border-you",
+              state === "full" && "bg-you",
               state === "half" &&
-                "bg-[linear-gradient(to_right,var(--color-accent)_50%,transparent_50%)]",
+                "bg-[linear-gradient(to_right,var(--color-you)_50%,transparent_50%)]",
             )}
           />
         );
