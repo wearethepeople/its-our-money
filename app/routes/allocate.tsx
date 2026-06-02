@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { ErrorList } from "@/components/forms";
 import { ViewSchemeToggle } from "@/components/view-scheme-toggle.tsx";
+import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
 import { FUNCTIONS } from "@/constants/budget-functions.ts";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
 import { Icon } from "@/ui/icon";
@@ -41,7 +42,7 @@ const formSchema = z.object({
         .number()
         .int()
         .min(1, "Every outlay function must have an allocation.")
-        .max(1000),
+        .max(MAX_ALLOCATION_WEIGHT),
     }),
   ),
 });
@@ -145,7 +146,7 @@ export default function AllocateRoute() {
       allocatableCategories.map((c) => {
         const existingBps = existingAllocationByCategoryId.get(c.id);
         const weight =
-          existingBps === undefined ? 0 : Math.min(1000, Math.max(1, Math.round(existingBps / 10)));
+          existingBps === undefined ? 1 : Math.min(MAX_ALLOCATION_WEIGHT, Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000)));
         return [c.id, weight];
       }),
     ),
@@ -157,12 +158,12 @@ export default function AllocateRoute() {
         const existingBps = existingAllocationByCategoryId.get(c.id);
 
         if (existingBps === undefined) {
-          return { id: c.id, weight: 0 };
+          return { id: c.id, weight: 1 };
         }
 
         return {
           id: c.id,
-          weight: Math.min(1000, Math.max(1, Math.round(existingBps / 10))),
+          weight: Math.min(MAX_ALLOCATION_WEIGHT, Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000))),
         };
       }),
     },
@@ -200,11 +201,11 @@ export default function AllocateRoute() {
           <div className="flex flex-col">
             <ConformSlider
               meta={categoryField.weight}
-              value={sliderWeights[fnId] ?? 0}
+              value={sliderWeights[fnId] ?? 1}
               onValueChange={(v) => setSliderWeights((prev) => ({ ...prev, [fnId]: v }))}
-              min={0}
-              max={1000}
-              step={5}
+              min={1}
+              max={MAX_ALLOCATION_WEIGHT}
+              step={1}
               ariaLabel="Category weight"
             />
             <input

@@ -1,6 +1,8 @@
 import { Slider } from "@base-ui/react/slider";
 import { useInputControl } from "@conform-to/react";
 
+import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
+
 type ConformSliderProps = {
   meta: any; // field metadata for categoryField.weight
   value: number;
@@ -15,9 +17,9 @@ export function ConformSlider({
   meta,
   value,
   onValueChange,
-  min = 0,
-  max = 1000,
-  step = 5,
+  min = 1,
+  max = MAX_ALLOCATION_WEIGHT,
+  step = 1,
   ariaLabel,
 }: ConformSliderProps) {
   const control = useInputControl(meta);
