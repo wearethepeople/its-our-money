@@ -1,4 +1,3 @@
-import { DrawerPreview as Drawer } from "@base-ui/react/drawer";
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { useRef, useState } from "react";
@@ -33,13 +32,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "#app/components/ui/collapsible.tsx";
-
-type OutlayDrawerPayload = {
-  code: string;
-  description: string;
-  commonUses: string[];
-  name: string;
-};
 
 const formSchema = z.object({
   allocations: z.array(
@@ -138,7 +130,6 @@ export async function action({ request }: Route.ActionArgs) {
 export default function AllocateRoute() {
   const actionData = useActionData<typeof action>();
   const { existingAllocation } = useLoaderData<typeof loader>();
-  const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>();
   const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false);
   const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
 
@@ -225,8 +216,17 @@ export default function AllocateRoute() {
           </div>
           <CollapsibleContent>
             <Card className="bg-surface-3 border-accent">
-              <CardTitle className="uppercase">What this pays for</CardTitle>
+              <CardTitle className="px-4 uppercase">What this pays for</CardTitle>
               <CardContent className="text-ink-faint">{fnData?.description}</CardContent>
+              {fnData?.commonUses && fnData.commonUses.length > 0 && (
+                <CardContent>
+                  <ul>
+                    {fnData.commonUses.map((use, i) => (
+                      <li key={i} className="ml-4 list-disc">{use}</li>
+                    ))}
+                  </ul>
+                </CardContent>
+              )}
             </Card>
           </CollapsibleContent>
         </Collapsible>
@@ -245,24 +245,6 @@ export default function AllocateRoute() {
             <Icon name="lock-closed" className="shrink-0 text-gray-400" />
             {fnData.name}
           </h3>
-          <div className="pr-2">
-            <Drawer.Trigger
-              className="shrink"
-              handle={outlaysDrawer}
-              payload={{
-                code: fnData.code,
-                description: fnData.description,
-                commonUses: fnData.commonUses ?? [],
-                name: fnData.name,
-              }}
-              title={fnData.name}
-            >
-              <Icon
-                name="question-mark-circled"
-                className="cursor-pointer text-gray-400 hover:text-gray-500"
-              />
-            </Drawer.Trigger>
-          </div>
         </div>
         <section className="ml-auto w-[95%] border-x border-b border-gray-600">
           <div className="flex">
@@ -349,40 +331,6 @@ export default function AllocateRoute() {
           </button>
         </div>
       </form>
-      <Drawer.Root handle={outlaysDrawer}>
-        {({ payload }) => {
-          return (
-            <Drawer.Portal>
-              <Drawer.Backdrop className="fixed inset-0 min-h-dvh bg-black opacity-[calc(var(--backdrop-opacity)*(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] [--backdrop-opacity:0.2] [--bleed:3rem] data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute dark:[--backdrop-opacity:0.7]" />
-              <Drawer.Viewport className="fixed inset-0 flex items-end">
-                <Drawer.Popup className="duration-450ms -mb-12 max-h-[calc(80vh+3rem)] w-full transform-[translateY(var(--drawer-swipe-movement-y))] touch-auto overflow-y-auto overscroll-contain rounded-t-2xl bg-gray-50 px-6 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+3rem)] text-gray-900 outline outline-gray-200 transition-transform ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:transform-[translateY(calc(100%-3rem))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-starting-style:transform-[translateY(calc(100%-3rem))] data-swiping:select-none dark:outline-gray-300">
-                  <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-gray-300" />
-                  <Drawer.Content className="mx-auto w-full max-w-208">
-                    <Drawer.Title className="mb-1 text-lg font-medium">
-                      {payload?.code}: {payload?.name}
-                    </Drawer.Title>
-                    <Drawer.Description className="mb-6 text-base text-gray-600">
-                      {payload?.description}
-                    </Drawer.Description>
-                    <ul>
-                      {payload?.commonUses.map((use, i) => (
-                        <li className="ml-8 list-disc" key={i}>
-                          {use}
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="hidden justify-end gap-4 md:flex">
-                      <Drawer.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
-                        Close
-                      </Drawer.Close>
-                    </div>
-                  </Drawer.Content>
-                </Drawer.Popup>
-              </Drawer.Viewport>
-            </Drawer.Portal>
-          );
-        }}
-      </Drawer.Root>
     </section>
   );
 }
