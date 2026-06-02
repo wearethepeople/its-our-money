@@ -29,7 +29,6 @@ import type { FinalAllocationItem } from "@/services/participant-service.server.
 import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { Progress } from "#app/components/ui/progress.tsx";
 import { cn } from "#app/utils/misc.tsx";
-import { Button } from "#app/components/ui/button.tsx";
 import {
   Collapsible,
   CollapsibleContent,
@@ -114,7 +113,7 @@ export async function action({ request }: Route.ActionArgs) {
 
       return { id: allocation.id, bps };
     });
-  } catch (error) {
+  } catch {
     return data(
       {
         resultType: "error",
@@ -352,13 +351,10 @@ export default function AllocateRoute() {
           <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
         </div>
         {/* Sticky header */}
-        <div className="py-4 flex flex-col sticky top-(--header-height) bg-background z-10">
-          <div className="flex flex-row justify-between uppercase">
-            <span>{viewScheme === "flat" ? "All sections" : "Section Title Here"}</span>
-            <span> 1 of 17</span>
-          </div>
-          <Progress value={progress * 100} />
-        </div>
+        <Progress
+          value={progress * 100}
+          className="py-4 sticky top-(--header-height) bg-background z-10"
+        />
         {/* Allocations */}
         <div className="mx-0.5">
           {viewScheme === "flat" ? (
@@ -384,6 +380,7 @@ export default function AllocateRoute() {
             </div>
           )}
         </div>
+        <div ref={sentinelRef} />
         <ErrorList id={form.errorId} errors={form.errors} />
         <div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
           <div>
@@ -438,7 +435,7 @@ export default function AllocateRoute() {
                   </p>
                 )}
               </div>
-              <div ref={sentinelRef} />
+
               <div className="mt-8 flex shrink-0 justify-end gap-4">
                 <Dialog.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
                   Keep Working
@@ -495,27 +492,4 @@ export default function AllocateRoute() {
 
 function AllocationCard({ children }: React.PropsWithChildren) {
   return <Card className="bg-surface-2 border p-4">{children}</Card>;
-}
-
-function AllocationDots({ filled = 0.5, max = 5 }: { filled?: number; max?: number }) {
-  return (
-    <div className="flex gap-1">
-      {Array.from({ length: max }, (_, i) => {
-        const position = i + 1;
-        const state: "full" | "half" | "empty" =
-          filled >= position ? "full" : filled >= position - 0.5 ? "half" : "empty";
-        return (
-          <div
-            key={i}
-            className={cn(
-              "size-3 rounded-full border-2 border-you",
-              state === "full" && "bg-you",
-              state === "half" &&
-                "bg-[linear-gradient(to_right,var(--color-you)_50%,transparent_50%)]",
-            )}
-          />
-        );
-      })}
-    </div>
-  );
 }
