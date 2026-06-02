@@ -1,8 +1,7 @@
 import { DrawerPreview as Drawer } from "@base-ui/react/drawer";
-import { Dialog } from "@base-ui/react/dialog";
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { type MouseEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { data, href, redirect, useActionData, useLoaderData } from "react-router";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { z } from "zod";
@@ -22,7 +21,7 @@ import {
 } from "@/utils/participant-session.server.ts";
 
 import { type Route } from "./+types/allocate";
-import { getFunctionDetailsById, getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
+import { getFunctionDetailsById } from "@/utils/budget-data.ts";
 import { AllocationService } from "@/services/allocation-service.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
 import type { FinalAllocationItem } from "@/services/participant-service.server.ts";
@@ -42,11 +41,6 @@ type OutlayDrawerPayload = {
   name: string;
 };
 
-type PreviewAllocation = {
-  id: string;
-  percent: number;
-};
-
 const formSchema = z.object({
   allocations: z.array(
     z.object({
@@ -62,18 +56,13 @@ const formSchema = z.object({
 
 export type AllocationFormInput = z.infer<typeof formSchema>;
 
-const SUMMARY_TRIGGER_ID = "summary";
-
 export async function loader({ request }: Route.LoaderArgs) {
   const participant = await getParticipantBySession(request);
   const existingAllocation = participant
     ? await AllocationService.getAllocationByParticipantId(participant.id)
     : null;
 
-  const ombData = getOmbBudgetByCodeForYear(2025);
-  const netInterestBps = ombData["net_interest"]?.bps ?? 0;
-
-  return data({ existingAllocation, netInterestBps });
+  return data({ existingAllocation });
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -146,11 +135,9 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect(href("/juxtapose"), { headers });
 }
 
-const normalizedDialogHandle = Dialog.createHandle();
-
 export default function AllocateRoute() {
   const actionData = useActionData<typeof action>();
-  const { existingAllocation, netInterestBps } = useLoaderData<typeof loader>();
+  const { existingAllocation } = useLoaderData<typeof loader>();
   const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>();
   const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false);
   const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
@@ -158,7 +145,6 @@ export default function AllocateRoute() {
   const contentRef = useRef<HTMLElement>(null);
   const { sentinelRef, progress } = useScrollProgress(contentRef);
 
-  const [previewAllocations, setPreviewAllocations] = useState<PreviewAllocation[]>([]);
   const existingAllocationByCategoryId = new Map(
     existingAllocation?.items.map((item) => [item.categoryCode, item.weightBps]) ?? [],
   );
@@ -204,38 +190,6 @@ export default function AllocateRoute() {
       return fid ? [[fid, { field: a, globalIndex: i }] as const] : [];
     }),
   );
-
-  const handleFinalizeClick = (event: MouseEvent<HTMLButtonElement>) => {
-    form.validate();
-
-    const formElement = event.currentTarget.form;
-    if (!formElement) return;
-
-    const submission = parseWithZod(new FormData(formElement), {
-      schema: formSchema,
-    });
-
-    if (submission.status === "success") {
-      const basisPoints = normalizeToBasisPoints(
-        submission.value.allocations.map((allocation) => allocation.weight),
-      );
-
-      if (basisPoints.length !== submission.value.allocations.length) return;
-
-      const preview = submission.value.allocations.map((allocation, i) => {
-        const bps = basisPoints[i];
-        if (bps === undefined) {
-          throw new Error(`Missing basis points at index ${i}`);
-        }
-        return {
-          id: allocation.id,
-          percent: bps / 100,
-        };
-      });
-      setPreviewAllocations(preview);
-      normalizedDialogHandle.open(SUMMARY_TRIGGER_ID);
-    }
-  };
 
   const renderAllocationItem = (a: (typeof allocations)[number]) => {
     const categoryField = a.getFieldset();
@@ -383,74 +337,17 @@ export default function AllocateRoute() {
         <div ref={sentinelRef} />
         <ErrorList id={form.errorId} errors={form.errors} />
         <div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
-          <div>
-            <p>
-              When you're finished prioritizing your budget, click the Finalize button and we'll
-              turn your weighted allocations into percentages for your review.
-            </p>
-            <p>
-              If you're happy with your allocations, you can proceed to the next step where you can
-              compare your budget with the actual US fiscal budget.
-            </p>
-          </div>
+          <p>
+            Your priorities will be scaled to percentages so your choices and Washington's budget
+            share the same measure — then you can see where you agree, and where you don't.
+          </p>
           <button
-            type="button"
-            onClick={handleFinalizeClick}
-            className="font-inherit m-0 flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
+            type="submit"
+            className="font-inherit m-0 flex h-10 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
           >
-            Finalize
+            Compare to D.C.'s
           </button>
         </div>
-        <Dialog.Root handle={normalizedDialogHandle} triggerId={SUMMARY_TRIGGER_ID}>
-          <Dialog.Portal>
-            <Dialog.Backdrop className="fixed inset-0 min-h-dvh bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute dark:opacity-70" />
-            <Dialog.Popup className="fixed top-1/2 left-1/2 -mt-8 flex max-h-[calc(100dvh-2rem)] w-lg max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-gray-50 p-6 text-gray-900 outline outline-1 outline-gray-200 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 dark:outline-gray-300">
-              <Dialog.Title className="-mt-1.5 mb-1 text-lg font-medium">
-                Your allocations as percentages
-              </Dialog.Title>
-              <Dialog.Description className="mb-6 text-base text-gray-600">
-                Your allocations have been converted to percentages and are shown below. If you want
-                to make changes click the "Keep working" button otherwise click "Submit" to see how
-                your budget compares to the actual US budget.
-              </Dialog.Description>
-              <div className="min-h-0 overflow-y-auto pr-1">
-                {previewAllocations.map((allocation) => {
-                  const data = getFunctionDetailsById(allocation.id);
-
-                  return (
-                    <div className="even:[&>div]:bg-muted-foreground" key={allocation.id}>
-                      <div className="flex items-center p-2">
-                        <strong className="grow">{data?.name}</strong>
-                        <span>{allocation.percent}%</span>
-                      </div>
-                    </div>
-                  );
-                })}
-                {netInterestBps > 0 && (
-                  <p className="mt-2 border-t border-gray-300 pt-3 text-sm text-gray-500 italic">
-                    Before any of these priorities are funded, {Math.round(netInterestBps / 100)}{" "}
-                    cents of every federal dollar is already committed to Net Interest — mandatory
-                    debt service on the national debt. Your allocations above apply to the remaining{" "}
-                    {100 - Math.round(netInterestBps / 100)} cents.
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-8 flex shrink-0 justify-end gap-4">
-                <Dialog.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
-                  Keep Working
-                </Dialog.Close>
-                <input
-                  type="submit"
-                  title={"Submit allocations"}
-                  className="border border-red-500"
-                  form={form.id}
-                  value={"Submit allocations"}
-                />
-              </div>
-            </Dialog.Popup>
-          </Dialog.Portal>
-        </Dialog.Root>
       </form>
       <Drawer.Root handle={outlaysDrawer}>
         {({ payload }) => {
