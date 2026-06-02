@@ -48,7 +48,7 @@ export function ConformSlider({
         }}
       >
         <Slider.Control className="flex w-auto touch-none items-center py-2 select-none">
-          <Slider.Track className="bg-muted h-2 w-full rounded shadow-[inset_0_0_0_1px]  select-none">
+          <Slider.Track className="bg-muted h-2 w-full rounded shadow-[inset_0_0_0_1px] select-none">
             <Slider.Indicator className="rounded select-none" />
             <Slider.Thumb
               aria-label={ariaLabel}

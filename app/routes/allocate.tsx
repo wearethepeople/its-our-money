@@ -2,7 +2,7 @@ import { DrawerPreview as Drawer } from "@base-ui/react/drawer";
 import { Dialog } from "@base-ui/react/dialog";
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { type MouseEvent, useState } from "react";
+import { type MouseEvent, useRef, useState } from "react";
 import { data, href, redirect, useActionData, useLoaderData } from "react-router";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import { FUNCTIONS } from "@/constants/budget-functions.ts";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
 import { Icon } from "@/ui/icon";
 import { ConformSlider } from "@/ui/conform-slider.tsx";
+import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { checkHoneypot } from "@/utils/honeypot.server";
 import { normalizeToBasisPoints, sum } from "@/utils/normalize-weights.ts";
 import {
@@ -154,6 +155,9 @@ export default function AllocateRoute() {
   const outlaysDrawer = Drawer.createHandle<OutlayDrawerPayload>();
   const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false);
   const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
+
+  const contentRef = useRef<HTMLElement>(null);
+  const { sentinelRef, progress } = useScrollProgress(contentRef);
 
   const [previewAllocations, setPreviewAllocations] = useState<PreviewAllocation[]>([]);
   const existingAllocationByCategoryId = new Map(
@@ -335,7 +339,7 @@ export default function AllocateRoute() {
   };
 
   return (
-    <section>
+    <section ref={contentRef}>
       <form method="post" {...getFormProps(form)}>
         <HoneypotInputs />
         {/* Legend + toggle */}
@@ -349,11 +353,11 @@ export default function AllocateRoute() {
         </div>
         {/* Sticky header */}
         <div className="py-4 flex flex-col sticky top-(--header-height) bg-background z-10">
-          <div className="flex flex-row justify-between">
-            <span>Section / All</span>
+          <div className="flex flex-row justify-between uppercase">
+            <span>{viewScheme === "flat" ? "All sections" : "Section Title Here"}</span>
             <span> 1 of 17</span>
           </div>
-          <Progress value={40} />
+          <Progress value={progress * 100} />
         </div>
         {/* Allocations */}
         <div className="mx-0.5">
@@ -434,6 +438,7 @@ export default function AllocateRoute() {
                   </p>
                 )}
               </div>
+              <div ref={sentinelRef} />
               <div className="mt-8 flex shrink-0 justify-end gap-4">
                 <Dialog.Close className="flex h-10 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base font-medium text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100">
                   Keep Working
