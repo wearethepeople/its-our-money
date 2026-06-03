@@ -202,20 +202,21 @@ export default function AllocateRoute() {
     if (!fnData) return null;
     const trackColorVar = functionTrackColorVar.get(fnId);
     const categoryField = field?.getFieldset();
+    const isNetInterest = fnId === "net_interest";
 
     return (
       <article key={fnId}>
-        <Collapsible className="flex flex-col">
+        <Collapsible className="flex flex-col gap-2">
           <h3>
             <CollapsibleTrigger className="flex items-center gap-1.5 text-left text-ink-2 data-panel-open:text-you underline decoration-dotted decoration-you underline-offset-2 hover:cursor-pointer">
-              {!categoryField && (
+              {isNetInterest && (
                 <Icon name="lock-closed" className="size-3.5 shrink-0 text-ink-faint" />
               )}
               {fnData.name}
             </CollapsibleTrigger>
           </h3>
           {categoryField && (
-            <div className="flex flex-col">
+            <div className="flex flex-col mx-2">
               <ConformSlider
                 meta={categoryField.weight}
                 value={sliderWeights[fnId] ?? 1}
@@ -233,7 +234,7 @@ export default function AllocateRoute() {
           <CollapsibleContent>
             <Card className="bg-surface-3 border-accent">
               <CardTitle className="px-4 uppercase">What this pays for</CardTitle>
-              {!categoryField && (
+              {isNetInterest && (
                 <CardContent className="text-ink-faint italic">
                   Mandatory obligation — this is not a priority you set. It reflects the cost of
                   existing national debt and cannot be redirected.
