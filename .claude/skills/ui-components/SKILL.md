@@ -25,6 +25,19 @@ This is an **Epic Stack** app (React Router v7, Express, Tailwind v4, Vitest) us
 Don't skimp on descriptive variable names that help describe what they represent.
 If a value represents a fiscal year, call it `fiscalYear`, not `fY`.
 
+Name boolean conditions for what they **mean**, not how they're derived. Extract any non-obvious condition into a named `const` before the JSX — the name replaces the comment:
+
+```tsx
+// Forces the reader to trace the data model to understand the branch
+{!categoryField && <Icon name="lock-closed" />}
+
+// Self-evident
+const isNetInterest = fnId === "net_interest";
+{isNetInterest && <Icon name="lock-closed" />}
+```
+
+When two render paths share the same visual structure, prefer one function with an optional parameter over two parallel implementations. The absent parameter encodes the variant — no `type` prop needed.
+
 New components should accept `className` via `WithClassName<T>` from `@/types/ui`:
 
 ```ts
@@ -115,7 +128,7 @@ Always use semantic tokens, never raw Tailwind palette values like `bg-blue-500`
 - `text-ink-2`, `text-ink-faint` — secondary/tertiary text
 - `text-you` / `bg-you-bar` / `bg-you-soft` — participant allocation (ochre)
 - `text-them` / `bg-them-bar` / `bg-them-soft` — OMB actual (slate-blue)
-- `text-locked` / `bg-locked-soft` — mandatory/locked outlays (olive)
+- `text-locked` / `bg-locked-soft` — mandatory/locked outlays (olive); use for non-allocatable items like Net Interest, not generic ink tokens
 - `text-success` / `bg-success-soft` — balanced state (green)
 
 ## Typography Scale
