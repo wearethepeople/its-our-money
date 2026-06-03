@@ -197,45 +197,50 @@ export default function AllocateRoute() {
     ),
   );
 
-  const renderAllocationItem = (a: (typeof allocations)[number]) => {
-    const categoryField = a.getFieldset();
-    const fnId = categoryField.id.initialValue;
-    if (fnId === undefined) return null;
+  const renderAllocationItem = (fnId: string, field?: (typeof allocations)[number]) => {
     const fnData = getFunctionDetailsById(fnId);
-    const trackColorVar = fnId ? functionTrackColorVar.get(fnId) : undefined;
+    if (!fnData) return null;
+    const trackColorVar = functionTrackColorVar.get(fnId);
+    const categoryField = field?.getFieldset();
 
-    // className="even:[&>section]:bg-muted flex w-full flex-col"
     return (
       <article key={fnId}>
         <Collapsible className="flex flex-col">
-          <h3 className="">
-            <CollapsibleTrigger className="text-left text-ink-2 data-panel-open:text-you underline decoration-dotted decoration-you underline-offset-2 hover:cursor-pointer">
-              {fnData?.name}
+          <h3>
+            <CollapsibleTrigger className="flex items-center gap-1.5 text-left text-ink-2 data-panel-open:text-you underline decoration-dotted decoration-you underline-offset-2 hover:cursor-pointer">
+              {!categoryField && (
+                <Icon name="lock-closed" className="size-3.5 shrink-0 text-ink-faint" />
+              )}
+              {fnData.name}
             </CollapsibleTrigger>
           </h3>
-          <div className="flex flex-col">
-            <ConformSlider
-              meta={categoryField.weight}
-              value={sliderWeights[fnId] ?? 1}
-              onValueChange={(v) => setSliderWeights((prev) => ({ ...prev, [fnId]: v }))}
-              min={1}
-              max={MAX_ALLOCATION_WEIGHT}
-              step={1}
-              ariaLabel="Category weight"
-              trackColorVar={trackColorVar}
-            />
-            <input
-              {...getInputProps(categoryField.id, {
-                type: "hidden",
-              })}
-            />
-            <ErrorList id={categoryField.weight.errorId} errors={categoryField.weight.errors} />
-          </div>
+          {categoryField && (
+            <div className="flex flex-col">
+              <ConformSlider
+                meta={categoryField.weight}
+                value={sliderWeights[fnId] ?? 1}
+                onValueChange={(v) => setSliderWeights((prev) => ({ ...prev, [fnId]: v }))}
+                min={1}
+                max={MAX_ALLOCATION_WEIGHT}
+                step={1}
+                ariaLabel="Category weight"
+                trackColorVar={trackColorVar}
+              />
+              <input {...getInputProps(categoryField.id, { type: "hidden" })} />
+              <ErrorList id={categoryField.weight.errorId} errors={categoryField.weight.errors} />
+            </div>
+          )}
           <CollapsibleContent>
             <Card className="bg-surface-3 border-accent">
               <CardTitle className="px-4 uppercase">What this pays for</CardTitle>
-              <CardContent className="text-ink-faint">{fnData?.description}</CardContent>
-              {fnData?.commonUses && fnData.commonUses.length > 0 && (
+              {!categoryField && (
+                <CardContent className="text-ink-faint italic">
+                  Mandatory obligation — this is not a priority you set. It reflects the cost of
+                  existing national debt and cannot be redirected.
+                </CardContent>
+              )}
+              <CardContent className="text-ink-faint">{fnData.description}</CardContent>
+              {fnData.commonUses && fnData.commonUses.length > 0 && (
                 <CardContent>
                   <ul>
                     {fnData.commonUses.map((use, i) => (
@@ -249,45 +254,6 @@ export default function AllocateRoute() {
             </Card>
           </CollapsibleContent>
         </Collapsible>
-      </article>
-    );
-  };
-
-  const renderNetInterestItem = () => {
-    const fnData = getFunctionDetailsById("net_interest");
-    if (!fnData) return null;
-
-    return (
-      <article className="flex w-full flex-col">
-        <div className="bg-secondary flex border border-gray-600">
-          <h3 className="flex grow items-center gap-2 p-1 pl-2 font-extrabold">
-            <Icon name="lock-closed" className="shrink-0 text-gray-400" />
-            {fnData.name}
-          </h3>
-        </div>
-        <section className="ml-auto w-[95%] border-x border-b border-gray-600">
-          <div className="flex">
-            <div className="grow px-6 py-4">
-              <p className="text-muted-foreground mb-3 text-sm italic">
-                Mandatory obligation — this is not a priority you set. It reflects the cost of
-                existing national debt and cannot be redirected.
-              </p>
-              <p className="text-sm">{fnData.description}</p>
-            </div>
-            <cite className="flex shrink flex-col border-gray-600">
-              <div>
-                <div className="border-b border-l border-gray-600">
-                  <p className="px-2 text-center text-sm font-semibold">Code</p>
-                </div>
-                <div>
-                  <p className="border-b border-l border-gray-600 py-1 text-center text-xs">
-                    {fnData.code}
-                  </p>
-                </div>
-              </div>
-            </cite>
-          </div>
-        </section>
       </article>
     );
   };
@@ -309,10 +275,13 @@ export default function AllocateRoute() {
         {/* Allocations */}
         <div className="mx-0.5">
           {viewScheme === "flat" ? (
-            <>
-              <AllocationCard>{allocations.map((a) => renderAllocationItem(a))}</AllocationCard>
-              <div className="mt-6">{renderNetInterestItem()}</div>
-            </>
+            <AllocationCard>
+              {allocations.map((a) => {
+                const fnId = a.getFieldset().id.initialValue;
+                return fnId ? renderAllocationItem(fnId, a) : null;
+              })}
+              {renderAllocationItem("net_interest")}
+            </AllocationCard>
           ) : (
             <div className="flex flex-col gap-6">
               {PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
@@ -322,12 +291,12 @@ export default function AllocateRoute() {
                     {group.functionIds.map((fid) => {
                       const entry = allocationsByFunctionId.get(fid);
                       if (!entry) return null;
-                      return renderAllocationItem(entry.field);
+                      return renderAllocationItem(fid, entry.field);
                     })}
                   </AllocationCard>
                 </div>
               ))}
-              {renderNetInterestItem()}
+              <AllocationCard>{renderAllocationItem("net_interest")}</AllocationCard>
             </div>
           )}
         </div>
