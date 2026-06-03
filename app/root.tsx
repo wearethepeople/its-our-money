@@ -160,7 +160,7 @@ function App() {
         >
           <nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
             <div>
-              <h1>
+              <h1 className="font-extrabold">
                 <Link to="/">It’s Our Money</Link>
               </h1>
             </div>
