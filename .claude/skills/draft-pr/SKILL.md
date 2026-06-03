@@ -80,3 +80,5 @@ Add X and improve Y
 ````
 
 Then ask: _"Ready to open with `gh pr create`?"_ — only run `gh pr create` if the user confirms.
+
+When running `gh pr create`, do **not** append any "Generated with Claude" footer or branding to the body.
