@@ -9,8 +9,8 @@ const DARK_L = 0.38;
 const DARK_C = 0.12;
 const LIGHT_L = 0.88 - 0.5 * (0.88 - DARK_L); // 0.505
 const LIGHT_C = 0.04 + 0.5 * (DARK_C - 0.04); // 0.10
-// Empty (right-of-thumb) track: a few shades darker than the card surface (--surface-2 ≈ oklch(28%))
-const EMPTY_TRACK_BG = "oklch(22% 0.009 76)";
+// Empty (right-of-thumb) track: a step darker than --color-surface-2, adaptive to light/dark.
+const EMPTY_TRACK_BG = "oklch(from var(--surface-2) calc(l - 0.06) c h)";
 
 type ConformSliderProps = {
   meta: any; // field metadata for categoryField.weight

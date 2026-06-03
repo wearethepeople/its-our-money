@@ -77,6 +77,22 @@ Tailwind v4 uses CSS-native configuration — no `tailwind.config.js`.
 - Use `size-*` when width and height are equal (`size-10` not `w-10 h-10`)
 - Use `cn()` from `@/utils/misc` for conditional class merging — never string template ternaries
 
+### Dynamic colors in inline styles
+
+**`@theme inline` tokens are build-time only** — `--color-chart-1` is never written to the browser as a real CSS custom property; only the underlying `:root` variables (e.g. `--chart-1`) are live. In `style` props or any JS-constructed `var(...)`, always use the `:root` name:
+
+```ts
+group.color.replace(/^text-/, "--")  // "text-chart-1" → "--chart-1" ✓
+// not "--color-chart-1" — that resolves to empty string at runtime
+```
+
+**CSS relative color syntax** lets you derive lightness/chroma variants from a live token without hardcoding separate values:
+
+```ts
+`oklch(from var(--chart-1) 0.6 0.08 h)`            // same hue, mid lightness
+`oklch(from var(--chart-1) calc(l + 0.15) c h)`     // relative adjustment
+```
+
 ## Semantic Color Tokens
 
 Always use semantic tokens, never raw Tailwind palette values like `bg-blue-500`.
