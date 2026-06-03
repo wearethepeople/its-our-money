@@ -11,15 +11,15 @@ we use Fly's request headers for determining when to redirect.
 
 ```ts
 app.use((req, res, next) => {
-	const proto = req.get('X-Forwarded-Proto')
-	const host = getHost(req)
-	if (proto === 'http') {
-		res.set('X-Forwarded-Proto', 'https')
-		res.redirect(`https://${host}${req.originalUrl}`)
-		return
-	}
-	next()
-})
+  const proto = req.get("X-Forwarded-Proto");
+  const host = getHost(req);
+  if (proto === "http") {
+    res.set("X-Forwarded-Proto", "https");
+    res.redirect(`https://${host}${req.originalUrl}`);
+    return;
+  }
+  next();
+});
 ```
 
 ## Remove trailing slashes
@@ -34,14 +34,14 @@ content.
 
 ```ts
 app.use((req, res, next) => {
-	if (req.path.endsWith('/') && req.path.length > 1) {
-		const query = req.url.slice(req.path.length)
-		const safepath = req.path.slice(0, -1).replace(/\/+/g, '/')
-		res.redirect(301, safepath + query)
-	} else {
-		next()
-	}
-})
+  if (req.path.endsWith("/") && req.path.length > 1) {
+    const query = req.url.slice(req.path.length);
+    const safepath = req.path.slice(0, -1).replace(/\/+/g, "/");
+    res.redirect(301, safepath + query);
+  } else {
+    next();
+  }
+});
 ```
 
 ## www subdomains
@@ -65,24 +65,24 @@ domain in code.
 
 ```ts
 app.use((req, res, next) => {
-	const host = getHost(req)
-	if (!host.startsWith('www.')) {
-		return res.redirect(301, `https://www.${host}${req.url}`)
-	} else {
-		next()
-	}
-})
+  const host = getHost(req);
+  if (!host.startsWith("www.")) {
+    return res.redirect(301, `https://www.${host}${req.url}`);
+  } else {
+    next();
+  }
+});
 ```
 
 **To redirect www traffic to non-www:**
 
 ```ts
 app.use((req, res, next) => {
-	const host = getHost(req)
-	if (host.startsWith('www.')) {
-		return res.redirect(301, `https://${host.slice(4)}${req.url}`)
-	} else {
-		next()
-	}
-})
+  const host = getHost(req);
+  if (host.startsWith("www.")) {
+    return res.redirect(301, `https://${host.slice(4)}${req.url}`);
+  } else {
+    next();
+  }
+});
 ```

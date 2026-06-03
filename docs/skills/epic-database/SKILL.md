@@ -41,20 +41,20 @@ than complex optimized ones. Add indexes when queries are slow, not before.
 ```typescript
 // ✅ Good - Fetch only needed fields
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-	select: {
-		id: true,
-		username: true,
-		name: true,
-		// Only fetch what you actually use
-	},
-})
+  where: { id: userId },
+  select: {
+    id: true,
+    username: true,
+    name: true,
+    // Only fetch what you actually use
+  },
+});
 
 // ❌ Avoid - Fetching everything
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-	// Fetches all fields including password hash, email, etc.
-})
+  where: { id: userId },
+  // Fetches all fields including password hash, email, etc.
+});
 ```
 
 **Example - Pragmatic optimization:**
@@ -62,11 +62,11 @@ const user = await prisma.user.findUnique({
 ```typescript
 // ✅ Good - Simple query first, optimize if needed
 const notes = await prisma.note.findMany({
-	where: { ownerId: userId },
-	select: { id: true, title: true, updatedAt: true },
-	orderBy: { updatedAt: 'desc' },
-	take: 20,
-})
+  where: { ownerId: userId },
+  select: { id: true, title: true, updatedAt: true },
+  orderBy: { updatedAt: "desc" },
+  take: 20,
+});
 
 // Only add indexes if this query is actually slow
 // Don't pre-optimize
@@ -302,66 +302,66 @@ ALTER TABLE User DROP COLUMN name;
 **Import Prisma Client:**
 
 ```typescript
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from "#app/utils/db.server.ts";
 ```
 
 **Basic query:**
 
 ```typescript
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-})
+  where: { id: userId },
+});
 ```
 
 **Specific select:**
 
 ```typescript
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-	select: {
-		id: true,
-		email: true,
-		username: true,
-		// Don't include password or sensitive data
-	},
-})
+  where: { id: userId },
+  select: {
+    id: true,
+    email: true,
+    username: true,
+    // Don't include password or sensitive data
+  },
+});
 ```
 
 **Include relations:**
 
 ```typescript
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-	include: {
-		notes: {
-			select: {
-				id: true,
-				title: true,
-			},
-			orderBy: { updatedAt: 'desc' },
-		},
-		roles: true,
-	},
-})
+  where: { id: userId },
+  include: {
+    notes: {
+      select: {
+        id: true,
+        title: true,
+      },
+      orderBy: { updatedAt: "desc" },
+    },
+    roles: true,
+  },
+});
 ```
 
 **Complex queries:**
 
 ```typescript
 const notes = await prisma.note.findMany({
-	where: {
-		ownerId: userId,
-		title: { contains: searchTerm },
-	},
-	select: {
-		id: true,
-		title: true,
-		updatedAt: true,
-	},
-	orderBy: { updatedAt: 'desc' },
-	take: 20,
-	skip: (page - 1) * 20,
-})
+  where: {
+    ownerId: userId,
+    title: { contains: searchTerm },
+  },
+  select: {
+    id: true,
+    title: true,
+    updatedAt: true,
+  },
+  orderBy: { updatedAt: "desc" },
+  take: 20,
+  skip: (page - 1) * 20,
+});
 ```
 
 ### Transactions
@@ -370,24 +370,24 @@ const notes = await prisma.note.findMany({
 
 ```typescript
 await prisma.$transaction(async (tx) => {
-	const user = await tx.user.create({
-		data: {
-			email,
-			username,
-			roles: { connect: { name: 'user' } },
-		},
-	})
+  const user = await tx.user.create({
+    data: {
+      email,
+      username,
+      roles: { connect: { name: "user" } },
+    },
+  });
 
-	await tx.note.create({
-		data: {
-			title: 'Welcome',
-			content: 'Welcome to the app!',
-			ownerId: user.id,
-		},
-	})
+  await tx.note.create({
+    data: {
+      title: "Welcome",
+      content: "Welcome to the app!",
+      ownerId: user.id,
+    },
+  });
 
-	return user
-})
+  return user;
+});
 ```
 
 ### SQLite con LiteFS
@@ -401,32 +401,32 @@ await prisma.$transaction(async (tx) => {
 **Check primary instance:**
 
 ```typescript
-import { ensurePrimary, getInstanceInfo } from '#app/utils/litefs.server.ts'
+import { ensurePrimary, getInstanceInfo } from "#app/utils/litefs.server.ts";
 
 export async function action({ request }: Route.ActionArgs) {
-	// Ensure we're on primary instance for writes
-	await ensurePrimary()
+  // Ensure we're on primary instance for writes
+  await ensurePrimary();
 
-	// Now we can write safely
-	await prisma.user.create({
-		data: {
-			/* ... */
-		},
-	})
+  // Now we can write safely
+  await prisma.user.create({
+    data: {
+      /* ... */
+    },
+  });
 }
 ```
 
 **Get instance information:**
 
 ```typescript
-import { getInstanceInfo } from '#app/utils/litefs.server.ts'
+import { getInstanceInfo } from "#app/utils/litefs.server.ts";
 
-const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
+const { currentIsPrimary, primaryInstance } = await getInstanceInfo();
 
 if (currentIsPrimary) {
-	// Can write
+  // Can write
 } else {
-	// Read-only, redirect to primary if necessary
+  // Read-only, redirect to primary if necessary
 }
 ```
 
@@ -436,37 +436,37 @@ if (currentIsPrimary) {
 
 ```typescript
 // prisma/seed.ts
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from "#app/utils/db.server.ts";
 
 async function seed() {
-	// Create roles
-	await prisma.role.createMany({
-		data: [
-			{ name: 'user', description: 'Standard user' },
-			{ name: 'admin', description: 'Administrator' },
-		],
-	})
+  // Create roles
+  await prisma.role.createMany({
+    data: [
+      { name: "user", description: "Standard user" },
+      { name: "admin", description: "Administrator" },
+    ],
+  });
 
-	// Create users
-	const user = await prisma.user.create({
-		data: {
-			email: 'user@example.com',
-			username: 'testuser',
-			roles: { connect: { name: 'user' } },
-		},
-	})
+  // Create users
+  const user = await prisma.user.create({
+    data: {
+      email: "user@example.com",
+      username: "testuser",
+      roles: { connect: { name: "user" } },
+    },
+  });
 
-	console.log('Seed complete!')
+  console.log("Seed complete!");
 }
 
 seed()
-	.catch((e) => {
-		console.error(e)
-		process.exit(1)
-	})
-	.finally(async () => {
-		await prisma.$disconnect()
-	})
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
 ```
 
 **Run seed:**
@@ -494,36 +494,36 @@ npx tsx prisma/seed.ts
 ```typescript
 // ❌ Avoid: Fetches everything unnecessarily
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-	// Fetches password hash, email, all relations, etc.
-})
+  where: { id: userId },
+  // Fetches password hash, email, all relations, etc.
+});
 
 // ✅ Good: Only needed fields - do as little as possible
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-	select: {
-		id: true,
-		username: true,
-		name: true,
-		// Only what you actually use
-	},
-})
+  where: { id: userId },
+  select: {
+    id: true,
+    username: true,
+    name: true,
+    // Only what you actually use
+  },
+});
 
 // ✅ Better: With selective relations (only if you need them)
 const user = await prisma.user.findUnique({
-	where: { id: userId },
-	select: {
-		id: true,
-		username: true,
-		notes: {
-			select: {
-				id: true,
-				title: true,
-			},
-			take: 10, // Only fetch what you need
-		},
-	},
-})
+  where: { id: userId },
+  select: {
+    id: true,
+    username: true,
+    notes: {
+      select: {
+        id: true,
+        title: true,
+      },
+      take: 10, // Only fetch what you need
+    },
+  },
+});
 ```
 
 ### Prisma Query Logging
@@ -533,18 +533,18 @@ const user = await prisma.user.findUnique({
 ```typescript
 // app/utils/db.server.ts
 const client = new PrismaClient({
-	log: [
-		{ level: 'query', emit: 'event' },
-		{ level: 'error', emit: 'stdout' },
-		{ level: 'warn', emit: 'stdout' },
-	],
-})
+  log: [
+    { level: "query", emit: "event" },
+    { level: "error", emit: "stdout" },
+    { level: "warn", emit: "stdout" },
+  ],
+});
 
-client.$on('query', async (e) => {
-	if (e.duration < 20) return // Only log slow queries
+client.$on("query", async (e) => {
+  if (e.duration < 20) return; // Only log slow queries
 
-	console.info(`prisma:query - ${e.duration}ms - ${e.query}`)
-})
+  console.info(`prisma:query - ${e.duration}ms - ${e.query}`);
+});
 ```
 
 ### Database URL
@@ -634,51 +634,51 @@ model Comment {
 
 ```typescript
 export async function getPosts({
-	userId,
-	page = 1,
-	perPage = 20,
-	published,
+  userId,
+  page = 1,
+  perPage = 20,
+  published,
 }: {
-	userId?: string
-	page?: number
-	perPage?: number
-	published?: boolean
+  userId?: string;
+  page?: number;
+  perPage?: number;
+  published?: boolean;
 }) {
-	const where: Prisma.PostWhereInput = {}
+  const where: Prisma.PostWhereInput = {};
 
-	if (userId) {
-		where.authorId = userId
-	}
-	if (published !== undefined) {
-		where.published = published
-	}
+  if (userId) {
+    where.authorId = userId;
+  }
+  if (published !== undefined) {
+    where.published = published;
+  }
 
-	const [posts, total] = await Promise.all([
-		prisma.post.findMany({
-			where,
-			select: {
-				id: true,
-				title: true,
-				updatedAt: true,
-				author: {
-					select: {
-						id: true,
-						username: true,
-					},
-				},
-			},
-			orderBy: { updatedAt: 'desc' },
-			take: perPage,
-			skip: (page - 1) * perPage,
-		}),
-		prisma.post.count({ where }),
-	])
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where,
+      select: {
+        id: true,
+        title: true,
+        updatedAt: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: perPage,
+      skip: (page - 1) * perPage,
+    }),
+    prisma.post.count({ where }),
+  ]);
 
-	return {
-		posts,
-		total,
-		pages: Math.ceil(total / perPage),
-	}
+  return {
+    posts,
+    total,
+    pages: Math.ceil(total / perPage),
+  };
 }
 ```
 
@@ -686,42 +686,42 @@ export async function getPosts({
 
 ```typescript
 export async function createPostWithTags({
-	authorId,
-	title,
-	content,
-	tagNames,
+  authorId,
+  title,
+  content,
+  tagNames,
 }: {
-	authorId: string
-	title: string
-	content: string
-	tagNames: string[]
+  authorId: string;
+  title: string;
+  content: string;
+  tagNames: string[];
 }) {
-	return await prisma.$transaction(async (tx) => {
-		// Create tags if they don't exist
-		await Promise.all(
-			tagNames.map((name) =>
-				tx.tag.upsert({
-					where: { name },
-					update: {},
-					create: { name },
-				}),
-			),
-		)
+  return await prisma.$transaction(async (tx) => {
+    // Create tags if they don't exist
+    await Promise.all(
+      tagNames.map((name) =>
+        tx.tag.upsert({
+          where: { name },
+          update: {},
+          create: { name },
+        }),
+      ),
+    );
 
-		// Create post
-		const post = await tx.post.create({
-			data: {
-				title,
-				content,
-				authorId,
-				tags: {
-					connect: tagNames.map((name) => ({ name })),
-				},
-			},
-		})
+    // Create post
+    const post = await tx.post.create({
+      data: {
+        title,
+        content,
+        authorId,
+        tags: {
+          connect: tagNames.map((name) => ({ name })),
+        },
+      },
+    });
 
-		return post
-	})
+    return post;
+  });
 }
 ```
 
@@ -729,49 +729,49 @@ export async function createPostWithTags({
 
 ```typescript
 async function seed() {
-	// Create permissions
-	const permissions = await Promise.all([
-		prisma.permission.create({
-			data: {
-				action: 'create',
-				entity: 'note',
-				access: 'own',
-				description: 'Can create own notes',
-			},
-		}),
-		prisma.permission.create({
-			data: {
-				action: 'read',
-				entity: 'note',
-				access: 'own',
-				description: 'Can read own notes',
-			},
-		}),
-	])
+  // Create permissions
+  const permissions = await Promise.all([
+    prisma.permission.create({
+      data: {
+        action: "create",
+        entity: "note",
+        access: "own",
+        description: "Can create own notes",
+      },
+    }),
+    prisma.permission.create({
+      data: {
+        action: "read",
+        entity: "note",
+        access: "own",
+        description: "Can read own notes",
+      },
+    }),
+  ]);
 
-	// Create roles with permissions
-	const userRole = await prisma.role.create({
-		data: {
-			name: 'user',
-			description: 'Standard user',
-			permissions: {
-				connect: permissions.map((p) => ({ id: p.id })),
-			},
-		},
-	})
+  // Create roles with permissions
+  const userRole = await prisma.role.create({
+    data: {
+      name: "user",
+      description: "Standard user",
+      permissions: {
+        connect: permissions.map((p) => ({ id: p.id })),
+      },
+    },
+  });
 
-	// Create user with role
-	const user = await prisma.user.create({
-		data: {
-			email: 'user@example.com',
-			username: 'testuser',
-			roles: {
-				connect: { id: userRole.id },
-			},
-		},
-	})
+  // Create user with role
+  const user = await prisma.user.create({
+    data: {
+      email: "user@example.com",
+      username: "testuser",
+      roles: {
+        connect: { id: userRole.id },
+      },
+    },
+  });
 
-	console.log('Seed complete!')
+  console.log("Seed complete!");
 }
 ```
 

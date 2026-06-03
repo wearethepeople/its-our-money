@@ -1,224 +1,511 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@font-face {
+  font-family: "Libre Franklin";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/libre-franklin-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libre Franklin";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/libre-franklin-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libre Franklin";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/libre-franklin-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libre Franklin";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/libre-franklin-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libre Franklin";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/libre-franklin-800.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-600.woff2") format("woff2");
+}
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-    --radius: 0.5rem;
+  --radius: 0.5rem;
+  --site-max: 1280px;
 
-    --background: oklch(0.91 0.0132 71.32);
-    --foreground: oklch(0.2442 0.0064 0.59);
+  /* ── Type ──────────────────────────────────────────────────────────────── */
+  --sans: "Libre Franklin", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-    --card: oklch(0.91 0.0132 71.32);
-    --card-foreground: oklch(0.2442 0.0064 0.59);
+  /* BEGIN: CSS semantic color tokens */
+  /* ── Surfaces ──────────────────────────────────────────────────────────── */
+  --background: oklch(93.82% 0.0144 84.58); /* --paper         */
+  --paper: oklch(93.82% 0.0144 84.58);
+  --paper-2: oklch(91.16% 0.0202 84.59);
 
-    --popover: oklch(0.91 0.0132 71.32);
-    --popover-foreground: oklch(0.2442 0.0064 0.59);
+  --card: oklch(97.98% 0.0086 84.57); /* --surface       */
+  --popover: oklch(97.98% 0.0086 84.57);
+  --surface: oklch(97.98% 0.0086 84.57);
 
-    --primary: oklch(20.79% 0.0399 265.73);
-    --primary-foreground: oklch(98.38% 0.0035 247.86);
+  --secondary: oklch(95.3% 0.0156 86.43); /* --surface-2     */
+  --muted: oklch(95.3% 0.0156 86.43);
+  --surface-2: oklch(95.3% 0.0156 86.43);
 
-    --secondary: oklch(86.48% 0.0153 248);
-    --secondary-foreground: oklch(20.79% 0.0399 265.73);
+  --surface-3: oklch(92.36% 0.0202 84.59);
 
-    --muted: oklch(94.32% 0.0123 247.96);
-    --muted-foreground: oklch(40.68% 0.0281 257.44);
+  /* ── Lines & Borders ───────────────────────────────────────────────────── */
+  --border: oklch(82.93% 0.0294 84.59); /* --line-strong   */
+  --input: oklch(82.93% 0.0294 84.59);
+  --line-strong: oklch(82.93% 0.0294 84.59);
 
-    --accent: oklch(91.87% 0.01770618193703561 248.02064625050508);
-    --accent-foreground: oklch(20.79% 0.0399 265.73);
+  --line-2: oklch(86.5% 0.024 84.59);
+  --line: oklch(89.8% 0.0187 84.59);
 
-    --border: oklch(92.9% 0.0126 255.53);
-    --input: oklch(92.56% 0.0133 255.54);
-    --input-invalid: oklch(63.68% 0.2078 25.33);
+  /* ── Ink / Text ────────────────────────────────────────────────────────── */
+  --foreground: oklch(23.63% 0.012 84.56); /* --ink           */
+  --card-foreground: oklch(23.63% 0.012 84.56);
+  --popover-foreground: oklch(23.63% 0.012 84.56);
+  --primary: oklch(23.63% 0.012 84.56);
+  --ink: oklch(23.63% 0.012 84.56);
 
-    --destructive: oklch(57.14% 0.2121 27.25);
-    --destructive-foreground: oklch(98.38% 0.0035 247.86);
-    /* prefixed with foreground because it should look good on the background */
-    --foreground-destructive: oklch(51.46% 0.1979 16.57);
+  --ink-2: oklch(35.55% 0.0236 82.9);
 
-    --ring: oklch(71.07% 0.0351 256.79);
+  --muted-foreground: oklch(45.66% 0.0243 81.66); /* --ink-muted     */
+  --ink-muted: oklch(45.66% 0.0243 81.66);
+
+  --ink-faint: oklch(50.77% 0.0288 80.97);
+
+  /* ── Brand — Yours (ochre) ─────────────────────────────────────────────── */
+  --accent-foreground: oklch(50.88% 0.1009 70.01); /* --you / --ring  */
+  --ring: oklch(50.88% 0.1009 70.01);
+  --you: oklch(50.88% 0.1009 70.01);
+
+  --you-bar: oklch(62.86% 0.114 75.78);
+
+  --accent: oklch(93.63% 0.0298 85.56); /* --you-soft      */
+  --you-soft: oklch(93.63% 0.0298 85.56);
+
+  --you-line: oklch(74.46% 0.084 78.2);
+
+  /* ── Brand — Washington (slate) ────────────────────────────────────────── */
+  --them: oklch(44.84% 0.0713 256.29);
+  --them-bar: oklch(52.17% 0.0709 256.03);
+  --them-soft: oklch(91.16% 0.0134 262.38);
+  --them-line: oklch(68.5% 0.058 256);
+
+  /* ── Brand — Locked / Mandatory (olive) ────────────────────────────────── */
+  --locked: oklch(46.92% 0.0454 109.64);
+  --locked-soft: oklch(90.64% 0.0201 103.69);
+
+  /* ── Status ────────────────────────────────────────────────────────────── */
+  --success: oklch(48.47% 0.0762 149.29); /* --ok            */
+  --ok: oklch(48.47% 0.0762 149.29);
+  --success-soft: oklch(91.73% 0.0182 142.82); /* --ok-soft       */
+  --ok-soft: oklch(91.73% 0.0182 142.82);
+
+  --destructive: oklch(49.45% 0.1316 36.24); /* --alert         */
+  --alert: oklch(49.45% 0.1316 36.24);
+  --input-invalid: oklch(49.45% 0.1316 36.24);
+  --foreground-destructive: oklch(49.45% 0.1316 36.24);
+  --destructive-foreground: oklch(97.98% 0.0086 84.57);
+  --alert-soft: oklch(92.8% 0.018 44);
+
+  /* ── Interaction ───────────────────────────────────────────────────────── */
+  --primary-foreground: oklch(93.82% 0.0144 84.58); /* text on --primary btn */
+  --secondary-foreground: oklch(23.63% 0.012 84.56);
+  --on-accent: oklch(100% 0 0); /* white on ochre btn    */
+  --on-primary: oklch(93.82% 0.0144 84.58);
+  --primary-hover: oklch(13% 0.008 84.56);
+  --accent-hover: oklch(43.5% 0.095 68);
+
+  /* ── Feature (Share) card ──────────────────────────────────────────────── */
+  --share-bg: oklch(23.63% 0.012 84.56);
+  --share-fg: oklch(93.82% 0.0144 84.58);
+  --share-hl: oklch(76.5% 0.098 78);
+
+  /* ── Chart aliases (shadcn) ────────────────────────────────────────────── */
+  --chart-1: oklch(50.88% 0.1009 70.01); /* ochre   */
+  --chart-2: oklch(44.84% 0.0713 256.29); /* slate   */
+  --chart-3: oklch(46.92% 0.0454 109.64); /* olive   */
+  --chart-4: oklch(48.47% 0.0762 149.29); /* green   */
+  --chart-5: oklch(49.45% 0.1316 36.24); /* red     */
+
+  /* ── Device / Canvas (design comp only) ────────────────────────────────── */
+  --bezel-1: oklch(82% 0.028 84.59);
+  --bezel-2: oklch(72% 0.042 84.59);
+  --bezel-shadow: rgba(60, 48, 28, 0.45);
+  --notch-bg: oklch(86% 0.024 84.59);
+  --canvas-bg: oklch(90% 0.02 84.59);
+  --canvas-grid: rgba(60, 48, 28, 0.05);
+  /* END: CSS semantic color tokens */
 }
 
 .dark {
-    --background: oklch(0.2442 0.0064 0.59);
-    --foreground: oklch(0.91 0.0132 71.32);
+  /* BEGIN: Dark CSS semantic color tokens */
+  /* ── Surfaces ──────────────────────────────────────────────────────────── */
+  --background: oklch(20.98% 0.0083 84.59);
+  --paper: oklch(20.98% 0.0083 84.59);
+  --paper-2: oklch(24.08% 0.0103 80.6);
 
-    --card: oklch(0.2442 0.0064 0.59);
-    --card-foreground: oklch(0.91 0.0132 71.32);
+  --card: oklch(24.9% 0.0118 84.57);
+  --popover: oklch(24.9% 0.0118 84.57);
+  --surface: oklch(24.9% 0.0118 84.57);
 
-    --popover: oklch(0.2442 0.0064 0.59);
-    --popover-foreground: oklch(0.91 0.0132 71.32);
+  --secondary: oklch(27.94% 0.0107 73.46);
+  --muted: oklch(27.94% 0.0107 73.46);
+  --surface-2: oklch(27.94% 0.0107 73.46);
 
-    --primary: oklch(0.91 0.0132 71.32);
-    --primary-foreground: oklch(20.79% 0.0399 265.73);
+  --surface-3: oklch(31.21% 0.0141 76.35);
 
-    --secondary: oklch(34.74% 0.0295 260.13);
-    --secondary-foreground: oklch(0.91 0.0132 71.32);
+  /* ── Lines & Borders ───────────────────────────────────────────────────── */
+  --border: oklch(42.81% 0.0219 78.02);
+  --input: oklch(42.81% 0.0219 78.02);
+  --line-strong: oklch(42.81% 0.0219 78.02);
 
-    --muted: oklch(22.6% 0.0267 260.02);
-    --muted-foreground: oklch(71.07% 0.0351 256.79);
+  --line-2: oklch(34.4% 0.0173 78.03);
+  --line: oklch(29.61% 0.0142 76.32);
 
-    --accent: oklch(20.56% 0.022816 260.0464);
-    --accent-foreground: oklch(0.91 0.0132 71.32);
+  /* ── Ink / Text ────────────────────────────────────────────────────────── */
+  --foreground: oklch(94.45% 0.0171 84.6);
+  --card-foreground: oklch(94.45% 0.0171 84.6);
+  --popover-foreground: oklch(94.45% 0.0171 84.6);
+  --primary: oklch(94.45% 0.0171 84.6);
+  --ink: oklch(94.45% 0.0171 84.6);
 
-    --border: oklch(28% 0.0369 259.97);
-    --input: oklch(28% 0.0369 259.97);
-    --input-invalid: oklch(39.59% 0.1331 25.72);
+  --ink-2: oklch(83.86% 0.0252 83.42);
 
-    --destructive: oklch(47.6% 0.159 25.64);
-    --destructive-foreground: oklch(97.1% 0.0127 17.38);
-    /* prefixed with foreground because it should look good on the background */
-    --foreground-destructive: oklch(63.72% 0.2071 21.89);
+  --muted-foreground: oklch(70.25% 0.0293 83.52);
+  --ink-muted: oklch(70.25% 0.0293 83.52);
 
-    --ring: oklch(65.28% 0.0684 260.07);
+  --ink-faint: oklch(60.47% 0.0239 76.39);
+
+  /* ── Brand — Yours (ochre) ─────────────────────────────────────────────── */
+  --accent-foreground: oklch(74.55% 0.124 76.22);
+  --ring: oklch(74.55% 0.124 76.22);
+  --you: oklch(74.55% 0.124 76.22);
+
+  --you-bar: oklch(70.73% 0.1203 75.22);
+
+  --accent: oklch(30.87% 0.0392 81.61);
+  --you-soft: oklch(30.87% 0.0392 81.61);
+
+  --you-line: oklch(79.53% 0.1095 81.32);
+
+  /* ── Brand — Washington (slate) ────────────────────────────────────────── */
+  --them: oklch(74.87% 0.0735 255.76);
+  --them-bar: oklch(65.3% 0.0854 256.71);
+  --them-soft: oklch(28.24% 0.0334 257.68);
+  --them-line: oklch(58.12% 0.0765 257.85);
+
+  /* ── Brand — Locked / Mandatory (olive) ────────────────────────────────── */
+  --locked: oklch(75.9% 0.0686 106.06);
+  --locked-soft: oklch(29.62% 0.0272 107.98);
+
+  /* ── Status ────────────────────────────────────────────────────────────── */
+  --success: oklch(72.17% 0.1133 149.4);
+  --ok: oklch(72.17% 0.1133 149.4);
+  --success-soft: oklch(30.81% 0.0268 155.4);
+  --ok-soft: oklch(30.81% 0.0268 155.4);
+
+  --destructive: oklch(71% 0.1203 42.52);
+  --alert: oklch(71% 0.1203 42.52);
+  --input-invalid: oklch(71% 0.1203 42.52);
+  --foreground-destructive: oklch(71% 0.1203 42.52);
+  --destructive-foreground: oklch(24.9% 0.0118 84.57);
+  --alert-soft: oklch(28.56% 0.0368 40.75);
+
+  /* ── Interaction ───────────────────────────────────────────────────────── */
+  --primary-foreground: oklch(20.98% 0.0083 84.59);
+  --secondary-foreground: oklch(94.45% 0.0171 84.6);
+  --on-accent: oklch(20.98% 0.0083 84.59);
+  --on-primary: oklch(20.98% 0.0083 84.59);
+  --primary-hover: oklch(100% 0.0001 263.28);
+  --accent-hover: oklch(81.04% 0.1126 80.25);
+
+  /* ── Feature (Share) card ──────────────────────────────────────────────── */
+  --share-bg: oklch(16.5% 0.007 78.09);
+  --share-fg: oklch(94.45% 0.0171 84.6);
+  --share-hl: oklch(79.53% 0.1095 81.32);
+
+  /* ── Chart aliases ─────────────────────────────────────────────────────── */
+  --chart-1: oklch(74.55% 0.124 76.22);
+  --chart-2: oklch(74.87% 0.0735 255.76);
+  --chart-3: oklch(75.9% 0.0686 106.06);
+  --chart-4: oklch(72.17% 0.1133 149.4);
+  --chart-5: oklch(71% 0.1203 42.52);
+
+  /* ── Device / Canvas ───────────────────────────────────────────────────── */
+  --bezel-1: oklch(32.84% 0.0175 78);
+  --bezel-2: oklch(38.65% 0.0203 79.14);
+  --bezel-shadow: rgba(0, 0, 0, 0.6);
+  --notch-bg: oklch(27.09% 0.0123 78.07);
+  --canvas-bg: oklch(18.26% 0.0043 84.6);
+  --canvas-grid: rgba(255, 255, 255, 0.035);
+  /* END: Dark CSS semantic color tokens */
 }
 
 @theme inline {
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-destructive: var(--destructive);
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
-    --color-input-invalid: var(--input-invalid);
-    --color-destructive-foreground: var(--destructive-foreground);
-    --color-foreground-destructive: var(--foreground-destructive);
+  /* ── Radius ──────────────────────────────────────────────────────────────── */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ── shadcn semantic colors ──────────────────────────────────────────────── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-foreground-destructive: var(--foreground-destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-invalid: var(--input-invalid);
+  --color-ring: var(--ring);
+
+  /* ── IOM surface scale ───────────────────────────────────────────────────── */
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  /* ── IOM line scale ──────────────────────────────────────────────────────── */
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-line-strong: var(--line-strong);
+
+  /* ── IOM ink scale ───────────────────────────────────────────────────────── */
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+
+  /* ── Brand — Yours (ochre) ───────────────────────────────────────────────── */
+  --color-you: var(--you);
+  --color-you-bar: var(--you-bar);
+  --color-you-soft: var(--you-soft);
+  --color-you-line: var(--you-line);
+
+  /* ── Brand — Washington (slate) ──────────────────────────────────────────── */
+  --color-them: var(--them);
+  --color-them-bar: var(--them-bar);
+  --color-them-soft: var(--them-soft);
+  --color-them-line: var(--them-line);
+
+  /* ── Brand — Locked / Mandatory (olive) ──────────────────────────────────── */
+  --color-locked: var(--locked);
+  --color-locked-soft: var(--locked-soft);
+
+  /* ── Status ──────────────────────────────────────────────────────────────── */
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-ok: var(--ok); /* IOM alias */
+  --color-ok-soft: var(--ok-soft); /* IOM alias */
+  --color-alert: var(--alert); /* IOM alias */
+  --color-alert-soft: var(--alert-soft); /* IOM alias */
+
+  /* ── Interaction ─────────────────────────────────────────────────────────── */
+  --color-on-accent: var(--on-accent);
+  --color-on-primary: var(--on-primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent-hover: var(--accent-hover);
+
+  /* ── Feature card ────────────────────────────────────────────────────────── */
+  --color-share-bg: var(--share-bg);
+  --color-share-fg: var(--share-fg);
+  --color-share-hl: var(--share-hl);
+
+  /* ── Chart aliases ───────────────────────────────────────────────────────── */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* ── Device / Canvas (comp only) ────────────────────────────────────────── */
+  --color-bezel-1: var(--bezel-1);
+  --color-bezel-2: var(--bezel-2);
+  --color-canvas-bg: var(--canvas-bg);
+  --color-notch-bg: var(--notch-bg);
+
+  /* ── Fonts ───────────────────────────────────────────────────────────────── */
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
 }
 
 @theme {
-    --text-mega: 5rem;
-    --text-mega--line-height: 5.25rem;
-    --text-mega--font-weight: 700;
-    --text-h1: 3.5rem;
-    --text-h1--line-height: 3.875rem;
-    --text-h1--font-weight: 700;
-    --text-h2: 2.5rem;
-    --text-h2--line-height: 3rem;
-    --text-h2--font-weight: 700;
-    --text-h3: 2rem;
-    --text-h3--line-height: 2.25rem;
-    --text-h3--font-weight: 700;
-    --text-h4: 1.75rem;
-    --text-h4--line-height: 2.25rem;
-    --text-h4--font-weight: 700;
-    --text-h5: 1.5rem;
-    --text-h5--line-height: 2rem;
-    --text-h5--font-weight: 700;
-    --text-h6: 1rem;
-    --text-h6--line-height: 1.25rem;
-    --text-h6--font-weight: 700;
-    --text-body-2xl: 2rem;
-    --text-body-2xl--line-height: 2.25rem;
-    --text-body-xl: 1.75rem;
-    --text-body-xl--line-height: 2.25rem;
-    --text-body-lg: 1.5rem;
-    --text-body-lg--line-height: 2rem;
-    --text-body-md: 1.25rem;
-    --text-body-md--line-height: 1.75rem;
-    --text-body-sm: 1rem;
-    --text-body-sm--line-height: 1.25rem;
-    --text-body-xs: 0.875rem;
-    --text-body-xs--line-height: 1.125rem;
-    --text-body-2xs: 0.75rem;
-    --text-body-2xs--line-height: 1rem;
-    --text-caption: 1.125rem;
-    --text-caption--line-height: 1.5rem;
-    --text-caption--font-weight: 600;
-    --text-button: 0.75rem;
-    --text-button--line-height: 1rem;
-    --text-button--font-weight: 700;
-    --animate-roll-reveal: roll-reveal 0.4s cubic-bezier(0.22, 1.28, 0.54, 0.99);
-    --animate-slide-left: slide-left 0.3s ease-out;
-    --animate-slide-top: slide-top 0.3s ease-out;
-    --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+  --text-mega: 5rem;
+  --text-mega--line-height: 5.25rem;
+  --text-mega--font-weight: 700;
+  --text-h1: 3.5rem;
+  --text-h1--line-height: 3.875rem;
+  --text-h1--font-weight: 700;
+  --text-h2: 2.5rem;
+  --text-h2--line-height: 3rem;
+  --text-h2--font-weight: 700;
+  --text-h3: 2rem;
+  --text-h3--line-height: 2.25rem;
+  --text-h3--font-weight: 700;
+  --text-h4: 1.75rem;
+  --text-h4--line-height: 2.25rem;
+  --text-h4--font-weight: 700;
+  --text-h5: 1.5rem;
+  --text-h5--line-height: 2rem;
+  --text-h5--font-weight: 700;
+  --text-h6: 1rem;
+  --text-h6--line-height: 1.25rem;
+  --text-h6--font-weight: 700;
+  --text-body-2xl: 2rem;
+  --text-body-2xl--line-height: 2.25rem;
+  --text-body-xl: 1.75rem;
+  --text-body-xl--line-height: 2.25rem;
+  --text-body-lg: 1.5rem;
+  --text-body-lg--line-height: 2rem;
+  --text-body-md: 1.25rem;
+  --text-body-md--line-height: 1.75rem;
+  --text-body-sm: 1rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-body-xs: 0.875rem;
+  --text-body-xs--line-height: 1.125rem;
+  --text-body-2xs: 0.75rem;
+  --text-body-2xs--line-height: 1rem;
+  --text-caption: 1.125rem;
+  --text-caption--line-height: 1.5rem;
+  --text-caption--font-weight: 600;
+  --text-button: 0.75rem;
+  --text-button--line-height: 1rem;
+  --text-button--font-weight: 700;
+  --animate-roll-reveal: roll-reveal 0.4s cubic-bezier(0.22, 1.28, 0.54, 0.99);
+  --animate-slide-left: slide-left 0.3s ease-out;
+  --animate-slide-top: slide-top 0.3s ease-out;
+  --animate-caret-blink: caret-blink 1.25s ease-out infinite;
 
-    @keyframes roll-reveal {
-        from {
-            transform: rotate(12deg) scale(0);
-            opacity: 0;
-        }
-
-        to {
-            transform: rotate(0deg) scale(1);
-            opacity: 1;
-        }
+  @keyframes roll-reveal {
+    from {
+      transform: rotate(12deg) scale(0);
+      opacity: 0;
     }
 
-    @keyframes slide-left {
-        from {
-            transform: translateX(20px);
-            opacity: 0;
-        }
+    to {
+      transform: rotate(0deg) scale(1);
+      opacity: 1;
+    }
+  }
 
-        to {
-            transform: translateX(0px);
-            opacity: 1;
-        }
+  @keyframes slide-left {
+    from {
+      transform: translateX(20px);
+      opacity: 0;
     }
 
-    @keyframes slide-top {
-        from {
-            transform: translateY(20px);
-            opacity: 0;
-        }
+    to {
+      transform: translateX(0px);
+      opacity: 1;
+    }
+  }
 
-        to {
-            transform: translateY(0px);
-            opacity: 1;
-        }
+  @keyframes slide-top {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
     }
 
-    @keyframes caret-blink {
-        0%,
-        70%,
-        100% {
-            opacity: 1;
-        }
-
-        20%,
-        50% {
-            opacity: 0;
-        }
+    to {
+      transform: translateY(0px);
+      opacity: 1;
     }
+  }
+
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+
+    20%,
+    50% {
+      opacity: 0;
+    }
+  }
 }
 
 @utility container {
-    margin-inline: auto;
-    padding-inline: 2rem;
+  margin-inline: auto;
+  padding-inline: 2rem;
 
-    @media (width >= 1400px) {
-        & {
-            max-width: 1400px;
-        }
+  @media (width >= 1400px) {
+    & {
+      max-width: 1400px;
     }
+  }
 }
 
 @layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        border-color: hsl(var(--border));
-    }
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface text-ink rounded-xl border border-line-2;
+  }
 }
 
 a {
-    text-decoration: underline
+  text-decoration: underline;
 }

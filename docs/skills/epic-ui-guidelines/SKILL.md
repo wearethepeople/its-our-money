@@ -1,7 +1,6 @@
 ---
 name: epic-ui-guidelines
-description:
-  Guide on UI/UX guidelines, accessibility, and component usage for Epic Stack
+description: Guide on UI/UX guidelines, accessibility, and component usage for Epic Stack
 categories:
   - ui
   - accessibility

@@ -25,9 +25,9 @@ Now you've added your font, there's a few places you need to update to use it.
    ```css
    /* tailwind.css */
    @layer base {
-   	:root {
-   		--font-sans: <YourFont>;
-   	}
+     :root {
+       --font-sans: <YourFont>;
+     }
    }
    ```
 
@@ -49,7 +49,7 @@ Now you've added your font, there's a few places you need to update to use it.
 
    ```tsx
    // app/routes/root.tsx
-   import fontStyleSheetUrl from './styles/yourfont.css?url'
+   import fontStyleSheetUrl from "./styles/yourfont.css?url";
    ```
 
    Add the font stylesheet to the links array.
@@ -106,14 +106,14 @@ Follow the steps below to add Font Metric Overrides to your custom fonts.
 
    ```css
    @font-face {
-   	font-family: 'NunitoSans Fallback';
-   	font-style: normal;
-   	font-weight: 200;
-   	src: local('Arial');
-   	ascent-override: 103.02%;
-   	descent-override: 35.97%;
-   	line-gap-override: 0%;
-   	size-adjust: 98.13%;
+     font-family: "NunitoSans Fallback";
+     font-style: normal;
+     font-weight: 200;
+     src: local("Arial");
+     ascent-override: 103.02%;
+     descent-override: 35.97%;
+     line-gap-override: 0%;
+     size-adjust: 98.13%;
    }
    ```
 
@@ -142,9 +142,9 @@ Follow the steps below to add Font Metric Overrides to your custom fonts.
    ```css
    /* tailwind.css */
    @layer base {
-   	:root {
-   		--font-sans: <YourFont> <YourFontFallback>;
-   	}
+     :root {
+       --font-sans: <YourFont> <YourFontFallback>;
+     }
    }
    ```
 

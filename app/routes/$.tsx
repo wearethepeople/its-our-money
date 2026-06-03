@@ -5,53 +5,51 @@
 // ensure the user gets the right status code and we can display a nicer error
 // message for them than the Remix and/or browser default.
 
-import { href, Link, redirect, useLocation } from 'react-router'
-import { GeneralErrorBoundary } from '@/components/error-boundary.tsx'
-import { Icon } from '@/components/ui/icon.tsx'
+import { href, Link, redirect, useLocation } from "react-router";
+import { GeneralErrorBoundary } from "@/components/error-boundary.tsx";
+import { Icon } from "@/components/ui/icon.tsx";
 
-import { type Route } from './+types/$'
+import { type Route } from "./+types/$";
 
 export function loader({ request, params }: Route.LoaderArgs) {
-	const url = new URL(request.url)
-	const pathname = url.pathname
-	const currentYear = new Date().getFullYear().toString()
+  const url = new URL(request.url);
+  const pathname = url.pathname;
+  const currentYear = new Date().getFullYear().toString();
 
-	if (pathname.startsWith('/allocate')) {
-		return redirect(href('/allocate/:year', { year: currentYear }))
-	}
+  if (pathname.startsWith("/allocate")) {
+    return redirect(href("/allocate/:year", { year: currentYear }));
+  }
 
-	throw new Response('Not found', { status: 404 })
+  throw new Response("Not found", { status: 404 });
 }
 
 export function action() {
-	throw new Response('Not found', { status: 404 })
+  throw new Response("Not found", { status: 404 });
 }
 
 export default function NotFound() {
-	// due to the loader, this component will never be rendered, but we'll return
-	// the error boundary just in case.
-	return <ErrorBoundary />
+  // due to the loader, this component will never be rendered, but we'll return
+  // the error boundary just in case.
+  return <ErrorBoundary />;
 }
 
 export function ErrorBoundary() {
-	const location = useLocation()
-	return (
-		<GeneralErrorBoundary
-			statusHandlers={{
-				404: () => (
-					<div className="flex flex-col gap-6">
-						<div className="flex flex-col gap-3">
-							<h1>We can't find this page:</h1>
-							<pre className="text-body-lg break-all whitespace-pre-wrap">
-								{location.pathname}
-							</pre>
-						</div>
-						<Link to="/" className="text-body-md underline">
-							<Icon name="arrow-left">Back to home</Icon>
-						</Link>
-					</div>
-				),
-			}}
-		/>
-	)
+  const location = useLocation();
+  return (
+    <GeneralErrorBoundary
+      statusHandlers={{
+        404: () => (
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <h1>We can't find this page:</h1>
+              <pre className="text-body-lg break-all whitespace-pre-wrap">{location.pathname}</pre>
+            </div>
+            <Link to="/" className="text-body-md underline">
+              <Icon name="arrow-left">Back to home</Icon>
+            </Link>
+          </div>
+        ),
+      }}
+    />
+  );
 }

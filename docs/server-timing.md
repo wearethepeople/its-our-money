@@ -27,65 +27,58 @@ Here are all those parts in action in the `/user/:username/notes` route at the
 time of this writing:
 
 ```tsx
-import {
-	combineServerTimings,
-	makeTimings,
-	time,
-} from '#app/utils/timing.server.ts'
-import { type Route } from './+types/notes.ts'
+import { combineServerTimings, makeTimings, time } from "#app/utils/timing.server.ts";
+import { type Route } from "./+types/notes.ts";
 
 export async function loader({ params }: Route.LoaderArgs) {
-	const timings = makeTimings('notes loader') // <-- 1. Setup Timings
-	// 2. Time functions
-	const owner = await time(
-		() =>
-			prisma.user.findUnique({
-				where: {
-					username: params.username,
-				},
-				select: {
-					id: true,
-					username: true,
-					name: true,
-					imageId: true,
-				},
-			}),
-		{ timings, type: 'find user' },
-	)
-	if (!owner) {
-		throw new Response('Not found', { status: 404 })
-	}
-	// 2. Time functions
-	const notes = await time(
-		() =>
-			prisma.note.findMany({
-				where: {
-					ownerId: owner.id,
-				},
-				select: {
-					id: true,
-					title: true,
-				},
-			}),
-		{ timings, type: 'find notes' },
-	)
-	return json(
-		{ owner, notes },
-		{ headers: { 'Server-Timing': timings.toString() } }, // <-- 3. Create headers
-	)
+  const timings = makeTimings("notes loader"); // <-- 1. Setup Timings
+  // 2. Time functions
+  const owner = await time(
+    () =>
+      prisma.user.findUnique({
+        where: {
+          username: params.username,
+        },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          imageId: true,
+        },
+      }),
+    { timings, type: "find user" },
+  );
+  if (!owner) {
+    throw new Response("Not found", { status: 404 });
+  }
+  // 2. Time functions
+  const notes = await time(
+    () =>
+      prisma.note.findMany({
+        where: {
+          ownerId: owner.id,
+        },
+        select: {
+          id: true,
+          title: true,
+        },
+      }),
+    { timings, type: "find notes" },
+  );
+  return json(
+    { owner, notes },
+    { headers: { "Server-Timing": timings.toString() } }, // <-- 3. Create headers
+  );
 }
 
 // We have a general headers handler to save you from boilerplating.
-export const headers: HeadersFunction = pipeHeaders
+export const headers: HeadersFunction = pipeHeaders;
 // this is basically what it does though
-export const headers: Route.HeadersFunction = ({
-	loaderHeaders,
-	parentHeaders,
-}) => {
-	return {
-		'Server-Timing': combineServerTimings(parentHeaders, loaderHeaders), // <-- 4. Send headers
-	}
-}
+export const headers: Route.HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
+  return {
+    "Server-Timing": combineServerTimings(parentHeaders, loaderHeaders), // <-- 4. Send headers
+  };
+};
 ```
 
 You can

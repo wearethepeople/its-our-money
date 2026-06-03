@@ -1,7 +1,6 @@
 ---
 name: epic-deployment
-description:
-  Guide on deployment with Fly.io, multi-region setup, and CI/CD for Epic Stack
+description: Guide on deployment with Fly.io, multi-region setup, and CI/CD for Epic Stack
 categories:
   - deployment
   - fly-io
@@ -67,24 +66,24 @@ primary_region = "sjc" # Change according to your location
 
 ```yaml
 fuse:
-  dir: '${LITEFS_DIR}'
+  dir: "${LITEFS_DIR}"
 
 data:
-  dir: '/data/litefs'
+  dir: "/data/litefs"
 
 proxy:
-  addr: ':${INTERNAL_PORT}'
-  target: 'localhost:${PORT}'
-  db: '${DATABASE_FILENAME}'
+  addr: ":${INTERNAL_PORT}"
+  target: "localhost:${PORT}"
+  db: "${DATABASE_FILENAME}"
 
 lease:
-  type: 'consul'
+  type: "consul"
   candidate: ${FLY_REGION == PRIMARY_REGION}
   promote: true
-  advertise-url: 'http://${HOSTNAME}.vm.${FLY_APP_NAME}.internal:20202'
+  advertise-url: "http://${HOSTNAME}.vm.${FLY_APP_NAME}.internal:20202"
   consul:
-    url: '${FLY_CONSUL_URL}'
-    key: 'epic-stack-litefs_20250222/${FLY_APP_NAME}'
+    url: "${FLY_CONSUL_URL}"
+    key: "epic-stack-litefs_20250222/${FLY_APP_NAME}"
 
 exec:
   - cmd: npx prisma migrate deploy
@@ -117,22 +116,21 @@ tls_skip_verify = false
 ```typescript
 // app/routes/resources/healthcheck.tsx
 export async function loader({ request }: Route.LoaderArgs) {
-	const host =
-		request.headers.get('X-Forwarded-Host') ?? request.headers.get('host')
+  const host = request.headers.get("X-Forwarded-Host") ?? request.headers.get("host");
 
-	try {
-		await Promise.all([
-			prisma.user.count(), // Verify DB
-			fetch(`${new URL(request.url).protocol}${host}`, {
-				method: 'HEAD',
-				headers: { 'X-Healthcheck': 'true' },
-			}),
-		])
-		return new Response('OK')
-	} catch (error) {
-		console.log('healthcheck ❌', { error })
-		return new Response('ERROR', { status: 500 })
-	}
+  try {
+    await Promise.all([
+      prisma.user.count(), // Verify DB
+      fetch(`${new URL(request.url).protocol}${host}`, {
+        method: "HEAD",
+        headers: { "X-Healthcheck": "true" },
+      }),
+    ]);
+    return new Response("OK");
+  } catch (error) {
+    console.log("healthcheck ❌", { error });
+    return new Response("ERROR", { status: 500 });
+  }
 }
 ```
 
@@ -656,48 +654,44 @@ jobs:
 
 ```typescript
 // app/utils/env.server.ts
-export function getDeploymentEnv():
-	| 'production'
-	| 'staging'
-	| 'preview'
-	| 'development' {
-	if (process.env.NODE_ENV === 'development') {
-		return 'development'
-	}
+export function getDeploymentEnv(): "production" | "staging" | "preview" | "development" {
+  if (process.env.NODE_ENV === "development") {
+    return "development";
+  }
 
-	// Preview deployments
-	if (process.env.FLY_APP_NAME?.includes('pr-')) {
-		return 'preview'
-	}
+  // Preview deployments
+  if (process.env.FLY_APP_NAME?.includes("pr-")) {
+    return "preview";
+  }
 
-	// Staging environment
-	if (process.env.FLY_APP_NAME?.includes('staging')) {
-		return 'staging'
-	}
+  // Staging environment
+  if (process.env.FLY_APP_NAME?.includes("staging")) {
+    return "staging";
+  }
 
-	// Production
-	return 'production'
+  // Production
+  return "production";
 }
 ```
 
 **✅ Good - Environment-specific configuration:**
 
 ```typescript
-const env = getDeploymentEnv()
+const env = getDeploymentEnv();
 
 export const config = {
-	production: env === 'production',
-	staging: env === 'staging',
-	preview: env === 'preview',
-	development: env === 'development',
+  production: env === "production",
+  staging: env === "staging",
+  preview: env === "preview",
+  development: env === "development",
 
-	// Preview deployments might have limited features
-	features: {
-		analytics: env === 'production',
-		sentry: env !== 'development',
-		indexing: env === 'production',
-	},
-}
+  // Preview deployments might have limited features
+  features: {
+    analytics: env === "production",
+    sentry: env !== "development",
+    indexing: env === "production",
+  },
+};
 ```
 
 ### Build Artifact Exclusion
@@ -770,15 +764,15 @@ build
 ```typescript
 // app/routes/admin/deployment-status.tsx
 export async function loader({ request }: Route.LoaderArgs) {
-	const deploymentInfo = {
-		appName: process.env.FLY_APP_NAME,
-		region: process.env.FLY_REGION,
-		environment: getDeploymentEnv(),
-		commitSha: process.env.COMMIT_SHA,
-		deployedAt: process.env.DEPLOYED_AT,
-	}
+  const deploymentInfo = {
+    appName: process.env.FLY_APP_NAME,
+    region: process.env.FLY_REGION,
+    environment: getDeploymentEnv(),
+    commitSha: process.env.COMMIT_SHA,
+    deployedAt: process.env.DEPLOYED_AT,
+  };
 
-	return { deploymentInfo }
+  return { deploymentInfo };
 }
 ```
 

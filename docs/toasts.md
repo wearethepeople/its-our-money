@@ -19,8 +19,8 @@ using this:
 
 ```tsx
 return redirectWithToast(`/users/${note.owner.username}/notes/${note.id}`, {
-	description: id ? 'Note updated' : 'Note created',
-})
+  description: id ? "Note updated" : "Note created",
+});
 ```
 
 This accepts an additional argument for other `ResponseInit` options so you can
@@ -31,14 +31,14 @@ directly:
 
 ```tsx
 return json(
-	{ success: true },
-	{
-		headers: await createToastHeaders({
-			description: 'Note updated',
-			type: 'success',
-		}),
-	},
-)
+  { success: true },
+  {
+    headers: await createToastHeaders({
+      description: "Note updated",
+      type: "success",
+    }),
+  },
+);
 ```
 
 And if you need to set multiple headers, you can use the `combineHeaders`
@@ -46,17 +46,17 @@ utility from `app/utils/misc.tsx`:
 
 ```tsx
 return json(
-	{ success: true },
-	{
-		headers: combineHeaders(
-			await createToastHeaders({
-				toast: {
-					description: 'Note updated',
-					type: 'success',
-				},
-			}),
-			{ 'x-foo': 'bar' },
-		),
-	},
-)
+  { success: true },
+  {
+    headers: combineHeaders(
+      await createToastHeaders({
+        toast: {
+          description: "Note updated",
+          type: "success",
+        },
+      }),
+      { "x-foo": "bar" },
+    ),
+  },
+);
 ```

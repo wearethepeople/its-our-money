@@ -1,0 +1,68 @@
+// Project-level Zed settings.
+// Requires the "Oxc" extension — open Zed, cmd+shift+p → "zed: extensions", search "Oxc".
+// oxlint and oxfmt are resolved from the local node_modules/.bin (devDependencies).
+{
+  "languages": {
+    // JS/TS: oxfmt formats, oxlint fixes on save via code action
+    "TypeScript": {
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    "TSX": {
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    "JavaScript": {
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    "JSX": {
+      "language_servers": ["oxfmt", "oxlint", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.oxc": true }
+    },
+    // oxfmt also handles these file types — format only, no lint
+    "JSON": {
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "JSONC": {
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "CSS": {
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "Markdown": {
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "YAML": {
+      "language_servers": ["oxfmt", "..."],
+      "formatter": "language_server",
+      "format_on_save": "on"
+    }
+  },
+  // Show oxlint diagnostics as you type (inline squiggles, not just on save)
+  "lsp": {
+    "oxlint": {
+      "initialization_options": {
+        "settings": {
+          "run": "onType"
+        }
+      }
+    }
+  }
+}

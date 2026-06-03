@@ -51,7 +51,7 @@ path = "/resources/healthcheck"
 protocol = "http"
 timeout = "2s"
 tls_skip_verify = false
-headers = { }
+headers = {}
 
 [[services.http_checks]]
 grace_period = "10s"

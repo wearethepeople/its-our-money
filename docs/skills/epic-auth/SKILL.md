@@ -1,7 +1,6 @@
 ---
 name: epic-auth
-description:
-  Guide on authentication, sessions, OAuth, 2FA, and passkeys for Epic Stack
+description: Guide on authentication, sessions, OAuth, 2FA, and passkeys for Epic Stack
 categories:
   - authentication
   - sessions
@@ -43,24 +42,24 @@ processing requests, and return clear errors quickly.
 ```typescript
 // ✅ Good - Minimal session data, explicit permissions
 const session = await prisma.session.create({
-	data: {
-		expirationDate: getSessionExpirationDate(),
-		userId, // Only store user ID, not full user data
-	},
-})
+  data: {
+    expirationDate: getSessionExpirationDate(),
+    userId, // Only store user ID, not full user data
+  },
+});
 
 // Session only grants access to this specific user
 // Permissions checked separately when needed
 
 // ❌ Avoid - Storing too much in session
 const session = await prisma.session.create({
-	data: {
-		expirationDate: getSessionExpirationDate(),
-		userId,
-		userRole: 'admin', // Don't store roles in session
-		permissions: ['all'], // Don't store permissions in session
-	},
-})
+  data: {
+    expirationDate: getSessionExpirationDate(),
+    userId,
+    userRole: "admin", // Don't store roles in session
+    permissions: ["all"], // Don't store permissions in session
+  },
+});
 // Roles and permissions should be checked from database, not session
 ```
 
@@ -69,31 +68,31 @@ const session = await prisma.session.create({
 ```typescript
 // ✅ Good - Validate authentication early
 export async function loader({ request }: Route.LoaderArgs) {
-	// Check authentication immediately - fail fast
-	const userId = await requireUserId(request)
+  // Check authentication immediately - fail fast
+  const userId = await requireUserId(request);
 
-	// Check permissions early - fail fast
-	await requireUserWithPermission(request, 'read:note:own')
+  // Check permissions early - fail fast
+  await requireUserWithPermission(request, "read:note:own");
 
-	// Only proceed if authenticated and authorized
-	const notes = await prisma.note.findMany({
-		where: { ownerId: userId },
-	})
+  // Only proceed if authenticated and authorized
+  const notes = await prisma.note.findMany({
+    where: { ownerId: userId },
+  });
 
-	return { notes }
+  return { notes };
 }
 
 // ❌ Avoid - Delayed authentication check
 export async function loader({ request }: Route.LoaderArgs) {
-	// Process request first...
-	const notes = await prisma.note.findMany()
+  // Process request first...
+  const notes = await prisma.note.findMany();
 
-	// Check authentication at the end - too late!
-	const userId = await getUserId(request)
-	if (!userId) {
-		// Already processed request
-		throw redirect('/login')
-	}
+  // Check authentication at the end - too late!
+  const userId = await getUserId(request);
+  if (!userId) {
+    // Already processed request
+    throw redirect("/login");
+  }
 }
 ```
 
@@ -106,18 +105,18 @@ the database and identified by signed cookies.
 
 ```typescript
 // app/utils/session.server.ts
-import { createCookieSessionStorage } from 'react-router'
+import { createCookieSessionStorage } from "react-router";
 
 export const authSessionStorage = createCookieSessionStorage({
-	cookie: {
-		name: 'en_session',
-		sameSite: 'lax', // CSRF protection advised if changing to 'none'
-		path: '/',
-		httpOnly: true,
-		secrets: process.env.SESSION_SECRET.split(','),
-		secure: process.env.NODE_ENV === 'production',
-	},
-})
+  cookie: {
+    name: "en_session",
+    sameSite: "lax", // CSRF protection advised if changing to 'none'
+    path: "/",
+    httpOnly: true,
+    secrets: process.env.SESSION_SECRET.split(","),
+    secure: process.env.NODE_ENV === "production",
+  },
+});
 ```
 
 ### Get current user
@@ -125,30 +124,30 @@ export const authSessionStorage = createCookieSessionStorage({
 **Server-side:**
 
 ```typescript
-import { getUserId, requireUserId } from '#app/utils/auth.server.ts'
+import { getUserId, requireUserId } from "#app/utils/auth.server.ts";
 
 // Get userId or null if not authenticated
-const userId = await getUserId(request)
+const userId = await getUserId(request);
 
 // Require authenticated user (redirects to /login if not)
-const userId = await requireUserId(request)
-const userId = await requireUserId(request, { redirectTo: '/custom-login' })
+const userId = await requireUserId(request);
+const userId = await requireUserId(request, { redirectTo: "/custom-login" });
 
 // Require that user is NOT authenticated
-import { requireAnonymous } from '#app/utils/auth.server.ts'
-await requireAnonymous(request) // Redirects to / if authenticated
+import { requireAnonymous } from "#app/utils/auth.server.ts";
+await requireAnonymous(request); // Redirects to / if authenticated
 ```
 
 **Client-side:**
 
 ```typescript
-import { useOptionalUser, useUser } from '#app/utils/user.ts'
+import { useOptionalUser, useUser } from "#app/utils/user.ts";
 
 // Get user or undefined if not authenticated
-const user = useOptionalUser()
+const user = useOptionalUser();
 
 // Get authenticated user (throws error if not)
-const user = useUser()
+const user = useUser();
 ```
 
 ### Login with Email/Password
@@ -157,55 +156,55 @@ const user = useUser()
 
 ```typescript
 const LoginSchema = z.object({
-	username: UsernameSchema,
-	password: z.string().min(1, 'Password is required'),
-	redirectTo: z.string().optional(),
-	remember: z.boolean().optional(),
-})
+  username: UsernameSchema,
+  password: z.string().min(1, "Password is required"),
+  redirectTo: z.string().optional(),
+  remember: z.boolean().optional(),
+});
 ```
 
 **Login action (fail fast):**
 
 ```typescript
-import { login } from '#app/utils/auth.server.ts'
-import { handleNewSession } from './login.server.ts'
+import { login } from "#app/utils/auth.server.ts";
+import { handleNewSession } from "./login.server.ts";
 
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+  const formData = await request.formData();
 
-	// Validate input early - fail fast
-	const submission = await parseWithZod(formData, {
-		schema: LoginSchema,
-	})
+  // Validate input early - fail fast
+  const submission = await parseWithZod(formData, {
+    schema: LoginSchema,
+  });
 
-	if (submission.status !== 'success') {
-		return data({ result: submission.reply() }, { status: 400 })
-	}
+  if (submission.status !== "success") {
+    return data({ result: submission.reply() }, { status: 400 });
+  }
 
-	const { username, password, redirectTo, remember } = submission.value
+  const { username, password, redirectTo, remember } = submission.value;
 
-	// Authenticate early - fail fast if invalid
-	const session = await login({ username, password })
+  // Authenticate early - fail fast if invalid
+  const session = await login({ username, password });
 
-	if (!session) {
-		// Return error immediately - don't process further
-		return data(
-			{
-				result: submission.reply({
-					formErrors: ['Invalid username or password'],
-				}),
-			},
-			{ status: 400 },
-		)
-	}
+  if (!session) {
+    // Return error immediately - don't process further
+    return data(
+      {
+        result: submission.reply({
+          formErrors: ["Invalid username or password"],
+        }),
+      },
+      { status: 400 },
+    );
+  }
 
-	// Only create session if authentication succeeded
-	return handleNewSession({
-		request,
-		session,
-		redirectTo,
-		remember: remember ?? false,
-	})
+  // Only create session if authentication succeeded
+  return handleNewSession({
+    request,
+    session,
+    redirectTo,
+    remember: remember ?? false,
+  });
 }
 ```
 
@@ -214,21 +213,21 @@ export async function action({ request }: Route.ActionArgs) {
 **Signup action:**
 
 ```typescript
-import { signup } from '#app/utils/auth.server.ts'
+import { signup } from "#app/utils/auth.server.ts";
 
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+  const formData = await request.formData();
 
-	// Validate form...
+  // Validate form...
 
-	const session = await signup({
-		email,
-		username,
-		password,
-		name,
-	})
+  const session = await signup({
+    email,
+    username,
+    password,
+    name,
+  });
 
-	// Handle session and redirect...
+  // Handle session and redirect...
 }
 ```
 
@@ -240,27 +239,27 @@ Epic Stack uses `remix-auth` for OAuth providers.
 
 ```typescript
 // app/utils/providers/github.server.ts
-import { GitHubStrategy } from 'remix-auth-github'
+import { GitHubStrategy } from "remix-auth-github";
 
 export class GitHubProvider implements AuthProvider {
-	getAuthStrategy() {
-		return new GitHubStrategy(
-			{
-				clientID: process.env.GITHUB_CLIENT_ID,
-				clientSecret: process.env.GITHUB_CLIENT_SECRET,
-				callbackURL: '/auth/github/callback',
-			},
-			async ({ profile }) => {
-				// Return user profile
-				return {
-					id: profile.id,
-					email: profile.emails[0].value,
-					username: profile.displayName,
-					name: profile.displayName,
-				}
-			},
-		)
-	}
+  getAuthStrategy() {
+    return new GitHubStrategy(
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: "/auth/github/callback",
+      },
+      async ({ profile }) => {
+        // Return user profile
+        return {
+          id: profile.id,
+          email: profile.emails[0].value,
+          username: profile.displayName,
+          name: profile.displayName,
+        };
+      },
+    );
+  }
 }
 ```
 
@@ -269,51 +268,51 @@ export class GitHubProvider implements AuthProvider {
 ```typescript
 // app/routes/_auth/auth.$provider/callback.ts
 export async function loader({ request, params }: Route.LoaderArgs) {
-	const providerName = ProviderNameSchema.parse(params.provider)
-	const authResult = await authenticator.authenticate(providerName, request)
+  const providerName = ProviderNameSchema.parse(params.provider);
+  const authResult = await authenticator.authenticate(providerName, request);
 
-	if (!authResult.success) {
-		throw redirectWithToast('/login', {
-			title: 'Auth Failed',
-			description: `Error authenticating with ${providerName}`,
-			type: 'error',
-		})
-	}
+  if (!authResult.success) {
+    throw redirectWithToast("/login", {
+      title: "Auth Failed",
+      description: `Error authenticating with ${providerName}`,
+      type: "error",
+    });
+  }
 
-	const { data: profile } = authResult
+  const { data: profile } = authResult;
 
-	// Check if connection exists
-	const existingConnection = await prisma.connection.findUnique({
-		where: {
-			providerName_providerId: {
-				providerName,
-				providerId: String(profile.id),
-			},
-		},
-	})
+  // Check if connection exists
+  const existingConnection = await prisma.connection.findUnique({
+    where: {
+      providerName_providerId: {
+        providerName,
+        providerId: String(profile.id),
+      },
+    },
+  });
 
-	// If exists, create session
-	if (existingConnection) {
-		return makeSession({ request, userId: existingConnection.userId })
-	}
+  // If exists, create session
+  if (existingConnection) {
+    return makeSession({ request, userId: existingConnection.userId });
+  }
 
-	// If email exists, link account
-	const user = await prisma.user.findUnique({
-		where: { email: profile.email.toLowerCase() },
-	})
-	if (user) {
-		await prisma.connection.create({
-			data: {
-				providerName,
-				providerId: String(profile.id),
-				userId: user.id,
-			},
-		})
-		return makeSession({ request, userId: user.id })
-	}
+  // If email exists, link account
+  const user = await prisma.user.findUnique({
+    where: { email: profile.email.toLowerCase() },
+  });
+  if (user) {
+    await prisma.connection.create({
+      data: {
+        providerName,
+        providerId: String(profile.id),
+        userId: user.id,
+      },
+    });
+    return makeSession({ request, userId: user.id });
+  }
 
-	// New user, go to onboarding
-	// ...
+  // New user, go to onboarding
+  // ...
 }
 ```
 
@@ -325,77 +324,77 @@ Epic Stack supports authentication with passkeys using WebAuthn.
 
 ```typescript
 // app/routes/_auth/webauthn/authentication.ts
-import { generateAuthenticationOptions } from '@simplewebauthn/server'
+import { generateAuthenticationOptions } from "@simplewebauthn/server";
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const config = getWebAuthnConfig(request)
-	const options = await generateAuthenticationOptions({
-		rpID: config.rpID,
-		userVerification: 'preferred',
-	})
+  const config = getWebAuthnConfig(request);
+  const options = await generateAuthenticationOptions({
+    rpID: config.rpID,
+    userVerification: "preferred",
+  });
 
-	const cookieHeader = await passkeyCookie.serialize({
-		challenge: options.challenge,
-	})
+  const cookieHeader = await passkeyCookie.serialize({
+    challenge: options.challenge,
+  });
 
-	return Response.json(
-		{ options },
-		{
-			headers: { 'Set-Cookie': cookieHeader },
-		},
-	)
+  return Response.json(
+    { options },
+    {
+      headers: { "Set-Cookie": cookieHeader },
+    },
+  );
 }
 ```
 
 **Action to verify authentication:**
 
 ```typescript
-import { verifyAuthenticationResponse } from '@simplewebauthn/server'
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 
 export async function action({ request }: Route.ActionArgs) {
-	const cookie = await passkeyCookie.parse(request.headers.get('Cookie'))
+  const cookie = await passkeyCookie.parse(request.headers.get("Cookie"));
 
-	if (!cookie?.challenge) {
-		throw new Error('Authentication challenge not found')
-	}
+  if (!cookie?.challenge) {
+    throw new Error("Authentication challenge not found");
+  }
 
-	const { authResponse } = await request.json()
-	const passkey = await prisma.passkey.findUnique({
-		where: { id: authResponse.id },
-		include: { user: true },
-	})
+  const { authResponse } = await request.json();
+  const passkey = await prisma.passkey.findUnique({
+    where: { id: authResponse.id },
+    include: { user: true },
+  });
 
-	const verification = await verifyAuthenticationResponse({
-		response: authResponse,
-		expectedChallenge: cookie.challenge,
-		expectedOrigin: config.origin,
-		expectedRPID: config.rpID,
-		credential: {
-			id: authResponse.id,
-			publicKey: passkey.publicKey,
-			counter: Number(passkey.counter),
-		},
-	})
+  const verification = await verifyAuthenticationResponse({
+    response: authResponse,
+    expectedChallenge: cookie.challenge,
+    expectedOrigin: config.origin,
+    expectedRPID: config.rpID,
+    credential: {
+      id: authResponse.id,
+      publicKey: passkey.publicKey,
+      counter: Number(passkey.counter),
+    },
+  });
 
-	if (!verification.verified) {
-		throw new Error('Authentication verification failed')
-	}
+  if (!verification.verified) {
+    throw new Error("Authentication verification failed");
+  }
 
-	// Actualizar counter
-	await prisma.passkey.update({
-		where: { id: passkey.id },
-		data: { counter: BigInt(verification.authenticationInfo.newCounter) },
-	})
+  // Actualizar counter
+  await prisma.passkey.update({
+    where: { id: passkey.id },
+    data: { counter: BigInt(verification.authenticationInfo.newCounter) },
+  });
 
-	// Create sesión
-	const session = await prisma.session.create({
-		data: {
-			expirationDate: getSessionExpirationDate(),
-			userId: passkey.userId,
-		},
-	})
+  // Create sesión
+  const session = await prisma.session.create({
+    data: {
+      expirationDate: getSessionExpirationDate(),
+      userId: passkey.userId,
+    },
+  });
 
-	return handleNewSession({ request, session, remember: true })
+  return handleNewSession({ request, session, remember: true });
 }
 ```
 
@@ -407,136 +406,132 @@ Epic Stack uses TOTP (Time-based One-Time Password) para 2FA.
 
 ```typescript
 const verification = await prisma.verification.findUnique({
-	where: {
-		target_type: {
-			target: session.userId,
-			type: twoFAVerificationType,
-		},
-	},
-})
-const userHasTwoFactor = Boolean(verification)
+  where: {
+    target_type: {
+      target: session.userId,
+      type: twoFAVerificationType,
+    },
+  },
+});
+const userHasTwoFactor = Boolean(verification);
 ```
 
 **Handle session with 2FA:**
 
 ```typescript
 export async function handleNewSession({
-	request,
-	session,
-	redirectTo,
-	remember,
+  request,
+  session,
+  redirectTo,
+  remember,
 }: {
-	request: Request
-	session: { userId: string; id: string; expirationDate: Date }
-	redirectTo?: string
-	remember: boolean
+  request: Request;
+  session: { userId: string; id: string; expirationDate: Date };
+  redirectTo?: string;
+  remember: boolean;
 }) {
-	const verification = await prisma.verification.findUnique({
-		where: {
-			target_type: {
-				target: session.userId,
-				type: twoFAVerificationType,
-			},
-		},
-	})
-	const userHasTwoFactor = Boolean(verification)
+  const verification = await prisma.verification.findUnique({
+    where: {
+      target_type: {
+        target: session.userId,
+        type: twoFAVerificationType,
+      },
+    },
+  });
+  const userHasTwoFactor = Boolean(verification);
 
-	if (userHasTwoFactor) {
-		// Save unverified session
-		const verifySession = await verifySessionStorage.getSession()
-		verifySession.set(unverifiedSessionIdKey, session.id)
-		verifySession.set(rememberKey, remember)
+  if (userHasTwoFactor) {
+    // Save unverified session
+    const verifySession = await verifySessionStorage.getSession();
+    verifySession.set(unverifiedSessionIdKey, session.id);
+    verifySession.set(rememberKey, remember);
 
-		// Redirect to 2FA verification
-		const redirectUrl = getRedirectToUrl({
-			request,
-			type: twoFAVerificationType,
-			target: session.userId,
-			redirectTo,
-		})
-		return redirect(redirectUrl.toString(), {
-			headers: {
-				'set-cookie': await verifySessionStorage.commitSession(verifySession),
-			},
-		})
-	} else {
-		// User without 2FA, create session directly
-		const authSession = await authSessionStorage.getSession(
-			request.headers.get('cookie'),
-		)
-		authSession.set(sessionKey, session.id)
-		return redirect(safeRedirect(redirectTo), {
-			headers: {
-				'set-cookie': await authSessionStorage.commitSession(authSession, {
-					expires: remember ? session.expirationDate : undefined,
-				}),
-			},
-		})
-	}
+    // Redirect to 2FA verification
+    const redirectUrl = getRedirectToUrl({
+      request,
+      type: twoFAVerificationType,
+      target: session.userId,
+      redirectTo,
+    });
+    return redirect(redirectUrl.toString(), {
+      headers: {
+        "set-cookie": await verifySessionStorage.commitSession(verifySession),
+      },
+    });
+  } else {
+    // User without 2FA, create session directly
+    const authSession = await authSessionStorage.getSession(request.headers.get("cookie"));
+    authSession.set(sessionKey, session.id);
+    return redirect(safeRedirect(redirectTo), {
+      headers: {
+        "set-cookie": await authSessionStorage.commitSession(authSession, {
+          expires: remember ? session.expirationDate : undefined,
+        }),
+      },
+    });
+  }
 }
 ```
 
 **Verify 2FA code:**
 
 ```typescript
-import { prepareTOTP, verifyTOTP } from '@epic-web/totp'
+import { prepareTOTP, verifyTOTP } from "@epic-web/totp";
 
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		schema: VerifySchema,
-	})
+  const formData = await request.formData();
+  const submission = await parseWithZod(formData, {
+    schema: VerifySchema,
+  });
 
-	if (submission.status !== 'success') {
-		return data({ result: submission.reply() }, { status: 400 })
-	}
+  if (submission.status !== "success") {
+    return data({ result: submission.reply() }, { status: 400 });
+  }
 
-	const { code } = submission.value
-	const verifySession = await verifySessionStorage.getSession(
-		request.headers.get('cookie'),
-	)
-	const target = verifySession.get(targetKey)
-	const type = verifySession.get(typeKey)
+  const { code } = submission.value;
+  const verifySession = await verifySessionStorage.getSession(request.headers.get("cookie"));
+  const target = verifySession.get(targetKey);
+  const type = verifySession.get(typeKey);
 
-	if (!target || !type) {
-		throw redirect('/login')
-	}
+  if (!target || !type) {
+    throw redirect("/login");
+  }
 
-	const verification = await prisma.verification.findUnique({
-		where: { target_type: { target, type } },
-		select: {
-			secret: true,
-			algorithm: true,
-			period: true,
-			digits: true,
-		},
-	})
+  const verification = await prisma.verification.findUnique({
+    where: { target_type: { target, type } },
+    select: {
+      secret: true,
+      algorithm: true,
+      period: true,
+      digits: true,
+    },
+  });
 
-	if (!verification) {
-		throw redirect('/login')
-	}
+  if (!verification) {
+    throw redirect("/login");
+  }
 
-	const isValid = verifyTOTP({
-		otp: code,
-		secret: verification.secret,
-		algorithm: verification.algorithm as any,
-		period: verification.period,
-		digits: verification.digits,
-	})
+  const isValid = verifyTOTP({
+    otp: code,
+    secret: verification.secret,
+    algorithm: verification.algorithm as any,
+    period: verification.period,
+    digits: verification.digits,
+  });
 
-	if (!isValid) {
-		return data(
-			{
-				result: submission.reply({
-					formErrors: ['Invalid code'],
-				}),
-			},
-			{ status: 400 },
-		)
-	}
+  if (!isValid) {
+    return data(
+      {
+        result: submission.reply({
+          formErrors: ["Invalid code"],
+        }),
+      },
+      { status: 400 },
+    );
+  }
 
-	// Verify session and complete login
-	return handleVerification({ request, submission })
+  // Verify session and complete login
+  return handleVerification({ request, submission });
 }
 ```
 
@@ -570,22 +565,20 @@ return redirect(redirectTo.toString())
 
 ```typescript
 export async function loader({ request }: Route.LoaderArgs) {
-	const verifySession = await verifySessionStorage.getSession(
-		request.headers.get('cookie'),
-	)
-	const target = verifySession.get(targetKey)
-	const type = verifySession.get(typeKey)
+  const verifySession = await verifySessionStorage.getSession(request.headers.get("cookie"));
+  const target = verifySession.get(targetKey);
+  const type = verifySession.get(typeKey);
 
-	if (!target || !type) {
-		throw redirect('/signup')
-	}
+  if (!target || !type) {
+    throw redirect("/signup");
+  }
 
-	return { target, type }
+  return { target, type };
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	// Verify code (similar to 2FA)
-	// ...
+  // Verify code (similar to 2FA)
+  // ...
 }
 ```
 
@@ -629,36 +622,36 @@ export async function action({ request }: Route.ActionArgs) {
 
 ```typescript
 export async function action({ request }: Route.ActionArgs) {
-	// Verify code first (similar to email verification)
-	// Then reset password
+  // Verify code first (similar to email verification)
+  // Then reset password
 
-	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		schema: ResetPasswordSchema,
-	})
+  const formData = await request.formData();
+  const submission = await parseWithZod(formData, {
+    schema: ResetPasswordSchema,
+  });
 
-	// Verify that code is valid
-	// ...
+  // Verify that code is valid
+  // ...
 
-	const { password } = submission.value
+  const { password } = submission.value;
 
-	await resetUserPassword({
-		username,
-		password,
-	})
+  await resetUserPassword({
+    username,
+    password,
+  });
 
-	// Destroy verification session and redirect to login
-	// ...
+  // Destroy verification session and redirect to login
+  // ...
 }
 ```
 
 ### Logout
 
 ```typescript
-import { logout } from '#app/utils/auth.server.ts'
+import { logout } from "#app/utils/auth.server.ts";
 
 export async function action({ request }: Route.ActionArgs) {
-	return logout({ request, redirectTo: '/' })
+  return logout({ request, redirectTo: "/" });
 }
 ```
 
@@ -668,33 +661,32 @@ export async function action({ request }: Route.ActionArgs) {
 
 ```typescript
 const session = await prisma.session.create({
-	data: {
-		expirationDate: getSessionExpirationDate(),
-		userId,
-	},
-	select: { id: true, expirationDate: true },
-})
+  data: {
+    expirationDate: getSessionExpirationDate(),
+    userId,
+  },
+  select: { id: true, expirationDate: true },
+});
 ```
 
 **Session expiration:**
 
 ```typescript
-export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30 // 30 days
+export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30; // 30 days
 
-export const getSessionExpirationDate = () =>
-	new Date(Date.now() + SESSION_EXPIRATION_TIME)
+export const getSessionExpirationDate = () => new Date(Date.now() + SESSION_EXPIRATION_TIME);
 ```
 
 **Destroy session:**
 
 ```typescript
-await prisma.session.deleteMany({ where: { id: sessionId } })
+await prisma.session.deleteMany({ where: { id: sessionId } });
 ```
 
 **Destroy all user sessions:**
 
 ```typescript
-await prisma.session.deleteMany({ where: { userId } })
+await prisma.session.deleteMany({ where: { userId } });
 ```
 
 ## Common examples
@@ -704,38 +696,38 @@ await prisma.session.deleteMany({ where: { userId } })
 ```typescript
 // app/routes/_auth/login.tsx
 export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
-	await checkHoneypot(formData)
+  const formData = await request.formData();
+  await checkHoneypot(formData);
 
-	const submission = await parseWithZod(formData, {
-		schema: LoginSchema,
-	})
+  const submission = await parseWithZod(formData, {
+    schema: LoginSchema,
+  });
 
-	if (submission.status !== 'success') {
-		return data({ result: submission.reply() }, { status: 400 })
-	}
+  if (submission.status !== "success") {
+    return data({ result: submission.reply() }, { status: 400 });
+  }
 
-	const { username, password, redirectTo, remember } = submission.value
+  const { username, password, redirectTo, remember } = submission.value;
 
-	const session = await login({ username, password })
+  const session = await login({ username, password });
 
-	if (!session) {
-		return data(
-			{
-				result: submission.reply({
-					formErrors: ['Invalid username or password'],
-				}),
-			},
-			{ status: 400 },
-		)
-	}
+  if (!session) {
+    return data(
+      {
+        result: submission.reply({
+          formErrors: ["Invalid username or password"],
+        }),
+      },
+      { status: 400 },
+    );
+  }
 
-	return handleNewSession({
-		request,
-		session,
-		redirectTo,
-		remember: remember ?? false,
-	})
+  return handleNewSession({
+    request,
+    session,
+    redirectTo,
+    remember: remember ?? false,
+  });
 }
 ```
 
@@ -763,8 +755,8 @@ export default function ProtectedRoute({ loaderData }: Route.ComponentProps) {
 ```typescript
 // app/routes/_auth/signup.tsx
 export async function loader({ request }: Route.LoaderArgs) {
-	await requireAnonymous(request)
-	return null
+  await requireAnonymous(request);
+  return null;
 }
 ```
 

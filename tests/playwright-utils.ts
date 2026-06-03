@@ -1,22 +1,22 @@
-import { test as base, type Response } from '@playwright/test'
-import { href, type Register } from 'react-router'
+import { test as base, type Response } from "@playwright/test";
+import { href, type Register } from "react-router";
 
-export * from './db-utils.ts'
+export * from "./db-utils.ts";
 
-export type AppPages = keyof Register['pages']
+export type AppPages = keyof Register["pages"];
 
 export const test = base.extend<{
-	navigate: <Path extends AppPages>(
-		...args: Parameters<typeof href<Path>>
-	) => Promise<null | Response>
+  navigate: <Path extends AppPages>(
+    ...args: Parameters<typeof href<Path>>
+  ) => Promise<null | Response>;
 }>({
-	navigate: async ({ page }, use) => {
-		await use((...args) => {
-			return page.goto(href(...args))
-		})
-	},
-})
-export const { expect } = test
+  navigate: async ({ page }, use) => {
+    await use((...args) => {
+      return page.goto(href(...args));
+    });
+  },
+});
+export const { expect } = test;
 
 /**
  * This allows you to wait for something (like an email to be available).
@@ -26,22 +26,19 @@ export const { expect } = test
  * throw the error message provided as a fallback
  */
 export async function waitFor<ReturnValue>(
-	cb: () => ReturnValue | Promise<ReturnValue>,
-	{
-		errorMessage,
-		timeout = 5000,
-	}: { errorMessage?: string; timeout?: number } = {},
+  cb: () => ReturnValue | Promise<ReturnValue>,
+  { errorMessage, timeout = 5000 }: { errorMessage?: string; timeout?: number } = {},
 ) {
-	const endTime = Date.now() + timeout
-	let lastError: unknown = new Error(errorMessage)
-	while (Date.now() < endTime) {
-		try {
-			const response = await cb()
-			if (response) return response
-		} catch (e: unknown) {
-			lastError = e
-		}
-		await new Promise((r) => setTimeout(r, 100))
-	}
-	throw lastError
+  const endTime = Date.now() + timeout;
+  let lastError: unknown = new Error(errorMessage);
+  while (Date.now() < endTime) {
+    try {
+      const response = await cb();
+      if (response) return response;
+    } catch (e: unknown) {
+      lastError = e;
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  throw lastError;
 }
