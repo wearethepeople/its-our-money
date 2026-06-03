@@ -152,7 +152,7 @@ function App() {
     <OpenImgContextProvider optimizerEndpoint="/resources/images" getSrc={getImgSrc}>
       <div className="mx-auto flex min-h-screen flex-col justify-between">
         <header
-          className="bg-surface-2 text-ink-2 border-b py-2 sticky top-0 z-10 mb-8"
+          className="text-ink border-b py-2 sticky top-0 z-10 mb-8"
           ref={(el) => {
             if (el)
               document.documentElement.style.setProperty("--header-height", `${el.offsetHeight}px`);

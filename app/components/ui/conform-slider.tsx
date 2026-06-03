@@ -9,6 +9,8 @@ const DARK_L = 0.38;
 const DARK_C = 0.12;
 const LIGHT_L = 0.88 - 0.5 * (0.88 - DARK_L); // 0.505
 const LIGHT_C = 0.04 + 0.5 * (DARK_C - 0.04); // 0.10
+// Empty (right-of-thumb) track: a few shades darker than the card surface (--surface-2 ≈ oklch(28%))
+const EMPTY_TRACK_BG = "oklch(22% 0.009 76)";
 
 type ConformSliderProps = {
   meta: any; // field metadata for categoryField.weight
@@ -61,18 +63,29 @@ export function ConformSlider({
         <Slider.Control className="flex w-auto touch-none items-center py-2 select-none">
           <Slider.Track
             className="h-2 w-full rounded select-none"
-            style={
-              trackColorVar
-                ? {
-                    background: `linear-gradient(to right, oklch(from var(${trackColorVar}) ${LIGHT_L} ${LIGHT_C} h), oklch(from var(${trackColorVar}) ${DARK_L} ${DARK_C} h))`,
-                  }
-                : { background: "var(--color-muted)" }
-            }
+            style={{ background: EMPTY_TRACK_BG }}
           >
-            <Slider.Indicator className="rounded select-none" />
+            <Slider.Indicator
+              className="rounded select-none"
+              style={(() => {
+                if (!trackColorVar) return undefined;
+                const pct = (value - min) / (max - min);
+                return {
+                  background: `linear-gradient(to right, oklch(from var(${trackColorVar}) ${LIGHT_L} ${LIGHT_C} h), oklch(from var(${trackColorVar}) ${DARK_L} ${DARK_C} h))`,
+                  backgroundSize: `${pct > 0 ? (1 / pct) * 100 : 10000}% 100%`,
+                  backgroundRepeat: "no-repeat",
+                };
+              })()}
+            />
             <Slider.Thumb
               aria-label={ariaLabel}
-              className="bg-primary size-4 rounded-full outline outline-gray-300 select-none has-focus-visible:outline has-focus-visible:outline-blue-800"
+              className="size-3.5 rounded-full select-none shadow-sm has-focus-visible:outline has-focus-visible:outline-blue-800"
+              style={{
+                background: trackColorVar
+                  ? `oklch(from var(${trackColorVar}) 0.6 0.08 h)`
+                  : "var(--color-ink-muted)",
+                boxShadow: `0 0 0 2px ${EMPTY_TRACK_BG}`,
+              }}
             />
           </Slider.Track>
         </Slider.Control>
