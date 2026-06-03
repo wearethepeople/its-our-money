@@ -437,6 +437,12 @@
   }
 }
 
+@layer components {
+  .card {
+    @apply bg-surface text-ink rounded-xl border border-line-2;
+  }
+}
+
 a {
   text-decoration: underline;
 }
