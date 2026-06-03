@@ -7,8 +7,8 @@ import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
 // Light end is interpolated 75% of the way toward the dark end to reduce contrast.
 const DARK_L = 0.38;
 const DARK_C = 0.12;
-const LIGHT_L = 0.88 - 0.5 * (0.88 - DARK_L); // 0.505
-const LIGHT_C = 0.04 + 0.5 * (DARK_C - 0.04); // 0.10
+const LIGHT_L = 0.88 - 0.25 * (0.88 - DARK_L); // 0.505
+const LIGHT_C = 0.04 + 0.25 * (DARK_C - 0.04); // 0.10
 // Empty (right-of-thumb) track: a step darker than --color-surface-2, adaptive to light/dark.
 const EMPTY_TRACK_BG = "oklch(from var(--surface-2) calc(l - 0.06) c h)";
 
@@ -62,7 +62,7 @@ export function ConformSlider({
       >
         <Slider.Control className="flex w-auto touch-none items-center py-2 select-none">
           <Slider.Track
-            className="h-2 w-full rounded select-none"
+            className="relative h-2 w-full rounded select-none"
             style={{ background: EMPTY_TRACK_BG }}
           >
             <Slider.Indicator
@@ -77,6 +77,17 @@ export function ConformSlider({
                 };
               })()}
             />
+            {Array.from({ length: Math.floor((max - min) / step) - 1 }, (_, i) => {
+              const pct = (((i + 1) * step) / (max - min)) * 100;
+              return (
+                <div
+                  key={i}
+                  aria-hidden
+                  className="pointer-events-none absolute -top-1 -bottom-1 w-1"
+                  style={{ left: `${pct}%`, background: EMPTY_TRACK_BG }}
+                />
+              );
+            })}
             <Slider.Thumb
               aria-label={ariaLabel}
               className="size-3.5 rounded-full select-none shadow-sm has-focus-visible:outline has-focus-visible:outline-blue-800"
