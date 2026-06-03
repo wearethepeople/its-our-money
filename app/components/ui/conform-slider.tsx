@@ -3,6 +3,13 @@ import { useInputControl } from "@conform-to/react";
 
 import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
 
+// Track gradient stops expressed in oklch (L: 0–1, C: 0–0.4, H inherited from color var).
+// Light end is interpolated 75% of the way toward the dark end to reduce contrast.
+const DARK_L = 0.38;
+const DARK_C = 0.12;
+const LIGHT_L = 0.88 - 0.5 * (0.88 - DARK_L); // 0.505
+const LIGHT_C = 0.04 + 0.5 * (DARK_C - 0.04); // 0.10
+
 type ConformSliderProps = {
   meta: any; // field metadata for categoryField.weight
   value: number;
@@ -11,6 +18,7 @@ type ConformSliderProps = {
   max?: number;
   step?: number;
   ariaLabel: string;
+  trackColorVar?: string;
 };
 
 export function ConformSlider({
@@ -21,6 +29,7 @@ export function ConformSlider({
   max = MAX_ALLOCATION_WEIGHT,
   step = 1,
   ariaLabel,
+  trackColorVar,
 }: ConformSliderProps) {
   const control = useInputControl(meta);
 
@@ -50,7 +59,16 @@ export function ConformSlider({
         }}
       >
         <Slider.Control className="flex w-auto touch-none items-center py-2 select-none">
-          <Slider.Track className="bg-muted h-2 w-full rounded shadow-[inset_0_0_0_1px] select-none">
+          <Slider.Track
+            className="h-2 w-full rounded select-none"
+            style={
+              trackColorVar
+                ? {
+                    background: `linear-gradient(to right, oklch(from var(${trackColorVar}) ${LIGHT_L} ${LIGHT_C} h), oklch(from var(${trackColorVar}) ${DARK_L} ${DARK_C} h))`,
+                  }
+                : { background: "var(--color-muted)" }
+            }
+          >
             <Slider.Indicator className="rounded select-none" />
             <Slider.Thumb
               aria-label={ariaLabel}

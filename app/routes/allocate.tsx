@@ -146,7 +146,12 @@ export default function AllocateRoute() {
       allocatableCategories.map((c) => {
         const existingBps = existingAllocationByCategoryId.get(c.id);
         const weight =
-          existingBps === undefined ? 1 : Math.min(MAX_ALLOCATION_WEIGHT, Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000)));
+          existingBps === undefined
+            ? 1
+            : Math.min(
+                MAX_ALLOCATION_WEIGHT,
+                Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000)),
+              );
         return [c.id, weight];
       }),
     ),
@@ -163,7 +168,10 @@ export default function AllocateRoute() {
 
         return {
           id: c.id,
-          weight: Math.min(MAX_ALLOCATION_WEIGHT, Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000))),
+          weight: Math.min(
+            MAX_ALLOCATION_WEIGHT,
+            Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000)),
+          ),
         };
       }),
     },
@@ -183,11 +191,18 @@ export default function AllocateRoute() {
     }),
   );
 
+  const functionTrackColorVar = new Map<string, string>(
+    PUBLIC_DOMAIN_SCHEME.groups.flatMap((group) =>
+      group.functionIds.map((fid) => [fid, group.color.replace(/^text-/, "--")] as const),
+    ),
+  );
+
   const renderAllocationItem = (a: (typeof allocations)[number]) => {
     const categoryField = a.getFieldset();
     const fnId = categoryField.id.initialValue;
     if (fnId === undefined) return null;
     const fnData = getFunctionDetailsById(fnId);
+    const trackColorVar = fnId ? functionTrackColorVar.get(fnId) : undefined;
 
     // className="even:[&>section]:bg-muted flex w-full flex-col"
     return (
@@ -207,6 +222,7 @@ export default function AllocateRoute() {
               max={MAX_ALLOCATION_WEIGHT}
               step={1}
               ariaLabel="Category weight"
+              trackColorVar={trackColorVar}
             />
             <input
               {...getInputProps(categoryField.id, {
@@ -223,7 +239,9 @@ export default function AllocateRoute() {
                 <CardContent>
                   <ul>
                     {fnData.commonUses.map((use, i) => (
-                      <li key={i} className="ml-4 list-disc">{use}</li>
+                      <li key={i} className="ml-4 list-disc">
+                        {use}
+                      </li>
                     ))}
                   </ul>
                 </CardContent>
@@ -276,22 +294,18 @@ export default function AllocateRoute() {
 
   return (
     <section ref={contentRef}>
+      <div>
+        <p>This is a place to describe things.</p>
+      </div>
       <form method="post" {...getFormProps(form)}>
         <HoneypotInputs />
         {/* Legend + toggle */}
-        <div className="my-4 flex flex-row gap-8">
-          <div className="flex grow">
-            <div>Less</div>
-            <div className="bg-accent grow"></div>
-            <div>More</div>
+        <div className="py-4 sticky top-(--header-height) bg-background z-10">
+          <div className="flex gap-8 items-center">
+            <Progress value={progress * 100} className="grow" />
+            <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
           </div>
-          <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
         </div>
-        {/* Sticky header */}
-        <Progress
-          value={progress * 100}
-          className="py-4 sticky top-(--header-height) bg-background z-10"
-        />
         {/* Allocations */}
         <div className="mx-0.5">
           {viewScheme === "flat" ? (

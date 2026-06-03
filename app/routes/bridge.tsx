@@ -2,7 +2,7 @@ import { href } from "react-router";
 
 export default function BridgeRoute() {
   return (
-    <div className="flex h-full grow flex-col items-start justify-center gap-8">
+    <div className="flex h-full grow flex-col items-start justify-center gap-8 my-20">
       <p>
         The federal budget divides money across priorities like defense, healthcare, and education.
       </p>

@@ -1,8 +1,15 @@
 import { Route } from "./+types/juxtapose";
+import type { WithClassName } from "@/types/ui";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { href, redirect, Form, data, Link } from "react-router";
-import { formatCurrency, formatPercent, formatSignedCurrency } from "@/utils/numbers.ts";
+import {
+  formatCurrency,
+  formatPercent,
+  formatSignedCurrency,
+  formatSignedPercent,
+} from "@/utils/numbers.ts";
 import { Button } from "@/ui/button.tsx";
+import { Badge } from "@/ui/badge.tsx";
 import { getFormProps, useForm } from "@conform-to/react";
 import { z } from "zod";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
@@ -14,11 +21,9 @@ import {
 import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { checkHoneypot } from "@/utils/honeypot.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
-import { BulletVisualization } from "@/components/compare-allocation.tsx";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
 import { Fragment, useMemo, useState } from "react";
 import { cn } from "@/utils/misc.tsx";
-import { useTheme } from "@/routes/resources/theme-switch.tsx";
 import { ViewSchemeToggle } from "@/components/view-scheme-toggle.tsx";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
 
@@ -47,7 +52,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       const ombData = getOmbBudgetByCodeForYear(2025);
       const netInterestBps = ombData["net_interest"]?.bps ?? 0;
 
-      return { allocation, pairedData, url, netInterestBps };
+      return { allocation, pairedData, url, netInterestBps, ombYear: 2025 };
     }
   }
 
@@ -157,8 +162,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function JuxtaposeRoute({ actionData, loaderData }: Route.ComponentProps) {
-  const { allocation, pairedData, url, netInterestBps } = loaderData;
-  const theme = useTheme();
+  const { allocation, pairedData, url, netInterestBps, ombYear } = loaderData;
   const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
   const [sortMode, setSortMode] = useState<SortModes>("participantPercent");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -182,12 +186,9 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
     });
   }, [pairedData, sortDirection, sortMode]);
 
-  const bulletPairedData = sortedPairedData.map((item) => ({
-    id: item.id,
-    title: `${item.code}: ${item.category}`,
-    ranges: [0, item.budgetPercent, 100],
-    measures: [item.participantPercent],
-  }));
+  const maxPercent = Math.max(
+    ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
+  );
 
   function handleSortModeClick(mode: SortModes) {
     if (mode === sortMode) {
@@ -348,12 +349,17 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
       </div>
       {activeTab === "comparison" && (
         <div>
+          <ComparisonLegend ombYear={ombYear} />
           {viewScheme === "flat" ? (
-            <BulletVisualization theme={theme} pairedBulletData={bulletPairedData} />
+            <div className="divide-y">
+              {sortedPairedData.map((item) => (
+                <ComparisonRow key={item.code} item={item} maxPercent={maxPercent} />
+              ))}
+            </div>
           ) : (
             <div className="flex flex-col gap-6">
               {PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
-                const groupItems = bulletPairedData.filter((d) =>
+                const groupItems = sortedPairedData.filter((d) =>
                   group.functionIds.includes(String(d.id)),
                 );
                 if (!groupItems.length) return null;
@@ -362,13 +368,11 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                     <h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
                       {group.label}
                     </h3>
-                    <BulletVisualization
-                      theme={theme}
-                      pairedBulletData={groupItems}
-                      style={{
-                        minHeight: `${groupItems.length * 50 + 60}px`,
-                      }}
-                    />
+                    <div className="divide-y">
+                      {groupItems.map((item) => (
+                        <ComparisonRow key={item.code} item={item} maxPercent={maxPercent} />
+                      ))}
+                    </div>
                   </div>
                 );
               })}
@@ -556,6 +560,84 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
         </div>
       )}
     </div>
+  );
+}
+
+type PairedItem = {
+  code: string;
+  category: string;
+  participantPercent: number;
+  budgetPercent: number;
+  delta: number;
+};
+
+function PercentBadge({ value, className }: WithClassName<{ value: number }>) {
+  return (
+    <Badge variant="ghost" className={cn("font-mono tabular-nums", className)}>
+      {formatPercent(value)}
+    </Badge>
+  );
+}
+
+function DeltaBadge({ value }: { value: number }) {
+  const nearZero = Math.abs(value) < 0.2;
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "font-mono tabular-nums border-transparent",
+        nearZero
+          ? "bg-surface-3 text-ink-faint"
+          : value > 0
+            ? "bg-you-soft text-you"
+            : "bg-them-soft text-them",
+      )}
+    >
+      {formatSignedPercent(value)}
+    </Badge>
+  );
+}
+
+function ComparisonLegend({ ombYear }: { ombYear: number }) {
+  const fy = String(ombYear).slice(2);
+  return (
+    <div className="mb-4 mt-4 flex items-center gap-5 text-sm">
+      <div className="flex items-center gap-1.5">
+        <span className="h-3 w-3 rounded-sm bg-you" />
+        <span>Your priorities</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="h-3 w-3 rounded-sm bg-them" />
+        <span>Washington (FY{fy})</span>
+      </div>
+    </div>
+  );
+}
+
+function ComparisonRow({ item, maxPercent }: { item: PairedItem; maxPercent: number }) {
+  const scale = maxPercent > 0 ? 100 / maxPercent : 1;
+  return (
+    <article className="py-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium">{item.category}</span>
+        <div className="flex shrink-0 items-center gap-1">
+          <PercentBadge value={item.participantPercent} className="text-you" />
+          <span className="text-xs text-muted-foreground">vs</span>
+          <PercentBadge value={item.budgetPercent} className="text-them" />
+          <DeltaBadge value={item.delta} />
+        </div>
+      </div>
+      <div className="mt-2 flex flex-col gap-1">
+        <div
+          className="h-2 rounded-full bg-you"
+          style={{ width: `${item.participantPercent * scale}%` }}
+        />
+        <div
+          className="h-2 rounded-full bg-them"
+          style={{ width: `${item.budgetPercent * scale}%` }}
+        />
+      </div>
+    </article>
   );
 }
 

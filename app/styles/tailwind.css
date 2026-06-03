@@ -7,137 +7,225 @@
   --radius: 0.5rem;
   --site-max: 1280px;
 
-  --background: oklch(93.82% 0.0144 84.58);
-  --foreground: oklch(23.63% 0.012 84.56);
+  /* ── Type ──────────────────────────────────────────────────────────────── */
+  --sans: "Libre Franklin", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --card: oklch(97.98% 0.0086 84.57);
-  --card-foreground: oklch(23.63% 0.012 84.56);
+  /* BEGIN: CSS semantic color tokens */
+  /* ── Surfaces ──────────────────────────────────────────────────────────── */
+  --background: oklch(93.82% 0.0144 84.58); /* --paper         */
+  --paper: oklch(93.82% 0.0144 84.58);
+  --paper-2: oklch(91.16% 0.0202 84.59);
 
+  --card: oklch(97.98% 0.0086 84.57); /* --surface       */
   --popover: oklch(97.98% 0.0086 84.57);
-  --popover-foreground: oklch(23.63% 0.012 84.56);
+  --surface: oklch(97.98% 0.0086 84.57);
 
-  /* near-black warm ink — matches the .btn-primary action */
-  --primary: oklch(23.63% 0.012 84.56);
-  --primary-foreground: oklch(93.82% 0.0144 84.58);
-
-  --secondary: oklch(95.3% 0.0156 86.43);
-  --secondary-foreground: oklch(23.63% 0.012 84.56);
-
+  --secondary: oklch(95.3% 0.0156 86.43); /* --surface-2     */
   --muted: oklch(95.3% 0.0156 86.43);
-  --muted-foreground: oklch(45.66% 0.0243 81.66);
-
-  /* subtle ochre tint + ochre ink — the brand accent */
-  --accent: oklch(93.63% 0.0298 85.56);
-  --accent-foreground: oklch(50.88% 0.1009 70.01);
-
-  --border: oklch(82.93% 0.0294 84.59);
-  --input: oklch(82.93% 0.0294 84.59);
-  --input-invalid: oklch(49.45% 0.1316 36.24);
-
-  --destructive: oklch(49.45% 0.1316 36.24);
-  --destructive-foreground: oklch(97.98% 0.0086 84.57);
-  /* reads on --background */
-  --foreground-destructive: oklch(49.45% 0.1316 36.24);
-
-  /* focus ring in brand ochre */
-  --ring: oklch(50.88% 0.1009 70.01);
-
-  /* ── brand / data-viz extension (civic budget palette) ── */
   --surface-2: oklch(95.3% 0.0156 86.43);
+
   --surface-3: oklch(92.36% 0.0202 84.59);
-  --line-strong: oklch(74.46% 0.0373 85.39);
+
+  /* ── Lines & Borders ───────────────────────────────────────────────────── */
+  --border: oklch(82.93% 0.0294 84.59); /* --line-strong   */
+  --input: oklch(82.93% 0.0294 84.59);
+  --line-strong: oklch(82.93% 0.0294 84.59);
+
+  --line-2: oklch(86.5% 0.024 84.59);
+  --line: oklch(89.8% 0.0187 84.59);
+
+  /* ── Ink / Text ────────────────────────────────────────────────────────── */
+  --foreground: oklch(23.63% 0.012 84.56); /* --ink           */
+  --card-foreground: oklch(23.63% 0.012 84.56);
+  --popover-foreground: oklch(23.63% 0.012 84.56);
+  --primary: oklch(23.63% 0.012 84.56);
+  --ink: oklch(23.63% 0.012 84.56);
+
   --ink-2: oklch(35.55% 0.0236 82.9);
+
+  --muted-foreground: oklch(45.66% 0.0243 81.66); /* --ink-muted     */
+  --ink-muted: oklch(45.66% 0.0243 81.66);
+
   --ink-faint: oklch(50.77% 0.0288 80.97);
 
-  --you: oklch(50.88% 0.1009 70.01); /* "yours" — ochre */
+  /* ── Brand — Yours (ochre) ─────────────────────────────────────────────── */
+  --accent-foreground: oklch(50.88% 0.1009 70.01); /* --you / --ring  */
+  --ring: oklch(50.88% 0.1009 70.01);
+  --you: oklch(50.88% 0.1009 70.01);
+
   --you-bar: oklch(62.86% 0.114 75.78);
+
+  --accent: oklch(93.63% 0.0298 85.56); /* --you-soft      */
   --you-soft: oklch(93.63% 0.0298 85.56);
 
-  --them: oklch(44.84% 0.0713 256.29); /* "Washington" — slate */
+  --you-line: oklch(74.46% 0.084 78.2);
+
+  /* ── Brand — Washington (slate) ────────────────────────────────────────── */
+  --them: oklch(44.84% 0.0713 256.29);
   --them-bar: oklch(52.17% 0.0709 256.03);
   --them-soft: oklch(91.16% 0.0134 262.38);
+  --them-line: oklch(68.5% 0.058 256);
 
-  --locked: oklch(46.92% 0.0454 109.64); /* mandatory — olive */
+  /* ── Brand — Locked / Mandatory (olive) ────────────────────────────────── */
+  --locked: oklch(46.92% 0.0454 109.64);
   --locked-soft: oklch(90.64% 0.0201 103.69);
 
-  --success: oklch(48.47% 0.0762 149.29); /* balanced */
-  --success-soft: oklch(91.73% 0.0182 142.82);
+  /* ── Status ────────────────────────────────────────────────────────────── */
+  --success: oklch(48.47% 0.0762 149.29); /* --ok            */
+  --ok: oklch(48.47% 0.0762 149.29);
+  --success-soft: oklch(91.73% 0.0182 142.82); /* --ok-soft       */
+  --ok-soft: oklch(91.73% 0.0182 142.82);
 
-  /* chart-N aliases for shadcn chart components */
-  --chart-1: oklch(50.88% 0.1009 70.01);
-  --chart-2: oklch(44.84% 0.0713 256.29);
-  --chart-3: oklch(46.92% 0.0454 109.64);
-  --chart-4: oklch(48.47% 0.0762 149.29);
-  --chart-5: oklch(49.45% 0.1316 36.24);
+  --destructive: oklch(49.45% 0.1316 36.24); /* --alert         */
+  --alert: oklch(49.45% 0.1316 36.24);
+  --input-invalid: oklch(49.45% 0.1316 36.24);
+  --foreground-destructive: oklch(49.45% 0.1316 36.24);
+  --destructive-foreground: oklch(97.98% 0.0086 84.57);
+  --alert-soft: oklch(92.8% 0.018 44);
+
+  /* ── Interaction ───────────────────────────────────────────────────────── */
+  --primary-foreground: oklch(93.82% 0.0144 84.58); /* text on --primary btn */
+  --secondary-foreground: oklch(23.63% 0.012 84.56);
+  --on-accent: oklch(100% 0 0); /* white on ochre btn    */
+  --on-primary: oklch(93.82% 0.0144 84.58);
+  --primary-hover: oklch(13% 0.008 84.56);
+  --accent-hover: oklch(43.5% 0.095 68);
+
+  /* ── Feature (Share) card ──────────────────────────────────────────────── */
+  --share-bg: oklch(23.63% 0.012 84.56);
+  --share-fg: oklch(93.82% 0.0144 84.58);
+  --share-hl: oklch(76.5% 0.098 78);
+
+  /* ── Chart aliases (shadcn) ────────────────────────────────────────────── */
+  --chart-1: oklch(50.88% 0.1009 70.01); /* ochre   */
+  --chart-2: oklch(44.84% 0.0713 256.29); /* slate   */
+  --chart-3: oklch(46.92% 0.0454 109.64); /* olive   */
+  --chart-4: oklch(48.47% 0.0762 149.29); /* green   */
+  --chart-5: oklch(49.45% 0.1316 36.24); /* red     */
+
+  /* ── Device / Canvas (design comp only) ────────────────────────────────── */
+  --bezel-1: oklch(82% 0.028 84.59);
+  --bezel-2: oklch(72% 0.042 84.59);
+  --bezel-shadow: rgba(60, 48, 28, 0.45);
+  --notch-bg: oklch(86% 0.024 84.59);
+  --canvas-bg: oklch(90% 0.02 84.59);
+  --canvas-grid: rgba(60, 48, 28, 0.05);
+  /* END: CSS semantic color tokens */
 }
 
 .dark {
+  /* BEGIN: Dark CSS semantic color tokens */
+  /* ── Surfaces ──────────────────────────────────────────────────────────── */
   --background: oklch(20.98% 0.0083 84.59);
-  --foreground: oklch(94.45% 0.0172 84.59);
+  --paper: oklch(20.98% 0.0083 84.59);
+  --paper-2: oklch(24.08% 0.0103 80.6);
 
-  --card: oklch(24.9% 0.0119 84.57);
-  --card-foreground: oklch(94.45% 0.0172 84.59);
+  --card: oklch(24.9% 0.0118 84.57);
+  --popover: oklch(24.9% 0.0118 84.57);
+  --surface: oklch(24.9% 0.0118 84.57);
 
-  --popover: oklch(24.9% 0.0119 84.57);
-  --popover-foreground: oklch(94.45% 0.0172 84.59);
+  --secondary: oklch(27.94% 0.0107 73.46);
+  --muted: oklch(27.94% 0.0107 73.46);
+  --surface-2: oklch(27.94% 0.0107 73.46);
 
-  /* light ink on dark — the inverted .btn-primary */
-  --primary: oklch(94.45% 0.0172 84.59);
-  --primary-foreground: oklch(20.98% 0.0083 84.59);
+  --surface-3: oklch(31.21% 0.0141 76.35);
 
-  --secondary: oklch(27.94% 0.0107 73.48);
-  --secondary-foreground: oklch(94.45% 0.0172 84.59);
+  /* ── Lines & Borders ───────────────────────────────────────────────────── */
+  --border: oklch(42.81% 0.0219 78.02);
+  --input: oklch(42.81% 0.0219 78.02);
+  --line-strong: oklch(42.81% 0.0219 78.02);
 
-  --muted: oklch(27.94% 0.0107 73.48);
-  --muted-foreground: oklch(70.25% 0.0293 83.51);
+  --line-2: oklch(34.4% 0.0173 78.03);
+  --line: oklch(29.61% 0.0142 76.32);
+
+  /* ── Ink / Text ────────────────────────────────────────────────────────── */
+  --foreground: oklch(94.45% 0.0171 84.6);
+  --card-foreground: oklch(94.45% 0.0171 84.6);
+  --popover-foreground: oklch(94.45% 0.0171 84.6);
+  --primary: oklch(94.45% 0.0171 84.6);
+  --ink: oklch(94.45% 0.0171 84.6);
+
+  --ink-2: oklch(83.86% 0.0252 83.42);
+
+  --muted-foreground: oklch(70.25% 0.0293 83.52);
+  --ink-muted: oklch(70.25% 0.0293 83.52);
+
+  --ink-faint: oklch(60.47% 0.0239 76.39);
+
+  /* ── Brand — Yours (ochre) ─────────────────────────────────────────────── */
+  --accent-foreground: oklch(74.55% 0.124 76.22);
+  --ring: oklch(74.55% 0.124 76.22);
+  --you: oklch(74.55% 0.124 76.22);
+
+  --you-bar: oklch(70.73% 0.1203 75.22);
 
   --accent: oklch(30.87% 0.0392 81.61);
-  --accent-foreground: oklch(74.55% 0.1241 76.22);
-
-  --border: oklch(34.4% 0.0173 78.03);
-  --input: oklch(34.4% 0.0173 78.03);
-  --input-invalid: oklch(57.5% 0.154 36.72);
-
-  --destructive: oklch(57.5% 0.154 36.72);
-  --destructive-foreground: oklch(94.45% 0.0172 84.59);
-  /* brighter coral that reads on the dark --background */
-  --foreground-destructive: oklch(71% 0.1204 42.53);
-
-  --ring: oklch(74.55% 0.1241 76.22);
-
-  /* ── brand / data-viz extension ── */
-  --surface-2: oklch(27.94% 0.0107 73.48);
-  --surface-3: oklch(31.21% 0.0141 76.36);
-  --line-strong: oklch(42.81% 0.0219 78.03);
-  --ink-2: oklch(83.86% 0.0252 83.41);
-  --ink-faint: oklch(60.47% 0.024 76.41);
-
-  --you: oklch(74.55% 0.1241 76.22);
-  --you-bar: oklch(70.73% 0.1203 75.22);
   --you-soft: oklch(30.87% 0.0392 81.61);
 
-  --them: oklch(74.87% 0.0734 255.75);
-  --them-bar: oklch(65.3% 0.0854 256.7);
-  --them-soft: oklch(28.24% 0.0334 257.67);
+  --you-line: oklch(79.53% 0.1095 81.32);
 
-  --locked: oklch(75.9% 0.0686 106.03);
-  --locked-soft: oklch(29.62% 0.0272 107.95);
+  /* ── Brand — Washington (slate) ────────────────────────────────────────── */
+  --them: oklch(74.87% 0.0735 255.76);
+  --them-bar: oklch(65.3% 0.0854 256.71);
+  --them-soft: oklch(28.24% 0.0334 257.68);
+  --them-line: oklch(58.12% 0.0765 257.85);
 
-  --success: oklch(72.17% 0.1133 149.37);
-  --success-soft: oklch(30.81% 0.0268 155.34);
+  /* ── Brand — Locked / Mandatory (olive) ────────────────────────────────── */
+  --locked: oklch(75.9% 0.0686 106.06);
+  --locked-soft: oklch(29.62% 0.0272 107.98);
 
-  --chart-1: oklch(74.55% 0.1241 76.22);
-  --chart-2: oklch(74.87% 0.0734 255.75);
-  --chart-3: oklch(75.9% 0.0686 106.03);
-  --chart-4: oklch(72.17% 0.1133 149.37);
-  --chart-5: oklch(71% 0.1204 42.53);
+  /* ── Status ────────────────────────────────────────────────────────────── */
+  --success: oklch(72.17% 0.1133 149.4);
+  --ok: oklch(72.17% 0.1133 149.4);
+  --success-soft: oklch(30.81% 0.0268 155.4);
+  --ok-soft: oklch(30.81% 0.0268 155.4);
+
+  --destructive: oklch(71% 0.1203 42.52);
+  --alert: oklch(71% 0.1203 42.52);
+  --input-invalid: oklch(71% 0.1203 42.52);
+  --foreground-destructive: oklch(71% 0.1203 42.52);
+  --destructive-foreground: oklch(24.9% 0.0118 84.57);
+  --alert-soft: oklch(28.56% 0.0368 40.75);
+
+  /* ── Interaction ───────────────────────────────────────────────────────── */
+  --primary-foreground: oklch(20.98% 0.0083 84.59);
+  --secondary-foreground: oklch(94.45% 0.0171 84.6);
+  --on-accent: oklch(20.98% 0.0083 84.59);
+  --on-primary: oklch(20.98% 0.0083 84.59);
+  --primary-hover: oklch(100% 0.0001 263.28);
+  --accent-hover: oklch(81.04% 0.1126 80.25);
+
+  /* ── Feature (Share) card ──────────────────────────────────────────────── */
+  --share-bg: oklch(16.5% 0.007 78.09);
+  --share-fg: oklch(94.45% 0.0171 84.6);
+  --share-hl: oklch(79.53% 0.1095 81.32);
+
+  /* ── Chart aliases ─────────────────────────────────────────────────────── */
+  --chart-1: oklch(74.55% 0.124 76.22);
+  --chart-2: oklch(74.87% 0.0735 255.76);
+  --chart-3: oklch(75.9% 0.0686 106.06);
+  --chart-4: oklch(72.17% 0.1133 149.4);
+  --chart-5: oklch(71% 0.1203 42.52);
+
+  /* ── Device / Canvas ───────────────────────────────────────────────────── */
+  --bezel-1: oklch(32.84% 0.0175 78);
+  --bezel-2: oklch(38.65% 0.0203 79.14);
+  --bezel-shadow: rgba(0, 0, 0, 0.6);
+  --notch-bg: oklch(27.09% 0.0123 78.07);
+  --canvas-bg: oklch(18.26% 0.0043 84.6);
+  --canvas-grid: rgba(255, 255, 255, 0.035);
+  /* END: Dark CSS semantic color tokens */
 }
 
 @theme inline {
+  /* ── Radius ──────────────────────────────────────────────────────────────── */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* ── shadcn semantic colors ──────────────────────────────────────────────── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -153,32 +241,82 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-input-invalid: var(--input-invalid);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-foreground-destructive: var(--foreground-destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-invalid: var(--input-invalid);
+  --color-ring: var(--ring);
+
+  /* ── IOM surface scale ───────────────────────────────────────────────────── */
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
+
+  /* ── IOM line scale ──────────────────────────────────────────────────────── */
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
   --color-line-strong: var(--line-strong);
+
+  /* ── IOM ink scale ───────────────────────────────────────────────────────── */
+  --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
+  --color-ink-muted: var(--ink-muted);
   --color-ink-faint: var(--ink-faint);
+
+  /* ── Brand — Yours (ochre) ───────────────────────────────────────────────── */
   --color-you: var(--you);
   --color-you-bar: var(--you-bar);
   --color-you-soft: var(--you-soft);
+  --color-you-line: var(--you-line);
+
+  /* ── Brand — Washington (slate) ──────────────────────────────────────────── */
   --color-them: var(--them);
   --color-them-bar: var(--them-bar);
   --color-them-soft: var(--them-soft);
+  --color-them-line: var(--them-line);
+
+  /* ── Brand — Locked / Mandatory (olive) ──────────────────────────────────── */
   --color-locked: var(--locked);
   --color-locked-soft: var(--locked-soft);
+
+  /* ── Status ──────────────────────────────────────────────────────────────── */
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
+  --color-ok: var(--ok); /* IOM alias */
+  --color-ok-soft: var(--ok-soft); /* IOM alias */
+  --color-alert: var(--alert); /* IOM alias */
+  --color-alert-soft: var(--alert-soft); /* IOM alias */
+
+  /* ── Interaction ─────────────────────────────────────────────────────────── */
+  --color-on-accent: var(--on-accent);
+  --color-on-primary: var(--on-primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent-hover: var(--accent-hover);
+
+  /* ── Feature card ────────────────────────────────────────────────────────── */
+  --color-share-bg: var(--share-bg);
+  --color-share-fg: var(--share-fg);
+  --color-share-hl: var(--share-hl);
+
+  /* ── Chart aliases ───────────────────────────────────────────────────────── */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* ── Device / Canvas (comp only) ────────────────────────────────────────── */
+  --color-bezel-1: var(--bezel-1);
+  --color-bezel-2: var(--bezel-2);
+  --color-canvas-bg: var(--canvas-bg);
+  --color-notch-bg: var(--notch-bg);
+
+  /* ── Fonts ───────────────────────────────────────────────────────────────── */
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
 }
 
 @theme {
