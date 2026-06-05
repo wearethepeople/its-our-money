@@ -28,6 +28,7 @@ import { cn } from "@/utils/misc.tsx";
 import { ViewToggle } from "@/components/view-toggle.tsx";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
+import { Card } from "#app/components/ui/card.tsx";
 
 const manageAllocationSchema = z.object({
   intent: z.enum(["publish", "unpublish"]),
@@ -232,7 +233,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             If you decide to publish, this page is exactly what gets shared: your percentage
             breakdown, nothing more. No name, no identifying information — just your priorities.
           </TypographyP>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-you">
             Want to change your numbers?{" "}
             <Link
               to={href("/allocate/:year", {
@@ -359,32 +360,36 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
       )}
       {activeTab === "tax-breakdown" && (
         <div className="mt-6">
-          <p className="text-sm text-gray-500">
-            Enter your total federal tax payment to see how the government spent it versus how you
-            would have.
-          </p>
-          <p className="mt-1 text-xs text-gray-400">
-            The figure you enter here is used only for this in-page calculation and is never stored
-            or transmitted. No personal financial information is collected or retained — the math
-            happens entirely in your browser.
-          </p>
-          <div className="mt-4 flex items-center gap-2">
-            <label htmlFor="tax-amount" className="text-sm font-medium">
-              Federal taxes paid:
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3 text-sm text-gray-500">$</span>
-              <input
-                id="tax-amount"
-                type="number"
-                min="0"
-                className="w-36 rounded border py-1.5 pr-3 pl-7 text-sm"
-                value={taxAmount}
-                onChange={(e) => setTaxAmount(e.target.value === "" ? "" : Number(e.target.value))}
-                placeholder="0"
-              />
+          <Card className="py-3 px-4">
+            <p>
+              Enter your total federal tax payment to see how the government spent it versus how you
+              would have.
+            </p>
+            <p className="text-ink-faint">
+              The figure you enter here is used only for this in-page calculation and is never
+              stored or transmitted. No personal financial information is collected or retained —
+              the math happens entirely in your browser.
+            </p>
+            <div className="flex items-center gap-2">
+              <label htmlFor="tax-amount" className="text-sm font-medium text-ink-muted">
+                Federal taxes paid:
+              </label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3 text-sm text-ink-muted">$</span>
+                <input
+                  id="tax-amount"
+                  type="number"
+                  min="0"
+                  className="w-36 rounded border border-line-2 py-1.5 pr-3 pl-7 text-sm"
+                  value={taxAmount}
+                  onChange={(e) =>
+                    setTaxAmount(e.target.value === "" ? "" : Number(e.target.value))
+                  }
+                  placeholder="0"
+                />
+              </div>
             </div>
-          </div>
+          </Card>
           {taxAmount !== "" && taxAmount > 0 && (
             <table className="mt-4 w-full text-sm">
               <thead>
