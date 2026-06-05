@@ -24,7 +24,7 @@ import { ParticipantService } from "@/services/participant-service.server.ts";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
 import { Fragment, useMemo, useState } from "react";
 import { cn } from "@/utils/misc.tsx";
-import { ViewSchemeToggle } from "@/components/view-scheme-toggle.tsx";
+import { ViewToggle } from "@/components/view-toggle.tsx";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 
@@ -164,7 +164,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function JuxtaposeRoute({ actionData, loaderData }: Route.ComponentProps) {
   const { allocation, pairedData, url, netInterestBps, ombYear } = loaderData;
-  const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
+  const [viewScheme, setViewScheme] = useState<ViewSchemeId>("public_domain");
   const [sortMode, setSortMode] = useState<SortModes>("participantPercent");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [taxAmount, setTaxAmount] = useState<number | "">("");
@@ -323,7 +323,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           ))}
         </div>
         <div className="ml-auto">
-          <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
+          <ViewToggle value={viewScheme} onChange={setViewScheme} />
         </div>
       </div>
       <div className="flex border-b">

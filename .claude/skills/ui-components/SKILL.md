@@ -8,6 +8,8 @@ user-invocable: true
 
 This is an **Epic Stack** app (React Router v7, Express, Tailwind v4, Vitest) using **ShadCN with BaseUI** (not Radix) as the component primitive layer. Components live in `app/components/ui/`. Prefer **clean semantic HTML** — use the right element for the job before reaching for a generic `div`.
 
+Any time a new file is created under app/components/, this skill applies.
+
 ## Stack
 
 | Layer                | Choice                                                                       |

@@ -6,7 +6,7 @@ import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { z } from "zod";
 
 import { ErrorList } from "@/components/forms";
-import { ViewSchemeToggle } from "@/components/view-scheme-toggle.tsx";
+import { ViewToggle } from "@/components/view-toggle.tsx";
 import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
 import { FUNCTIONS } from "@/constants/budget-functions.ts";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
@@ -134,7 +134,7 @@ export default function AllocateRoute() {
   const actionData = useActionData<typeof action>();
   const { existingAllocation } = useLoaderData<typeof loader>();
   const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false);
-  const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
+  const [viewScheme, setViewScheme] = useState<ViewSchemeId>("public_domain");
 
   const contentRef = useRef<HTMLElement>(null);
   const { sentinelRef, progress } = useScrollProgress(contentRef);
@@ -280,7 +280,7 @@ export default function AllocateRoute() {
         <div className="py-4 sticky top-(--header-height) bg-background z-10">
           <div className="flex gap-4 items-center">
             <Progress value={progress * 100} className="grow" />
-            <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
+            <ViewToggle value={viewScheme} onChange={setViewScheme} />
           </div>
         </div>
         {/* Allocations */}
