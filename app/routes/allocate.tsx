@@ -33,6 +33,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "#app/components/ui/collapsible.tsx";
+import { TypographyH1, TypographyH2, TypographyP } from "#app/components/ui/typography.tsx";
+import { Hr } from "#app/components/ui/hr.tsx";
 
 const formSchema = z.object({
   allocations: z.array(
@@ -232,17 +234,17 @@ export default function AllocateRoute() {
             </div>
           )}
           <CollapsibleContent>
-            <Card className="bg-surface-3 border-accent">
-              <CardTitle className="px-4 uppercase">What this pays for</CardTitle>
+            <Card className="bg-surface-3 border-line-2 border-l-2 border-l-you/60">
+              <CardTitle className="px-4 uppercase text-ink-muted">What this pays for</CardTitle>
               {isNetInterest && (
-                <CardContent className="text-ink-faint italic">
+                <CardContent className="text-ink-2 italic">
                   Mandatory obligation — this is not a priority you set. It reflects the cost of
                   existing national debt and cannot be redirected.
                 </CardContent>
               )}
-              <CardContent className="text-ink-faint">{fnData.description}</CardContent>
+              <CardContent className="text-ink-2">{fnData.description}</CardContent>
               {fnData.commonUses && fnData.commonUses.length > 0 && (
-                <CardContent>
+                <CardContent className="text-ink-2">
                   <ul>
                     {fnData.commonUses.map((use, i) => (
                       <li key={i} className="ml-4 list-disc">
@@ -262,13 +264,21 @@ export default function AllocateRoute() {
   return (
     <section ref={contentRef}>
       <div>
-        <p>This is a place to describe things.</p>
+        <TypographyH1>A budget isn't just numbers.</TypographyH1>
+        <TypographyP className="text-you font-semibold not-first:mt-2 mb-8">
+          It's a statement of values and tradeoffs.
+        </TypographyP>
+        <TypographyH2>Your turn.</TypographyH2>
+        <TypographyP className="not-first:mt-2">
+          Drag the sliders to match your priorities — where you'd put your money. You know your
+          values, so no expertise required. Tap any title for context.
+        </TypographyP>
       </div>
-      <form method="post" {...getFormProps(form)}>
+      <form className="flex flex-col gap-4" method="post" {...getFormProps(form)}>
         <HoneypotInputs />
         {/* Legend + toggle */}
         <div className="py-4 sticky top-(--header-height) bg-background z-10">
-          <div className="flex gap-8 items-center">
+          <div className="flex gap-4 items-center">
             <Progress value={progress * 100} className="grow" />
             <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
           </div>
@@ -284,10 +294,18 @@ export default function AllocateRoute() {
               {renderAllocationItem("net_interest")}
             </AllocationCard>
           ) : (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-8">
               {PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
                 <div key={group.id}>
-                  <div className={cn("uppercase", group.color)}>{group.label}</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="size-3 shrink-0 rounded-sm"
+                      style={{ backgroundColor: `var(${group.color.replace(/^text-/, "--")})` }}
+                    />
+                    <span className="text-body-xs uppercase text-ink-faint tracking-wide">
+                      {group.label}
+                    </span>
+                  </div>
                   <AllocationCard>
                     {group.functionIds.map((fid) => {
                       const entry = allocationsByFunctionId.get(fid);
@@ -303,7 +321,7 @@ export default function AllocateRoute() {
         </div>
         <div ref={sentinelRef} />
         <ErrorList id={form.errorId} errors={form.errors} />
-        <div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
+        <Card className="flex items-center justify-between gap-8">
           <p>
             Your priorities will be scaled to percentages so your choices and Washington's budget
             share the same measure — then you can see where you agree, and where you don't.
@@ -314,12 +332,12 @@ export default function AllocateRoute() {
           >
             Compare to D.C.'s
           </button>
-        </div>
+        </Card>
       </form>
     </section>
   );
 }
 
 function AllocationCard({ children }: React.PropsWithChildren) {
-  return <Card className="bg-surface-2 border p-4">{children}</Card>;
+  return <Card className="bg-surface-2 border p-6">{children}</Card>;
 }

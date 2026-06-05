@@ -1,6 +1,6 @@
 ---
 name: ui-components
-description: Component development context for this project — building, styling, and composing UI components with Tailwind v4, ShadCN (BaseUI), and clean semantic HTML in an Epic Stack React Router v7 app. Triggers for: "build a component", "add a component", "style this", "create a UI", "write a component", "add styles", "refactor component".
+description: UI Component context — building, styling, and composing UI components with Tailwind v4, ShadCN (BaseUI), and clean semantic HTML in an Epic Stack React Router v7 app. Triggers for: "follows convention", "build a component", "add a component", "style this", "create a UI", "write a component", "add styles", "refactor component", "WithClassName", "add className prop", "className passthrough", "component props".
 user-invocable: true
 ---
 
@@ -10,15 +10,15 @@ This is an **Epic Stack** app (React Router v7, Express, Tailwind v4, Vitest) us
 
 ## Stack
 
-| Layer                | Choice                                                                   |
-| -------------------- | ------------------------------------------------------------------------ |
-| Framework            | React Router v7 (no Next.js — no `"use client"` needed)                  |
-| Styling              | Tailwind v4 — CSS-variable-first, no `tailwind.config.js`                |
-| Component primitives | ShadCN default style, **BaseUI** (`@base-ui/react/*`)                    |
-| Icons                | SVG spritesheet via `<Icon name="..." />` (`app/components/ui/icon.tsx`) |
-| Forms                | `conform` + Zod schemas                                                  |
+| Layer                | Choice                                                                       |
+| -------------------- | ---------------------------------------------------------------------------- |
+| Framework            | React Router v7 (no Next.js — no `"use client"` needed)                      |
+| Styling              | Tailwind v4 — CSS-variable-first, no `tailwind.config.js`                    |
+| Component primitives | ShadCN default style, **BaseUI** (`@base-ui/react/*`)                        |
+| Icons                | SVG spritesheet via `<Icon name="..." />` (`app/components/ui/icon.tsx`)     |
+| Forms                | `conform` + Zod schemas                                                      |
 | Path aliases         | `@/ui/*` → `app/components/ui/*` · `@/*` → `app/*` · `@/types/*` → `types/*` |
-| CSS entry            | `app/styles/tailwind.css`                                                |
+| CSS entry            | `app/styles/tailwind.css`                                                    |
 
 ## Simple, robust, and declarative
 
@@ -29,11 +29,15 @@ Name boolean conditions for what they **mean**, not how they're derived. Extract
 
 ```tsx
 // Forces the reader to trace the data model to understand the branch
-{!categoryField && <Icon name="lock-closed" />}
+{
+  !categoryField && <Icon name="lock-closed" />;
+}
 
 // Self-evident
 const isNetInterest = fnId === "net_interest";
-{isNetInterest && <Icon name="lock-closed" />}
+{
+  isNetInterest && <Icon name="lock-closed" />;
+}
 ```
 
 When two render paths share the same visual structure, prefer one function with an optional parameter over two parallel implementations. The absent parameter encodes the variant — no `type` prop needed.
@@ -46,7 +50,7 @@ import type { WithClassName } from "@/types/ui";
 function MyComponent({ value, className }: WithClassName<{ value: number }>) {
 ```
 
-Use `WithClassName<T>` when the component has a tight prop shape and just needs className passthrough. Use `React.ComponentPropsWithoutRef<'el'>` instead when the component *is* the element and should forward all HTML attributes (event handlers, aria, etc.).
+Use `WithClassName<T>` when the component has a tight prop shape and just needs className passthrough. Use `React.ComponentPropsWithoutRef<'el'>` instead when the component _is_ the element and should forward all HTML attributes (event handlers, aria, etc.).
 
 ## Semantic HTML First
 
@@ -95,15 +99,15 @@ Tailwind v4 uses CSS-native configuration — no `tailwind.config.js`.
 **`@theme inline` tokens are build-time only** — `--color-chart-1` is never written to the browser as a real CSS custom property; only the underlying `:root` variables (e.g. `--chart-1`) are live. In `style` props or any JS-constructed `var(...)`, always use the `:root` name:
 
 ```ts
-group.color.replace(/^text-/, "--")  // "text-chart-1" → "--chart-1" ✓
+group.color.replace(/^text-/, "--"); // "text-chart-1" → "--chart-1" ✓
 // not "--color-chart-1" — that resolves to empty string at runtime
 ```
 
 **CSS relative color syntax** lets you derive lightness/chroma variants from a live token without hardcoding separate values:
 
 ```ts
-`oklch(from var(--chart-1) 0.6 0.08 h)`            // same hue, mid lightness
-`oklch(from var(--chart-1) calc(l + 0.15) c h)`     // relative adjustment
+`oklch(from var(--chart-1) 0.6 0.08 h)` // same hue, mid lightness
+`oklch(from var(--chart-1) calc(l + 0.15) c h)`; // relative adjustment
 ```
 
 ## Semantic Color Tokens

@@ -161,14 +161,6 @@
   --chart-3: oklch(46.92% 0.0454 109.64); /* olive   */
   --chart-4: oklch(48.47% 0.0762 149.29); /* green   */
   --chart-5: oklch(49.45% 0.1316 36.24); /* red     */
-
-  /* ── Device / Canvas (design comp only) ────────────────────────────────── */
-  --bezel-1: oklch(82% 0.028 84.59);
-  --bezel-2: oklch(72% 0.042 84.59);
-  --bezel-shadow: rgba(60, 48, 28, 0.45);
-  --notch-bg: oklch(86% 0.024 84.59);
-  --canvas-bg: oklch(90% 0.02 84.59);
-  --canvas-grid: rgba(60, 48, 28, 0.05);
   /* END: CSS semantic color tokens */
 }
 
@@ -265,14 +257,6 @@
   --chart-3: oklch(75.9% 0.0686 106.06);
   --chart-4: oklch(72.17% 0.1133 149.4);
   --chart-5: oklch(71% 0.1203 42.52);
-
-  /* ── Device / Canvas ───────────────────────────────────────────────────── */
-  --bezel-1: oklch(32.84% 0.0175 78);
-  --bezel-2: oklch(38.65% 0.0203 79.14);
-  --bezel-shadow: rgba(0, 0, 0, 0.6);
-  --notch-bg: oklch(27.09% 0.0123 78.07);
-  --canvas-bg: oklch(18.26% 0.0043 84.6);
-  --canvas-grid: rgba(255, 255, 255, 0.035);
   /* END: Dark CSS semantic color tokens */
 }
 
@@ -498,14 +482,14 @@
     font-family: var(--font-sans);
     font-size: 1rem;
   }
+
+  a {
+    text-decoration: underline;
+  }
 }
 
 @layer components {
   .card {
     @apply bg-surface text-ink rounded-xl border border-line-2;
   }
-}
-
-a {
-  text-decoration: underline;
 }

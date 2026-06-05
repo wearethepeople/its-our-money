@@ -26,6 +26,7 @@ import { Fragment, useMemo, useState } from "react";
 import { cn } from "@/utils/misc.tsx";
 import { ViewSchemeToggle } from "@/components/view-scheme-toggle.tsx";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
+import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 
 const manageAllocationSchema = z.object({
   intent: z.enum(["publish", "unpublish"]),
@@ -214,23 +215,25 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
     <div>
       <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
         <div className="flex-1 space-y-3">
-          <h1>You & the US Fiscal Budget</h1>
-          <p>
+          <TypographyH1>Where your priorities land.</TypographyH1>
+          <TypographyLead>Not a budget. A statement of priorities.</TypographyLead>
+          <TypographyP>Your preferences, next to what Washington actually spent.</TypographyP>
+          <TypographyP>
             When you moved the sliders, you distributed your priorities across the 18 allocatable
             federal budget functions. Those choices were converted into percentages, your personal
             allocation, and are shown here alongside the government's actual spending from the most
             recent OMB data.
-          </p>
-          <p>
+          </TypographyP>
+          <TypographyP>
             Use the <strong>Comparison</strong> tab to see where you and the federal government
             align or diverge — sort by difference to find where your priorities diverge most. The{" "}
             <strong>Tax Breakdown</strong> tab translates those percentages into dollar amounts
             based on your federal tax payment, making the abstract concrete.
-          </p>
-          <p>
+          </TypographyP>
+          <TypographyP>
             If you decide to publish, this page is exactly what gets shared: your percentage
             breakdown, nothing more. No name, no identifying information — just your priorities.
-          </p>
+          </TypographyP>
           <p className="text-sm text-gray-500">
             Want to change your numbers?{" "}
             <Link
@@ -266,7 +269,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           </div>
         </div>
       </div>
-      <div className="my-4 flex flex-wrap items-center gap-3">
+      <div className="my-4 flex flex-wrap items-center gap-3" id="data-massage">
         <span className="text-xs text-gray-500">Sort by:</span>
         <div className="flex">
           {(
