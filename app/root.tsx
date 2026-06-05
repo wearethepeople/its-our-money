@@ -152,7 +152,7 @@ function App() {
     <OpenImgContextProvider optimizerEndpoint="/resources/images" getSrc={getImgSrc}>
       <div className="mx-auto flex min-h-screen flex-col justify-between">
         <header
-          className="bg-background text-ink-2 border-b py-2 sticky top-0 z-10 mb-8"
+          className="bg-background border-b py-2 sticky top-0 z-10 mb-8"
           ref={(el) => {
             if (el)
               document.documentElement.style.setProperty("--header-height", `${el.offsetHeight}px`);
@@ -194,14 +194,14 @@ function App() {
           }}
         >
           <div className="container flex justify-between">
-            <p className="text-sm leading-snug">
+            <p className="text-sm leading-snug text-ink-muted">
               A&nbsp;
               <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
                 We&nbsp;(ARE)&nbsp;the&nbsp;People
               </Link>
               &nbsp;project.
               <br />
-              <small>&copy; 2026 We (ARE) the People</small>
+              <small className="text-ink-muted">&copy; 2026 We (ARE) the People</small>
             </p>
             <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
           </div>

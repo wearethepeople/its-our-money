@@ -486,6 +486,11 @@
   a {
     text-decoration: underline;
   }
+
+  header a,
+  footer a {
+    color: var(--ink-2);
+  }
 }
 
 @layer components {

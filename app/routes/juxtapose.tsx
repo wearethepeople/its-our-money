@@ -9,6 +9,7 @@ import {
   formatSignedPercent,
 } from "@/utils/numbers.ts";
 import { Button } from "@/ui/button.tsx";
+import { ButtonGroup } from "@/ui/button-group.tsx";
 import { Badge } from "@/ui/badge.tsx";
 import { getFormProps, useForm } from "@conform-to/react";
 import { z } from "zod";
@@ -37,7 +38,7 @@ const inputFormSchema = manageAllocationSchema.omit({
   allocationId: true,
 });
 
-type SortModes = "participantPercent" | "budgetPercent" | "delta" | "category" | "code";
+type SortModes = "participantPercent" | "budgetPercent" | "delta" | "category";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const participant = await getParticipantBySession(request);
@@ -180,9 +181,6 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
       if (sortMode === "category") {
         return a.category.localeCompare(b.category) * direction;
       }
-      if (sortMode === "code") {
-        return a.code.localeCompare(b.code) * direction;
-      }
       return (a[sortMode] - b[sortMode]) * direction;
     });
   }, [pairedData, sortDirection, sortMode]);
@@ -270,58 +268,26 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
         </div>
       </div>
       <div className="my-4 flex flex-wrap items-center gap-3" id="data-massage">
-        <span className="text-xs text-gray-500">Sort by:</span>
-        <div className="flex">
+        <ButtonGroup>
           {(
             [
               { mode: "participantPercent", label: "Yours" },
               { mode: "budgetPercent", label: "Federal" },
               { mode: "delta", label: "Difference" },
+              { mode: "category", label: "Function" },
             ] as const
-          ).map(({ mode, label }, i, arr) => (
-            <button
+          ).map(({ mode, label }) => (
+            <Button
               key={mode}
-              type="button"
-              className={cn(
-                "-ml-px rounded-none border px-2.5 py-1 text-xs font-medium transition-colors",
-                i === 0 && "ml-0 rounded-l-md",
-                i === arr.length - 1 && "rounded-r-md",
-                sortMode === mode
-                  ? "border-primary bg-primary text-primary-foreground relative z-10"
-                  : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
-              )}
+              size="sm"
+              variant={sortMode === mode ? "default" : "outline"}
               onClick={() => handleSortModeClick(mode)}
             >
               {label}
-              {sortMode === mode ? ` (${sortDirection})` : ""}
-            </button>
+              {sortMode === mode ? (sortDirection === "asc" ? " ↑" : " ↓") : ""}
+            </Button>
           ))}
-        </div>
-        <div className="flex">
-          {(
-            [
-              { mode: "code", label: "Code" },
-              { mode: "category", label: "Category" },
-            ] as const
-          ).map(({ mode, label }, i, arr) => (
-            <button
-              key={mode}
-              type="button"
-              className={cn(
-                "-ml-px rounded-none border px-2.5 py-1 text-xs font-medium transition-colors",
-                i === 0 && "ml-0 rounded-l-md",
-                i === arr.length - 1 && "rounded-r-md",
-                sortMode === mode
-                  ? "border-primary bg-primary text-primary-foreground relative z-10"
-                  : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
-              )}
-              onClick={() => handleSortModeClick(mode)}
-            >
-              {label}
-              {sortMode === mode ? ` (${sortDirection})` : ""}
-            </button>
-          ))}
-        </div>
+        </ButtonGroup>
         <div className="ml-auto">
           <ViewToggle value={viewScheme} onChange={setViewScheme} />
         </div>

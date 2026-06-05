@@ -33,8 +33,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "#app/components/ui/collapsible.tsx";
-import { TypographyH1, TypographyH2, TypographyP } from "#app/components/ui/typography.tsx";
-import { Hr } from "#app/components/ui/hr.tsx";
+import {
+  TypographyH1,
+  TypographyLead,
+  TypographyH2,
+  TypographyP,
+} from "#app/components/ui/typography.tsx";
+import { Button } from "#app/components/ui/button.tsx";
+import { Separator } from "#app/components/ui/separator.tsx";
 
 const formSchema = z.object({
   allocations: z.array(
@@ -234,7 +240,7 @@ export default function AllocateRoute() {
             </div>
           )}
           <CollapsibleContent>
-            <Card className="bg-surface-3 border-line-2 border-l-2 border-l-you/60">
+            <Card className="bg-surface-3 border-line-2 border-l-2 border-l-you/60 mt-4">
               <CardTitle className="px-4 uppercase text-ink-muted">What this pays for</CardTitle>
               {isNetInterest && (
                 <CardContent className="text-ink-2 italic">
@@ -264,15 +270,11 @@ export default function AllocateRoute() {
   return (
     <section ref={contentRef}>
       <div>
-        <TypographyH1>A budget isn't just numbers.</TypographyH1>
-        <TypographyP className="text-you font-semibold not-first:mt-2 mb-8">
-          It's a statement of values and tradeoffs.
-        </TypographyP>
-        <TypographyH2>Your turn.</TypographyH2>
-        <TypographyP className="not-first:mt-2">
+        <TypographyH1 className="mb-3">Your turn.</TypographyH1>
+        <TypographyLead className="mb-8">
           Drag the sliders to match your priorities — where you'd put your money. You know your
           values, so no expertise required. Tap any title for context.
-        </TypographyP>
+        </TypographyLead>
       </div>
       <form className="flex flex-col gap-4" method="post" {...getFormProps(form)}>
         <HoneypotInputs />
@@ -321,18 +323,21 @@ export default function AllocateRoute() {
         </div>
         <div ref={sentinelRef} />
         <ErrorList id={form.errorId} errors={form.errors} />
-        <Card className="flex items-center justify-between gap-8">
-          <p>
-            Your priorities will be scaled to percentages so your choices and Washington's budget
-            share the same measure — then you can see where you agree, and where you don't.
-          </p>
-          <button
+        <Separator className="my-8" />
+        <div className="flex flex-col">
+          <TypographyH2 className="mb-0">How's that feel?</TypographyH2>
+          <TypographyLead className="mb-12">
+            Now that you've set your priorities, they'll be mapped against Washington's. See where
+            you agree, and where you don't. Some of it might surprise you.
+          </TypographyLead>
+          <Button
             type="submit"
-            className="font-inherit m-0 flex h-10 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
+            className="h-10 border-ink border-2 bg-surface font-semibold mx-auto py-6 px-7 mb-4"
+            variant="outline"
           >
-            Compare to D.C.'s
-          </button>
-        </Card>
+            See how your priorities compare
+          </Button>
+        </div>
       </form>
     </section>
   );
