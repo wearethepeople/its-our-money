@@ -268,7 +268,10 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           </div>
         </div>
       </div>
-      <div className="my-4 flex flex-wrap items-center gap-3" id="data-massage">
+      <div
+        className="my-4 flex flex-wrap items-center gap-3 bg-background sticky top-(--header-height) py-2"
+        id="data-massage"
+      >
         <ButtonGroup>
           {(
             [
@@ -293,13 +296,13 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           <ViewToggle value={viewScheme} onChange={setViewScheme} />
         </div>
       </div>
-      <div className="flex border-b">
+      <div className="flex border-b border-ink">
         <button
           type="button"
           className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
             activeTab === "comparison"
-              ? "border-current"
-              : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              ? "border-you"
+              : "border-transparent text-ink-muted hover:text-ink"
           }`}
           onClick={() => setActiveTab("comparison")}
         >
@@ -309,8 +312,8 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           type="button"
           className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
             activeTab === "tax-breakdown"
-              ? "border-current"
-              : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              ? "border-you"
+              : "border-transparent text-ink-muted hover:text-ink"
           }`}
           onClick={() => setActiveTab("tax-breakdown")}
         >
@@ -335,10 +338,10 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                 if (!groupItems.length) return null;
                 return (
                   <div key={group.id}>
-                    <h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
+                    <h3 className="border-b border-ink-muted pb-1 text-sm font-semibold tracking-wide uppercase">
                       {group.label}
                     </h3>
-                    <div className="divide-y">
+                    <div className="divide-y divide-line">
                       {groupItems.map((item) => (
                         <ComparisonRow key={item.code} item={item} maxPercent={maxPercent} />
                       ))}
@@ -380,7 +383,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                   id="tax-amount"
                   type="number"
                   min="0"
-                  className="w-36 rounded border border-line-2 py-1.5 pr-3 pl-7 text-sm"
+                  className="w-36 rounded border border-line-2 py-1.5 pr-3 pl-7 text-sm font-mono"
                   value={taxAmount}
                   onChange={(e) =>
                     setTaxAmount(e.target.value === "" ? "" : Number(e.target.value))
@@ -394,10 +397,10 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             <table className="mt-4 w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="pb-2 text-left font-semibold">Budget Function</th>
-                  <th className="pb-2 text-right font-semibold">Your Budget</th>
-                  <th className="pb-2 text-right font-semibold">Actual Budget</th>
-                  <th className="pb-2 text-right font-semibold">Difference</th>
+                  <th className="pb-2 text-left tax-breakdown-header">Budget Function</th>
+                  <th className="pb-2 text-right tax-breakdown-header">You</th>
+                  <th className="pb-2 text-right tax-breakdown-header">Actual</th>
+                  <th className="pb-2 text-right tax-breakdown-header">Difference</th>
                 </tr>
               </thead>
               <tbody>
@@ -412,24 +415,30 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                       );
                       const difference = yourDollars - actualDollars;
                       return (
-                        <tr key={item.code} className="border-b">
+                        <tr key={item.code} className="border-b border-b-line">
                           <td className="py-1.5">{item.category}</td>
-                          <td className="py-1.5 text-right">{formatCurrency(yourDollars)}</td>
-                          <td className="py-1.5 text-right">{formatCurrency(actualDollars)}</td>
-                          <td className="py-1.5 text-right">{formatSignedCurrency(difference)}</td>
+                          <td className="py-1.5 text-right numeric">
+                            {formatCurrency(yourDollars)}
+                          </td>
+                          <td className="py-1.5 text-right numeric">
+                            {formatCurrency(actualDollars)}
+                          </td>
+                          <td className="py-1.5 text-right numeric">
+                            {formatSignedCurrency(difference)}
+                          </td>
                         </tr>
                       );
                     })}
                     {netInterestBps > 0 && (
-                      <tr className="border-b text-gray-500 italic">
+                      <tr className="border-b border-b-line text-locked italic">
                         <td className="py-1.5">Net Interest (mandatory)</td>
-                        <td className="py-1.5 text-right">
+                        <td className="py-1.5 text-right numeric">
                           {formatCurrency(netInterestFraction * taxAmount)}
                         </td>
-                        <td className="py-1.5 text-right">
+                        <td className="py-1.5 text-right numeric">
                           {formatCurrency(netInterestFraction * taxAmount)}
                         </td>
-                        <td className="py-1.5 text-right">{formatCurrency(0)}</td>
+                        <td className="py-1.5 text-right numeric">{formatCurrency(0)}</td>
                       </tr>
                     )}
                   </>
@@ -460,7 +469,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                           <tr>
                             <td
                               colSpan={4}
-                              className="border-b border-gray-300 pt-4 pb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400"
+                              className="border-b border-ink-muted pt-4 pb-1 text-xs font-semibold tracking-wide uppercase"
                             >
                               {group.label}
                             </td>
@@ -474,32 +483,29 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                             );
                             const difference = yourDollars - actualDollars;
                             return (
-                              <tr
-                                key={item.code}
-                                className="border-b border-gray-100 dark:border-gray-800"
-                              >
+                              <tr key={item.code} className="border-b border-line">
                                 <td className="py-1.5 pl-3">{item.category}</td>
-                                <td className="py-1.5 text-right">{formatCurrency(yourDollars)}</td>
-                                <td className="py-1.5 text-right">
+                                <td className="py-1.5 text-right numeric">
+                                  {formatCurrency(yourDollars)}
+                                </td>
+                                <td className="py-1.5 text-right numeric">
                                   {formatCurrency(actualDollars)}
                                 </td>
-                                <td className="py-1.5 text-right">
+                                <td className="py-1.5 text-right numeric">
                                   {formatSignedCurrency(difference)}
                                 </td>
                               </tr>
                             );
                           })}
-                          <tr className="border-b border-gray-300 dark:border-gray-600">
-                            <td className="py-1.5 pl-3 text-xs font-semibold text-gray-500">
-                              Subtotal
-                            </td>
-                            <td className="py-1.5 text-right font-semibold">
+                          <tr className="border-b  border-line">
+                            <td className="py-1.5 pl-3 text-xs font-semibold">Subtotal</td>
+                            <td className="py-1.5 text-right font-semibold numeric">
                               {formatCurrency(groupYours)}
                             </td>
-                            <td className="py-1.5 text-right font-semibold">
+                            <td className="py-1.5 text-right font-semibold numeric">
                               {formatCurrency(groupActual)}
                             </td>
-                            <td className="py-1.5 text-right font-semibold">
+                            <td className="py-1.5 text-right font-semibold numeric">
                               {formatSignedCurrency(groupDiff)}
                             </td>
                           </tr>
@@ -507,7 +513,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                       );
                     })}
                     {netInterestBps > 0 && (
-                      <tr className="border-b text-gray-500 italic">
+                      <tr className="border-b  border-line text-locked italic">
                         <td className="py-1.5">Net Interest (mandatory)</td>
                         <td className="py-1.5 text-right">
                           {formatCurrency(netInterestFraction * taxAmount)}
@@ -522,10 +528,10 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                 )}
               </tbody>
               <tfoot>
-                <tr className="border-t font-semibold">
+                <tr className="border-t  border-line font-semibold">
                   <td className="pt-2">Total</td>
-                  <td className="pt-2 text-right">{formatCurrency(taxAmount)}</td>
-                  <td className="pt-2 text-right">{formatCurrency(taxAmount)}</td>
+                  <td className="pt-2 text-right numeric">{formatCurrency(taxAmount)}</td>
+                  <td className="pt-2 text-right numeric">{formatCurrency(taxAmount)}</td>
                   <td />
                 </tr>
               </tfoot>
@@ -575,14 +581,14 @@ function DeltaBadge({ value }: { value: number }) {
 function ComparisonLegend({ ombYear }: { ombYear: number }) {
   const fy = String(ombYear).slice(2);
   return (
-    <div className="mb-4 mt-4 flex items-center gap-5 text-sm">
+    <div className="mb-6 mt-4 flex items-center gap-5 text-sm">
       <div className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded-sm bg-you" />
-        <span>Your priorities</span>
+        <span className="text-ink-muted">Your priorities</span>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded-sm bg-them" />
-        <span>Washington (FY{fy})</span>
+        <span className="text-ink-muted">Washington (FY{fy})</span>
       </div>
     </div>
   );

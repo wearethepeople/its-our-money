@@ -491,6 +491,15 @@
   footer a {
     color: var(--ink-2);
   }
+
+  .numeric {
+    font-family: var(--font-mono);
+  }
+
+  .tax-breakdown-header {
+    color: var(--ink-muted);
+    font-weight: var(--font-weight-semibold);
+  }
 }
 
 @layer components {

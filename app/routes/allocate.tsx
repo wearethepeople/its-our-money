@@ -304,7 +304,7 @@ export default function AllocateRoute() {
                       className="size-3 shrink-0 rounded-sm"
                       style={{ backgroundColor: `var(${group.color.replace(/^text-/, "--")})` }}
                     />
-                    <span className="text-body-xs uppercase text-ink-faint tracking-wide">
+                    <span className="uppercase text-ink-faint tracking-wide font-semibold">
                       {group.label}
                     </span>
                   </div>
