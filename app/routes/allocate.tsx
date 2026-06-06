@@ -299,15 +299,13 @@ export default function AllocateRoute() {
             <div className="flex flex-col gap-8">
               {PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
                 <div key={group.id}>
-                  <div className="flex items-center gap-2 mb-2">
+                  <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
                     <span
                       className="size-3 shrink-0 rounded-sm"
                       style={{ backgroundColor: `var(${group.color.replace(/^text-/, "--")})` }}
                     />
-                    <span className="uppercase text-ink-faint tracking-wide font-semibold">
-                      {group.label}
-                    </span>
-                  </div>
+                    {group.label}
+                  </h3>
                   <AllocationCard>
                     {group.functionIds.map((fid) => {
                       const entry = allocationsByFunctionId.get(fid);

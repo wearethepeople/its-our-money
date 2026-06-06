@@ -212,7 +212,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
 
   return (
     <div>
-      <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+      <div className="mb-8 flex flex-col gap-6">
         <div className="flex-1 space-y-3">
           <TypographyH1>Where your priorities land.</TypographyH1>
           <TypographyLead>Not a budget. A statement of priorities.</TypographyLead>
@@ -245,7 +245,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             .
           </p>
         </div>
-        <div className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
+        <Card className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
           <div>
             <Form method="post" {...getFormProps(form)}>
               <HoneypotInputs />
@@ -266,11 +266,18 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
               </div>
             )}
           </div>
-        </div>
+        </Card>
       </div>
       <div
         className="my-4 flex flex-wrap items-center gap-3 bg-background sticky top-(--header-height) py-2"
         id="data-massage"
+        ref={(el) => {
+          if (el)
+            document.documentElement.style.setProperty(
+              "--data-massage-height",
+              `${el.offsetHeight}px`,
+            );
+        }}
       >
         <ButtonGroup>
           {(
@@ -296,7 +303,13 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           <ViewToggle value={viewScheme} onChange={setViewScheme} />
         </div>
       </div>
-      <div className="flex border-b border-ink">
+      <div
+        className="flex border-b border-ink bg-background sticky top-[calc(var(--header-height)+var(--data-massage-height))]"
+        ref={(el) => {
+          if (el)
+            document.documentElement.style.setProperty("--tabs-height", `${el.offsetHeight}px`);
+        }}
+      >
         <button
           type="button"
           className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
@@ -330,7 +343,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-10">
               {PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
                 const groupItems = sortedPairedData.filter((d) =>
                   group.functionIds.includes(String(d.id)),
@@ -338,7 +351,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                 if (!groupItems.length) return null;
                 return (
                   <div key={group.id}>
-                    <h3 className="border-b border-ink-muted pb-1 text-sm font-semibold tracking-wide uppercase">
+                    <h3 className="mb-2 border-b border-ink-muted pb-1 text-sm font-semibold tracking-wide uppercase">
                       {group.label}
                     </h3>
                     <div className="divide-y divide-line">
@@ -350,14 +363,6 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                 );
               })}
             </div>
-          )}
-          {netInterestBps > 0 && (
-            <p className="mt-4 text-sm text-gray-500 italic">
-              The priorities shown here — yours and the government's — each apply to{" "}
-              {100 - Math.round(netInterestBps / 100)} cents of every federal dollar. The remaining{" "}
-              {Math.round(netInterestBps / 100)} cents is committed to Net Interest, mandatory debt
-              service on the national debt that cannot be redirected.
-            </p>
           )}
         </div>
       )}
@@ -395,8 +400,8 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           </Card>
           {taxAmount !== "" && taxAmount > 0 && (
             <table className="mt-4 w-full text-sm">
-              <thead>
-                <tr className="border-b">
+              <thead className="bg-background sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]">
+                <tr className="border-b border-ink">
                   <th className="pb-2 text-left tax-breakdown-header">Budget Function</th>
                   <th className="pb-2 text-right tax-breakdown-header">You</th>
                   <th className="pb-2 text-right tax-breakdown-header">Actual</th>
@@ -430,7 +435,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                       );
                     })}
                     {netInterestBps > 0 && (
-                      <tr className="border-b border-b-line text-locked italic">
+                      <tr className="border-b border-b-line text-locked">
                         <td className="py-1.5">Net Interest (mandatory)</td>
                         <td className="py-1.5 text-right numeric">
                           {formatCurrency(netInterestFraction * taxAmount)}
@@ -497,7 +502,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                               </tr>
                             );
                           })}
-                          <tr className="border-b  border-line">
+                          <tr className="border-b border-line">
                             <td className="py-1.5 pl-3 text-xs font-semibold">Subtotal</td>
                             <td className="py-1.5 text-right font-semibold numeric">
                               {formatCurrency(groupYours)}
@@ -513,7 +518,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                       );
                     })}
                     {netInterestBps > 0 && (
-                      <tr className="border-b  border-line text-locked italic">
+                      <tr className="border-b border-line text-locked">
                         <td className="py-1.5">Net Interest (mandatory)</td>
                         <td className="py-1.5 text-right">
                           {formatCurrency(netInterestFraction * taxAmount)}
@@ -528,7 +533,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                 )}
               </tbody>
               <tfoot>
-                <tr className="border-t  border-line font-semibold">
+                <tr className="border-t border-line font-semibold">
                   <td className="pt-2">Total</td>
                   <td className="pt-2 text-right numeric">{formatCurrency(taxAmount)}</td>
                   <td className="pt-2 text-right numeric">{formatCurrency(taxAmount)}</td>
@@ -581,7 +586,7 @@ function DeltaBadge({ value }: { value: number }) {
 function ComparisonLegend({ ombYear }: { ombYear: number }) {
   const fy = String(ombYear).slice(2);
   return (
-    <div className="mb-6 mt-4 flex items-center gap-5 text-sm">
+    <div className="bg-background mb-6 mt-4 flex items-center py-2 gap-5 text-sm sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]">
       <div className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded-sm bg-you" />
         <span className="text-ink-muted">Your priorities</span>
