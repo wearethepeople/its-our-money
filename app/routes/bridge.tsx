@@ -12,19 +12,19 @@ export default function BridgeRoute() {
           education.
         </span>
         <br />
-        <span className="text-ink">
+        <span className="text-you-ok-soft">
           You don’t have to be an expert to have an opinion on what matters.
         </span>
       </TypographyLead>
       <TypographyLead>
         <span className="font-bold text-ink-2">Some spending is fixed, like your bills.</span>
         <br />
-        <span className="text-ink">Some is flexible.</span>
+        <span className="text-you-ok-soft">Some is flexible.</span>
       </TypographyLead>
       <TypographyLead>
         <span className="font-bold text-ink-2">This isn’t about drafting a federal budget.</span>
         <br />
-        <span className="text-ink">
+        <span className="text-you-ok-soft">
           It’s about what you would prioritize if{" "}
           <em>
             <strong>you</strong>
@@ -34,7 +34,10 @@ export default function BridgeRoute() {
       </TypographyLead>
       <a
         href={href("/allocate/:year", { year: "2026" })}
-        className={cn(buttonVariants({ variant: "default", size: "lg" }), "no-underline py-5 px-6")}
+        className={cn(
+          buttonVariants({ variant: "default", size: "lg" }),
+          "no-underline py-5 px- bg-line border border-ink-faint text-ink-faint",
+        )}
       >
         Continue
       </a>

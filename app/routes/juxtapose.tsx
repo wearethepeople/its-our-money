@@ -18,6 +18,7 @@ import { useState } from "react";
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 import { Card } from "#app/components/ui/card.tsx";
 import { AllocationViewer } from "@/components/allocation-viewer.tsx";
+import { Separator } from "#app/components/ui/separator.tsx";
 
 const manageAllocationSchema = z.object({
   intent: z.enum(["publish", "unpublish"]),
@@ -203,29 +204,30 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             .
           </p>
         </div>
-        <Card className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
-          <div>
-            <Form method="post" {...getFormProps(form)}>
-              <HoneypotInputs />
-              <input type="hidden" name="intent" value={publishButtonText.toLowerCase()} />
-              <Button>{publishButtonText}</Button>
-            </Form>
-            <div id={form.errorId} className="mb-2 text-sm text-red-500">
-              {form.errors}
-            </div>
-          </div>
-          <div>
-            <p className="mb-1 text-base">
-              Your allocation is <strong className="font-semibold">{publishState}</strong>.
-            </p>
-            {allocation.publicId && publishState === "Published" && (
-              <div className="mt-3">
-                <ShareInfo publicId={allocation.publicId} url={url} />
-              </div>
-            )}
-          </div>
-        </Card>
       </div>
+      <Card className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
+        <div>
+          <Form method="post" {...getFormProps(form)}>
+            <HoneypotInputs />
+            <input type="hidden" name="intent" value={publishButtonText.toLowerCase()} />
+            <Button>{publishButtonText}</Button>
+          </Form>
+          <div id={form.errorId} className="mb-2 text-sm text-red-500">
+            {form.errors}
+          </div>
+        </div>
+        <div>
+          <p className="mb-1 text-base">
+            Your allocation is <strong className="font-semibold">{publishState}</strong>.
+          </p>
+          {allocation.publicId && publishState === "Published" && (
+            <div className="mt-3">
+              <ShareInfo publicId={allocation.publicId} url={url} />
+            </div>
+          )}
+        </div>
+      </Card>
+      <Separator className="my-6" />
       <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} />
     </div>
   );

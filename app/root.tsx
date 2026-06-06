@@ -10,6 +10,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useLocation,
 } from "react-router";
 import { HoneypotProvider } from "remix-utils/honeypot/react";
 import { type Route } from "./+types/root.ts";
@@ -26,12 +27,13 @@ import { ClientHintCheck, getHints } from "./utils/client-hints.tsx";
 import { getEnv } from "./utils/env.server.ts";
 import { pipeHeaders } from "./utils/headers.server.ts";
 import { honeypot } from "./utils/honeypot.server.ts";
-import { combineHeaders, getDomainUrl, getImgSrc } from "./utils/misc.tsx";
+import { cn, combineHeaders, getDomainUrl, getImgSrc } from "./utils/misc.tsx";
 import { useNonce } from "./utils/nonce-provider.ts";
 import { type Theme, getTheme } from "./utils/theme.server.ts";
 import { makeTimings } from "./utils/timing.server.ts";
 import { getToast } from "./utils/toast.server.ts";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
+import { Separator } from "./components/ui/separator.tsx";
 
 export const links: Route.LinksFunction = () => {
   return [
@@ -147,22 +149,38 @@ export function Layout({ children }: { children: React.ReactNode }) {
 function App() {
   const data = useLoaderData<typeof loader>();
   const theme = useTheme();
+  const { pathname } = useLocation();
+  console.log("Pathname", pathname);
+
+  const isHome = pathname === "/";
+  const isParticipant = data?.participant !== null;
+  console.log("");
+  console.log("Participant", data?.participant);
+
   useToast(data.toast);
 
   return (
     <OpenImgContextProvider optimizerEndpoint="/resources/images" getSrc={getImgSrc}>
       <div className="mx-auto flex min-h-screen flex-col justify-between">
         <header
-          className="bg-background border-b py-2 sticky top-0 z-10 mb-8"
+          className={cn(
+            "bg-background border-b py-2 sticky top-0 z-10 mb-8",
+            isHome && !isParticipant ? "" : "",
+          )}
           ref={(el) => {
             if (el)
               document.documentElement.style.setProperty("--header-height", `${el.offsetHeight}px`);
           }}
         >
-          <nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+          <nav
+            className={cn(
+              "container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8",
+              isParticipant ? "text-sm" : "text-4xl",
+            )}
+          >
             <div>
-              <h1 className="font-extrabold no-underline text-xl">
-                <Link to="/" className="no-underline">
+              <h1>
+                <Link to="/" className="font-extrabold no-underline text-you">
                   It’s Our Money
                 </Link>
               </h1>
@@ -178,8 +196,9 @@ function App() {
                     isActive ? "underline font-semibold" : "text-ink-faint no-underline"
                   }
                 >
-                  Your allocation
+                  Allocation
                 </NavLink>
+                <Separator orientation="vertical" />
                 <NavLink
                   to={href("/juxtapose")}
                   end
