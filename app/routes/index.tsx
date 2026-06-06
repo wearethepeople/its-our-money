@@ -7,22 +7,24 @@ export default function IndexRoute() {
   return (
     <div className="flex h-full grow flex-col items-start justify-center gap-8 my-20">
       <TypographyLead>
-        <span className="font-bold">Money is personal.</span>
+        <span className="font-bold text-ink-2">Money is personal.</span>
         <br />
-        You trade your time for it.
+        <span className="text-ink">You trade your time for it.</span>
       </TypographyLead>
       <TypographyLead>
-        <span className="font-bold">A budget isn’t just numbers.</span>
+        <span className="font-bold text-ink-2">A budget isn’t just numbers.</span>
         <br />
-        It’s a ledger of values.
+        <span className="text-ink">It’s a ledger of values.</span>
       </TypographyLead>
       <TypographyLead>
-        <span className="font-bold">Uncle Sam collects your money all year.</span>
+        <span className="font-bold text-ink-2">Uncle Sam collects your money all year.</span>
         <br />
-        You’ve never been asked where it should go.
+        <span className="text-ink">You’ve never been asked where it should go.</span>
       </TypographyLead>
       <TypographyLead>
-        If you could decide… what would <em>you</em> choose?
+        <span className="font-bold text-ink-2">
+          If you could decide… what would <em>you</em> choose?
+        </span>
       </TypographyLead>
       <a
         href={href("/bridge")}

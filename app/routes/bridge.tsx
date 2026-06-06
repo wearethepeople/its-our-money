@@ -7,26 +7,30 @@ export default function BridgeRoute() {
   return (
     <div className="flex h-full grow flex-col items-start justify-center gap-8 my-20">
       <TypographyLead>
-        <span className="font-bold">
+        <span className="font-bold text-ink-2">
           The federal budget divides money across priorities like defense, healthcare, and
           education.
         </span>
         <br />
-        You don’t have to be an expert to have an opinion on what matters.
+        <span className="text-ink">
+          You don’t have to be an expert to have an opinion on what matters.
+        </span>
       </TypographyLead>
       <TypographyLead>
-        <span className="font-bold">Some spending is fixed, like your bills.</span>
+        <span className="font-bold text-ink-2">Some spending is fixed, like your bills.</span>
         <br />
-        <span className="font-normal">Some is flexible.</span>
+        <span className="text-ink">Some is flexible.</span>
       </TypographyLead>
       <TypographyLead>
-        <span className="font-bold">This isn’t about drafting a federal budget.</span>
+        <span className="font-bold text-ink-2">This isn’t about drafting a federal budget.</span>
         <br />
-        It’s about what you would prioritize if{" "}
-        <em>
-          <strong>you</strong>
-        </em>{" "}
-        had a say.
+        <span className="text-ink">
+          It’s about what you would prioritize if{" "}
+          <em>
+            <strong>you</strong>
+          </em>{" "}
+          had a say.
+        </span>
       </TypographyLead>
       <a
         href={href("/allocate/:year", { year: "2026" })}

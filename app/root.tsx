@@ -5,6 +5,7 @@ import {
   Link,
   Links,
   Meta,
+  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -167,16 +168,27 @@ function App() {
               </h1>
             </div>
             {data.participant && (
-              <div>
-                <Link
+              <div className="flex gap-4">
+                <NavLink
                   to={href("/allocate/:year", {
                     year: new Date().getFullYear().toString(),
                   })}
+                  end
+                  className={({ isActive }) =>
+                    isActive ? "underline font-semibold" : "text-ink-faint no-underline"
+                  }
                 >
                   Your allocation
-                </Link>
-                &nbsp;&nbsp;
-                <Link to={href("/juxtapose")}>Comparison</Link>
+                </NavLink>
+                <NavLink
+                  to={href("/juxtapose")}
+                  end
+                  className={({ isActive }) =>
+                    isActive ? "underline font-semibold" : "text-ink-faint no-underline"
+                  }
+                >
+                  Comparison
+                </NavLink>
               </div>
             )}
           </nav>
