@@ -9,26 +9,31 @@ export default function IndexRoute() {
       <TypographyLead>
         <span className="font-bold text-ink-2">Money is personal.</span>
         <br />
-        <span className="text-ink">You trade your time for it.</span>
+        <span className="text-you-ok-soft">You trade your time for it.</span>
       </TypographyLead>
       <TypographyLead>
         <span className="font-bold text-ink-2">A budget isn’t just numbers.</span>
         <br />
-        <span className="text-ink">It’s a ledger of values.</span>
+        <span className="text-you-ok-soft">It’s a ledger of values.</span>
       </TypographyLead>
       <TypographyLead>
         <span className="font-bold text-ink-2">Uncle Sam collects your money all year.</span>
         <br />
-        <span className="text-ink">You’ve never been asked where it should go.</span>
+        <span className="text-you-ok-soft">You’ve never been asked where it should go.</span>
       </TypographyLead>
       <TypographyLead>
         <span className="font-bold text-ink-2">
-          If you could decide… what would <em>you</em> choose?
+          If you could decide…
+          <br />
+          what would <em>you</em> choose?
         </span>
       </TypographyLead>
       <a
         href={href("/bridge")}
-        className={cn(buttonVariants({ variant: "default", size: "lg" }), "no-underline py-5 px-6")}
+        className={cn(
+          buttonVariants({ variant: "default", size: "lg" }),
+          "no-underline py-5 px-6 bg-line border border-ink-faint text-ink-faint",
+        )}
       >
         Begin
       </a>

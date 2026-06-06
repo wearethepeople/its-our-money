@@ -71,7 +71,7 @@ export function AllocationViewer({
   return (
     <div>
       <div
-        className="my-4 flex flex-wrap items-center gap-3 bg-background sticky top-(--header-height) py-2"
+        className="my-4 flex flex-nowrap items-center gap-3 bg-background sticky top-(--header-height) py-2"
         id="data-massage"
         ref={(el) => {
           if (el)
@@ -81,7 +81,7 @@ export function AllocationViewer({
             );
         }}
       >
-        <ButtonGroup>
+        <ButtonGroup className="overflow-x-auto min-w-0" id="sorts">
           {(
             [
               { mode: "participantPercent", label: "Yours" },
@@ -111,6 +111,7 @@ export function AllocationViewer({
           if (el)
             document.documentElement.style.setProperty("--tabs-height", `${el.offsetHeight}px`);
         }}
+        id="tabs"
       >
         <button
           type="button"
@@ -152,7 +153,7 @@ export function AllocationViewer({
                 );
                 if (!groupItems.length) return null;
                 return (
-                  <div key={group.id}>
+                  <div key={group.id} className="public-domain rounded bg-surface p-3">
                     <h3 className="mb-2 border-b border-ink-muted pb-1 text-sm font-semibold tracking-wide uppercase">
                       {group.label}
                     </h3>
@@ -273,9 +274,7 @@ export function AllocationViewer({
                       const groupActual = groupItems.reduce(
                         (sum, item) =>
                           sum +
-                          Math.round(
-                            (item.budgetPercent / 100) * allocatableFraction * taxAmount,
-                          ),
+                          Math.round((item.budgetPercent / 100) * allocatableFraction * taxAmount),
                         0,
                       );
                       const groupDiff = groupYours - groupActual;
@@ -412,7 +411,9 @@ function ComparisonLegend({ ombYear, possessive }: { ombYear: number; possessive
     <div className="bg-background mb-6 mt-4 flex items-center py-2 gap-5 text-sm sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]">
       <div className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded-sm bg-you" />
-        <span className="text-ink-muted">{possessive.charAt(0).toUpperCase() + possessive.slice(1)} priorities</span>
+        <span className="text-ink-muted">
+          {possessive.charAt(0).toUpperCase() + possessive.slice(1)} priorities
+        </span>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded-sm bg-them" />
