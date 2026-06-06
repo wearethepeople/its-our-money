@@ -1,15 +1,7 @@
 import { Route } from "./+types/juxtapose";
-import type { WithClassName } from "@/types/ui";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { href, redirect, Form, data, Link } from "react-router";
-import {
-  formatCurrency,
-  formatPercent,
-  formatSignedCurrency,
-  formatSignedPercent,
-} from "@/utils/numbers.ts";
 import { Button } from "@/ui/button.tsx";
-import { Badge } from "@/ui/badge.tsx";
 import { getFormProps, useForm } from "@conform-to/react";
 import { z } from "zod";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
@@ -22,10 +14,10 @@ import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { checkHoneypot } from "@/utils/honeypot.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
-import { Fragment, useMemo, useState } from "react";
-import { cn } from "@/utils/misc.tsx";
-import { ViewSchemeToggle } from "@/components/view-scheme-toggle.tsx";
-import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
+import { useState } from "react";
+import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
+import { Card } from "#app/components/ui/card.tsx";
+import { AllocationViewer } from "@/components/allocation-viewer.tsx";
 
 const manageAllocationSchema = z.object({
   intent: z.enum(["publish", "unpublish"]),
@@ -35,8 +27,6 @@ const manageAllocationSchema = z.object({
 const inputFormSchema = manageAllocationSchema.omit({
   allocationId: true,
 });
-
-type SortModes = "participantPercent" | "budgetPercent" | "delta" | "category" | "code";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const participant = await getParticipantBySession(request);
@@ -163,41 +153,9 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function JuxtaposeRoute({ actionData, loaderData }: Route.ComponentProps) {
   const { allocation, pairedData, url, netInterestBps, ombYear } = loaderData;
-  const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
-  const [sortMode, setSortMode] = useState<SortModes>("participantPercent");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [taxAmount, setTaxAmount] = useState<number | "">("");
-  const [activeTab, setActiveTab] = useState<"comparison" | "tax-breakdown">("comparison");
-  const netInterestFraction = netInterestBps / 10000;
-  const allocatableFraction = 1 - netInterestFraction;
   const lastResult = actionData?.result;
   const publishState = allocation.publicId && allocation.publishedAt ? "Published" : "Unpublished";
   const publishButtonText = publishState === "Published" ? "Unpublish" : "Publish";
-  const sortedPairedData = useMemo(() => {
-    const direction = sortDirection === "asc" ? 1 : -1;
-    return [...pairedData].sort((a, b) => {
-      if (sortMode === "category") {
-        return a.category.localeCompare(b.category) * direction;
-      }
-      if (sortMode === "code") {
-        return a.code.localeCompare(b.code) * direction;
-      }
-      return (a[sortMode] - b[sortMode]) * direction;
-    });
-  }, [pairedData, sortDirection, sortMode]);
-
-  const maxPercent = Math.max(
-    ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
-  );
-
-  function handleSortModeClick(mode: SortModes) {
-    if (mode === sortMode) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-      return;
-    }
-    setSortMode(mode);
-    setSortDirection("desc");
-  }
 
   const [form, fields] = useForm({
     defaultValue: {
@@ -212,26 +170,28 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
 
   return (
     <div>
-      <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+      <div className="mb-8 flex flex-col gap-6">
         <div className="flex-1 space-y-3">
-          <h1>You & the US Fiscal Budget</h1>
-          <p>
+          <TypographyH1>Where your priorities land.</TypographyH1>
+          <TypographyLead>Not a budget. A statement of priorities.</TypographyLead>
+          <TypographyP>Your preferences, next to what Washington actually spent.</TypographyP>
+          <TypographyP>
             When you moved the sliders, you distributed your priorities across the 18 allocatable
             federal budget functions. Those choices were converted into percentages, your personal
             allocation, and are shown here alongside the government's actual spending from the most
             recent OMB data.
-          </p>
-          <p>
+          </TypographyP>
+          <TypographyP>
             Use the <strong>Comparison</strong> tab to see where you and the federal government
             align or diverge — sort by difference to find where your priorities diverge most. The{" "}
             <strong>Tax Breakdown</strong> tab translates those percentages into dollar amounts
             based on your federal tax payment, making the abstract concrete.
-          </p>
-          <p>
+          </TypographyP>
+          <TypographyP>
             If you decide to publish, this page is exactly what gets shared: your percentage
             breakdown, nothing more. No name, no identifying information — just your priorities.
-          </p>
-          <p className="text-sm text-gray-500">
+          </TypographyP>
+          <p className="text-sm text-you">
             Want to change your numbers?{" "}
             <Link
               to={href("/allocate/:year", {
@@ -243,7 +203,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             .
           </p>
         </div>
-        <div className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
+        <Card className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
           <div>
             <Form method="post" {...getFormProps(form)}>
               <HoneypotInputs />
@@ -264,380 +224,10 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
               </div>
             )}
           </div>
-        </div>
+        </Card>
       </div>
-      <div className="my-4 flex flex-wrap items-center gap-3">
-        <span className="text-xs text-gray-500">Sort by:</span>
-        <div className="flex">
-          {(
-            [
-              { mode: "participantPercent", label: "Yours" },
-              { mode: "budgetPercent", label: "Federal" },
-              { mode: "delta", label: "Difference" },
-            ] as const
-          ).map(({ mode, label }, i, arr) => (
-            <button
-              key={mode}
-              type="button"
-              className={cn(
-                "-ml-px rounded-none border px-2.5 py-1 text-xs font-medium transition-colors",
-                i === 0 && "ml-0 rounded-l-md",
-                i === arr.length - 1 && "rounded-r-md",
-                sortMode === mode
-                  ? "border-primary bg-primary text-primary-foreground relative z-10"
-                  : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
-              )}
-              onClick={() => handleSortModeClick(mode)}
-            >
-              {label}
-              {sortMode === mode ? ` (${sortDirection})` : ""}
-            </button>
-          ))}
-        </div>
-        <div className="flex">
-          {(
-            [
-              { mode: "code", label: "Code" },
-              { mode: "category", label: "Category" },
-            ] as const
-          ).map(({ mode, label }, i, arr) => (
-            <button
-              key={mode}
-              type="button"
-              className={cn(
-                "-ml-px rounded-none border px-2.5 py-1 text-xs font-medium transition-colors",
-                i === 0 && "ml-0 rounded-l-md",
-                i === arr.length - 1 && "rounded-r-md",
-                sortMode === mode
-                  ? "border-primary bg-primary text-primary-foreground relative z-10"
-                  : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
-              )}
-              onClick={() => handleSortModeClick(mode)}
-            >
-              {label}
-              {sortMode === mode ? ` (${sortDirection})` : ""}
-            </button>
-          ))}
-        </div>
-        <div className="ml-auto">
-          <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
-        </div>
-      </div>
-      <div className="flex border-b">
-        <button
-          type="button"
-          className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-            activeTab === "comparison"
-              ? "border-current"
-              : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          }`}
-          onClick={() => setActiveTab("comparison")}
-        >
-          Comparison
-        </button>
-        <button
-          type="button"
-          className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-            activeTab === "tax-breakdown"
-              ? "border-current"
-              : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          }`}
-          onClick={() => setActiveTab("tax-breakdown")}
-        >
-          Tax Breakdown
-        </button>
-      </div>
-      {activeTab === "comparison" && (
-        <div>
-          <ComparisonLegend ombYear={ombYear} />
-          {viewScheme === "flat" ? (
-            <div className="divide-y">
-              {sortedPairedData.map((item) => (
-                <ComparisonRow key={item.code} item={item} maxPercent={maxPercent} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6">
-              {PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
-                const groupItems = sortedPairedData.filter((d) =>
-                  group.functionIds.includes(String(d.id)),
-                );
-                if (!groupItems.length) return null;
-                return (
-                  <div key={group.id}>
-                    <h3 className="border-b border-gray-300 pb-1 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400">
-                      {group.label}
-                    </h3>
-                    <div className="divide-y">
-                      {groupItems.map((item) => (
-                        <ComparisonRow key={item.code} item={item} maxPercent={maxPercent} />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {netInterestBps > 0 && (
-            <p className="mt-4 text-sm text-gray-500 italic">
-              The priorities shown here — yours and the government's — each apply to{" "}
-              {100 - Math.round(netInterestBps / 100)} cents of every federal dollar. The remaining{" "}
-              {Math.round(netInterestBps / 100)} cents is committed to Net Interest, mandatory debt
-              service on the national debt that cannot be redirected.
-            </p>
-          )}
-        </div>
-      )}
-      {activeTab === "tax-breakdown" && (
-        <div className="mt-6">
-          <p className="text-sm text-gray-500">
-            Enter your total federal tax payment to see how the government spent it versus how you
-            would have.
-          </p>
-          <p className="mt-1 text-xs text-gray-400">
-            The figure you enter here is used only for this in-page calculation and is never stored
-            or transmitted. No personal financial information is collected or retained — the math
-            happens entirely in your browser.
-          </p>
-          <div className="mt-4 flex items-center gap-2">
-            <label htmlFor="tax-amount" className="text-sm font-medium">
-              Federal taxes paid:
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3 text-sm text-gray-500">$</span>
-              <input
-                id="tax-amount"
-                type="number"
-                min="0"
-                className="w-36 rounded border py-1.5 pr-3 pl-7 text-sm"
-                value={taxAmount}
-                onChange={(e) => setTaxAmount(e.target.value === "" ? "" : Number(e.target.value))}
-                placeholder="0"
-              />
-            </div>
-          </div>
-          {taxAmount !== "" && taxAmount > 0 && (
-            <table className="mt-4 w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="pb-2 text-left font-semibold">Budget Function</th>
-                  <th className="pb-2 text-right font-semibold">Your Budget</th>
-                  <th className="pb-2 text-right font-semibold">Actual Budget</th>
-                  <th className="pb-2 text-right font-semibold">Difference</th>
-                </tr>
-              </thead>
-              <tbody>
-                {viewScheme === "flat" ? (
-                  <>
-                    {sortedPairedData.map((item) => {
-                      const yourDollars = Math.round(
-                        (item.participantPercent / 100) * allocatableFraction * taxAmount,
-                      );
-                      const actualDollars = Math.round(
-                        (item.budgetPercent / 100) * allocatableFraction * taxAmount,
-                      );
-                      const difference = yourDollars - actualDollars;
-                      return (
-                        <tr key={item.code} className="border-b">
-                          <td className="py-1.5">{item.category}</td>
-                          <td className="py-1.5 text-right">{formatCurrency(yourDollars)}</td>
-                          <td className="py-1.5 text-right">{formatCurrency(actualDollars)}</td>
-                          <td className="py-1.5 text-right">{formatSignedCurrency(difference)}</td>
-                        </tr>
-                      );
-                    })}
-                    {netInterestBps > 0 && (
-                      <tr className="border-b text-gray-500 italic">
-                        <td className="py-1.5">Net Interest (mandatory)</td>
-                        <td className="py-1.5 text-right">
-                          {formatCurrency(netInterestFraction * taxAmount)}
-                        </td>
-                        <td className="py-1.5 text-right">
-                          {formatCurrency(netInterestFraction * taxAmount)}
-                        </td>
-                        <td className="py-1.5 text-right">{formatCurrency(0)}</td>
-                      </tr>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
-                      const groupItems = sortedPairedData.filter((item) =>
-                        group.functionIds.includes(String(item.id)),
-                      );
-                      if (!groupItems.length) return null;
-                      const groupYours = groupItems.reduce(
-                        (sum, item) =>
-                          sum +
-                          Math.round(
-                            (item.participantPercent / 100) * allocatableFraction * taxAmount,
-                          ),
-                        0,
-                      );
-                      const groupActual = groupItems.reduce(
-                        (sum, item) =>
-                          sum +
-                          Math.round((item.budgetPercent / 100) * allocatableFraction * taxAmount),
-                        0,
-                      );
-                      const groupDiff = groupYours - groupActual;
-                      return (
-                        <Fragment key={group.id}>
-                          <tr>
-                            <td
-                              colSpan={4}
-                              className="border-b border-gray-300 pt-4 pb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:border-gray-600 dark:text-gray-400"
-                            >
-                              {group.label}
-                            </td>
-                          </tr>
-                          {groupItems.map((item) => {
-                            const yourDollars = Math.round(
-                              (item.participantPercent / 100) * allocatableFraction * taxAmount,
-                            );
-                            const actualDollars = Math.round(
-                              (item.budgetPercent / 100) * allocatableFraction * taxAmount,
-                            );
-                            const difference = yourDollars - actualDollars;
-                            return (
-                              <tr
-                                key={item.code}
-                                className="border-b border-gray-100 dark:border-gray-800"
-                              >
-                                <td className="py-1.5 pl-3">{item.category}</td>
-                                <td className="py-1.5 text-right">{formatCurrency(yourDollars)}</td>
-                                <td className="py-1.5 text-right">
-                                  {formatCurrency(actualDollars)}
-                                </td>
-                                <td className="py-1.5 text-right">
-                                  {formatSignedCurrency(difference)}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                          <tr className="border-b border-gray-300 dark:border-gray-600">
-                            <td className="py-1.5 pl-3 text-xs font-semibold text-gray-500">
-                              Subtotal
-                            </td>
-                            <td className="py-1.5 text-right font-semibold">
-                              {formatCurrency(groupYours)}
-                            </td>
-                            <td className="py-1.5 text-right font-semibold">
-                              {formatCurrency(groupActual)}
-                            </td>
-                            <td className="py-1.5 text-right font-semibold">
-                              {formatSignedCurrency(groupDiff)}
-                            </td>
-                          </tr>
-                        </Fragment>
-                      );
-                    })}
-                    {netInterestBps > 0 && (
-                      <tr className="border-b text-gray-500 italic">
-                        <td className="py-1.5">Net Interest (mandatory)</td>
-                        <td className="py-1.5 text-right">
-                          {formatCurrency(netInterestFraction * taxAmount)}
-                        </td>
-                        <td className="py-1.5 text-right">
-                          {formatCurrency(netInterestFraction * taxAmount)}
-                        </td>
-                        <td className="py-1.5 text-right">{formatCurrency(0)}</td>
-                      </tr>
-                    )}
-                  </>
-                )}
-              </tbody>
-              <tfoot>
-                <tr className="border-t font-semibold">
-                  <td className="pt-2">Total</td>
-                  <td className="pt-2 text-right">{formatCurrency(taxAmount)}</td>
-                  <td className="pt-2 text-right">{formatCurrency(taxAmount)}</td>
-                  <td />
-                </tr>
-              </tfoot>
-            </table>
-          )}
-        </div>
-      )}
+      <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} />
     </div>
-  );
-}
-
-type PairedItem = {
-  code: string;
-  category: string;
-  participantPercent: number;
-  budgetPercent: number;
-  delta: number;
-};
-
-function PercentBadge({ value, className }: WithClassName<{ value: number }>) {
-  return (
-    <Badge variant="ghost" className={cn("font-mono tabular-nums", className)}>
-      {formatPercent(value)}
-    </Badge>
-  );
-}
-
-function DeltaBadge({ value }: { value: number }) {
-  const nearZero = Math.abs(value) < 0.2;
-  return (
-    <Badge
-      variant="outline"
-      className={cn(
-        "font-mono tabular-nums border-transparent",
-        nearZero
-          ? "bg-surface-3 text-ink-faint"
-          : value > 0
-            ? "bg-you-soft text-you"
-            : "bg-them-soft text-them",
-      )}
-    >
-      {formatSignedPercent(value)}
-    </Badge>
-  );
-}
-
-function ComparisonLegend({ ombYear }: { ombYear: number }) {
-  const fy = String(ombYear).slice(2);
-  return (
-    <div className="mb-4 mt-4 flex items-center gap-5 text-sm">
-      <div className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded-sm bg-you" />
-        <span>Your priorities</span>
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded-sm bg-them" />
-        <span>Washington (FY{fy})</span>
-      </div>
-    </div>
-  );
-}
-
-function ComparisonRow({ item, maxPercent }: { item: PairedItem; maxPercent: number }) {
-  const scale = maxPercent > 0 ? 100 / maxPercent : 1;
-  return (
-    <article className="py-3">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium">{item.category}</span>
-        <div className="flex shrink-0 items-center gap-1">
-          <PercentBadge value={item.participantPercent} className="text-you" />
-          <span className="text-xs text-muted-foreground">vs</span>
-          <PercentBadge value={item.budgetPercent} className="text-them" />
-          <DeltaBadge value={item.delta} />
-        </div>
-      </div>
-      <div className="mt-2 flex flex-col gap-1">
-        <div
-          className="h-2 rounded-full bg-you"
-          style={{ width: `${item.participantPercent * scale}%` }}
-        />
-        <div
-          className="h-2 rounded-full bg-them"
-          style={{ width: `${item.budgetPercent * scale}%` }}
-        />
-      </div>
-    </article>
   );
 }
 

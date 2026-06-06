@@ -1,7 +1,8 @@
 import { Route } from "./+types/share-allocation.route";
 import { invariant } from "@epic-web/invariant";
 import { AllocationService } from "@/services/allocation-service.server.ts";
-import CompareAllocation from "@/components/compare-allocation.tsx";
+import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
+import { AllocationViewer } from "@/components/allocation-viewer.tsx";
 import { Button } from "@/ui/button.tsx";
 import { href, Link } from "react-router";
 
@@ -14,19 +15,23 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   const pairedData = await AllocationService.zipAllocationWithUsFiscalBudget(allocation);
 
+  const ombData = getOmbBudgetByCodeForYear(2025);
+  const netInterestBps = ombData["net_interest"]?.bps ?? 0;
+
   return {
     allocation,
     pairedData,
+    netInterestBps,
+    ombYear: 2025,
   };
 }
 
 export default function ShareAllocationRoute({ loaderData, params }: Route.ComponentProps) {
-  const { allocation, pairedData } = loaderData;
+  const { pairedData, netInterestBps, ombYear } = loaderData;
 
   return (
     <div>
-      <h1>{params.publicId}'s fiscal budget & the US fiscal budget</h1>
-      <CompareAllocation className="mt-8" pairedData={pairedData} />
+      <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} subject="they" />
       <BuildYourOwnBudget />
     </div>
   );

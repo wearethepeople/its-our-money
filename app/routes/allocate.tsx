@@ -6,7 +6,7 @@ import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { z } from "zod";
 
 import { ErrorList } from "@/components/forms";
-import { ViewSchemeToggle } from "@/components/view-scheme-toggle.tsx";
+import { ViewToggle } from "@/components/view-toggle.tsx";
 import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
 import { FUNCTIONS } from "@/constants/budget-functions.ts";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
@@ -33,6 +33,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "#app/components/ui/collapsible.tsx";
+import {
+  TypographyH1,
+  TypographyLead,
+  TypographyH2,
+  TypographyP,
+} from "#app/components/ui/typography.tsx";
+import { Button } from "#app/components/ui/button.tsx";
+import { Separator } from "#app/components/ui/separator.tsx";
 
 const formSchema = z.object({
   allocations: z.array(
@@ -132,7 +140,7 @@ export default function AllocateRoute() {
   const actionData = useActionData<typeof action>();
   const { existingAllocation } = useLoaderData<typeof loader>();
   const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false);
-  const [viewScheme, setViewScheme] = useState<ViewSchemeId>("flat");
+  const [viewScheme, setViewScheme] = useState<ViewSchemeId>("public_domain");
 
   const contentRef = useRef<HTMLElement>(null);
   const { sentinelRef, progress } = useScrollProgress(contentRef);
@@ -232,17 +240,17 @@ export default function AllocateRoute() {
             </div>
           )}
           <CollapsibleContent>
-            <Card className="bg-surface-3 border-accent">
-              <CardTitle className="px-4 uppercase">What this pays for</CardTitle>
+            <Card className="bg-surface-3 border-line-2 border-l-2 border-l-you/60 mt-4">
+              <CardTitle className="px-4 uppercase text-ink-muted">What this pays for</CardTitle>
               {isNetInterest && (
-                <CardContent className="text-ink-faint italic">
+                <CardContent className="text-ink-2 italic">
                   Mandatory obligation — this is not a priority you set. It reflects the cost of
                   existing national debt and cannot be redirected.
                 </CardContent>
               )}
-              <CardContent className="text-ink-faint">{fnData.description}</CardContent>
+              <CardContent className="text-ink-2">{fnData.description}</CardContent>
               {fnData.commonUses && fnData.commonUses.length > 0 && (
-                <CardContent>
+                <CardContent className="text-ink-2">
                   <ul>
                     {fnData.commonUses.map((use, i) => (
                       <li key={i} className="ml-4 list-disc">
@@ -262,15 +270,19 @@ export default function AllocateRoute() {
   return (
     <section ref={contentRef}>
       <div>
-        <p>This is a place to describe things.</p>
+        <TypographyH1 className="mb-3">Your turn.</TypographyH1>
+        <TypographyLead className="mb-8">
+          Drag the sliders to match your priorities — where you'd put your money. You know your
+          values, so no expertise required. Tap any title for context.
+        </TypographyLead>
       </div>
-      <form method="post" {...getFormProps(form)}>
+      <form className="flex flex-col gap-4" method="post" {...getFormProps(form)}>
         <HoneypotInputs />
         {/* Legend + toggle */}
         <div className="py-4 sticky top-(--header-height) bg-background z-10">
-          <div className="flex gap-8 items-center">
+          <div className="flex gap-4 items-center">
             <Progress value={progress * 100} className="grow" />
-            <ViewSchemeToggle value={viewScheme} onChange={setViewScheme} />
+            <ViewToggle value={viewScheme} onChange={setViewScheme} />
           </div>
         </div>
         {/* Allocations */}
@@ -284,10 +296,16 @@ export default function AllocateRoute() {
               {renderAllocationItem("net_interest")}
             </AllocationCard>
           ) : (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-8">
               {PUBLIC_DOMAIN_SCHEME.groups.map((group) => (
                 <div key={group.id}>
-                  <div className={cn("uppercase", group.color)}>{group.label}</div>
+                  <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
+                    <span
+                      className="size-3 shrink-0 rounded-sm"
+                      style={{ backgroundColor: `var(${group.color.replace(/^text-/, "--")})` }}
+                    />
+                    {group.label}
+                  </h3>
                   <AllocationCard>
                     {group.functionIds.map((fid) => {
                       const entry = allocationsByFunctionId.get(fid);
@@ -303,17 +321,20 @@ export default function AllocateRoute() {
         </div>
         <div ref={sentinelRef} />
         <ErrorList id={form.errorId} errors={form.errors} />
-        <div className="border-primary mt-8 flex items-center justify-between gap-8 rounded-md border p-4">
-          <p>
-            Your priorities will be scaled to percentages so your choices and Washington's budget
-            share the same measure — then you can see where you agree, and where you don't.
-          </p>
-          <button
+        <Separator className="my-8" />
+        <div className="flex flex-col">
+          <TypographyH2 className="mb-0">How's that feel?</TypographyH2>
+          <TypographyLead className="mb-12">
+            Now that you've set your priorities, they'll be mapped against Washington's. See where
+            you agree, and where you don't. Some of it might surprise you.
+          </TypographyLead>
+          <Button
             type="submit"
-            className="font-inherit m-0 flex h-10 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3.5 text-base leading-6 font-medium text-gray-900 outline-0 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:border-t-gray-300 active:bg-gray-200 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] data-[disabled]:text-gray-500 hover:data-[disabled]:bg-gray-50 active:data-[disabled]:border-t-gray-200 active:data-[disabled]:bg-gray-50 active:data-[disabled]:shadow-none"
+            className="h-10 border-ink border-2 bg-surface font-semibold mx-auto py-6 px-7 mb-4"
+            variant="outline"
           >
-            Compare to D.C.'s
-          </button>
+            See how your priorities compare
+          </Button>
         </div>
       </form>
     </section>
@@ -321,5 +342,5 @@ export default function AllocateRoute() {
 }
 
 function AllocationCard({ children }: React.PropsWithChildren) {
-  return <Card className="bg-surface-2 border p-4">{children}</Card>;
+  return <Card className="bg-surface-2 border p-6">{children}</Card>;
 }

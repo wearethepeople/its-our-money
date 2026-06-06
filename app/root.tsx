@@ -5,6 +5,7 @@ import {
   Link,
   Links,
   Meta,
+  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -152,7 +153,7 @@ function App() {
     <OpenImgContextProvider optimizerEndpoint="/resources/images" getSrc={getImgSrc}>
       <div className="mx-auto flex min-h-screen flex-col justify-between">
         <header
-          className="bg-background text-ink border-b py-2 sticky top-0 z-10 mb-8"
+          className="bg-background border-b py-2 sticky top-0 z-10 mb-8"
           ref={(el) => {
             if (el)
               document.documentElement.style.setProperty("--header-height", `${el.offsetHeight}px`);
@@ -160,21 +161,34 @@ function App() {
         >
           <nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
             <div>
-              <h1 className="font-extrabold">
-                <Link to="/">It’s Our Money</Link>
+              <h1 className="font-extrabold no-underline text-xl">
+                <Link to="/" className="no-underline">
+                  It’s Our Money
+                </Link>
               </h1>
             </div>
             {data.participant && (
-              <div>
-                <Link
+              <div className="flex gap-4">
+                <NavLink
                   to={href("/allocate/:year", {
                     year: new Date().getFullYear().toString(),
                   })}
+                  end
+                  className={({ isActive }) =>
+                    isActive ? "underline font-semibold" : "text-ink-faint no-underline"
+                  }
                 >
                   Your allocation
-                </Link>
-                &nbsp;&nbsp;
-                <Link to={href("/juxtapose")}>Comparison</Link>
+                </NavLink>
+                <NavLink
+                  to={href("/juxtapose")}
+                  end
+                  className={({ isActive }) =>
+                    isActive ? "underline font-semibold" : "text-ink-faint no-underline"
+                  }
+                >
+                  Comparison
+                </NavLink>
               </div>
             )}
           </nav>
@@ -184,17 +198,25 @@ function App() {
           <Outlet />
         </main>
 
-        <footer className="container mt-8 flex justify-between pb-5">
-          <p className="text-sm leading-snug">
-            A&nbsp;
-            <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
-              We&nbsp;(ARE)&nbsp;the&nbsp;People
-            </Link>
-            &nbsp;project.
-            <br />
-            <small>&copy; 2026 We (ARE) the People</small>
-          </p>
-          <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+        <footer
+          className="mt-8 py-2 border-t border-t-line-2 bg-surface text-ink-muted"
+          ref={(el) => {
+            if (el)
+              document.documentElement.style.setProperty("--footer-height", `${el.offsetHeight}px`);
+          }}
+        >
+          <div className="container flex justify-between">
+            <p className="text-sm leading-snug text-ink-muted">
+              A&nbsp;
+              <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
+                We&nbsp;(ARE)&nbsp;the&nbsp;People
+              </Link>
+              &nbsp;project.
+              <br />
+              <small className="text-ink-muted">&copy; 2026 We (ARE) the People</small>
+            </p>
+            <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+          </div>
         </footer>
       </div>
       <EpicToaster closeButton position="top-center" theme={theme} />

@@ -163,9 +163,9 @@ export function CheckboxField({
           aria-invalid={errorId ? true : undefined}
           aria-describedby={errorId}
           checked={input.value === checkedValue}
-          onCheckedChange={(state) => {
-            input.change(state.valueOf() ? checkedValue : "");
-            buttonProps.onCheckedChange?.(state);
+          onCheckedChange={(state, event) => {
+            input.change(state ? checkedValue : "");
+            buttonProps.onCheckedChange?.(state, event);
           }}
           onFocus={(event) => {
             input.focus();
@@ -175,7 +175,6 @@ export function CheckboxField({
             input.blur();
             buttonProps.onBlur?.(event);
           }}
-          type="button"
         />
         <label
           htmlFor={id}
