@@ -157,8 +157,10 @@ export function AllocationViewer({
                       {group.label}
                     </h3>
                     <div className="divide-y divide-line">
-                      {groupItems.map((item) => (
-                        <ComparisonRow key={item.code} item={item} maxPercent={maxPercent} />
+                      {groupItems.map((item, index) => (
+                        <div key={item.code} className={index % 2 === 1 ? "bg-surface-2" : ""}>
+                          <ComparisonRow item={item} maxPercent={maxPercent} />
+                        </div>
                       ))}
                     </div>
                   </div>
