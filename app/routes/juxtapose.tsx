@@ -422,14 +422,14 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                       return (
                         <tr key={item.code} className="border-b border-b-line">
                           <td className="py-1.5">{item.category}</td>
-                          <td className="py-1.5 text-right numeric">
+                          <td className="py-1.5 text-right numeric text-you">
                             {formatCurrency(yourDollars)}
                           </td>
-                          <td className="py-1.5 text-right numeric">
+                          <td className="py-1.5 text-right numeric text-them">
                             {formatCurrency(actualDollars)}
                           </td>
                           <td className="py-1.5 text-right numeric">
-                            {formatSignedCurrency(difference)}
+                            <DeltaCurrencyBadge value={difference} />
                           </td>
                         </tr>
                       );
@@ -437,13 +437,15 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                     {netInterestBps > 0 && (
                       <tr className="border-b border-b-line text-locked">
                         <td className="py-1.5">Net Interest (mandatory)</td>
-                        <td className="py-1.5 text-right numeric">
+                        <td className="py-1.5 text-right numeric text-you">
+                          {formatCurrency(netInterestFraction * taxAmount)}
+                        </td>
+                        <td className="py-1.5 text-right numeric text-them">
                           {formatCurrency(netInterestFraction * taxAmount)}
                         </td>
                         <td className="py-1.5 text-right numeric">
-                          {formatCurrency(netInterestFraction * taxAmount)}
+                          <DeltaCurrencyBadge value={0} />
                         </td>
-                        <td className="py-1.5 text-right numeric">{formatCurrency(0)}</td>
                       </tr>
                     )}
                   </>
@@ -490,28 +492,28 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                             return (
                               <tr key={item.code} className="border-b border-line">
                                 <td className="py-1.5 pl-3">{item.category}</td>
-                                <td className="py-1.5 text-right numeric">
+                                <td className="py-1.5 text-right numeric text-you">
                                   {formatCurrency(yourDollars)}
                                 </td>
-                                <td className="py-1.5 text-right numeric">
+                                <td className="py-1.5 text-right numeric text-them">
                                   {formatCurrency(actualDollars)}
                                 </td>
                                 <td className="py-1.5 text-right numeric">
-                                  {formatSignedCurrency(difference)}
+                                  <DeltaCurrencyBadge value={difference} />
                                 </td>
                               </tr>
                             );
                           })}
                           <tr className="border-b border-line">
                             <td className="py-1.5 pl-3 text-xs font-semibold">Subtotal</td>
-                            <td className="py-1.5 text-right font-semibold numeric">
+                            <td className="py-1.5 text-right font-semibold numeric text-you">
                               {formatCurrency(groupYours)}
                             </td>
-                            <td className="py-1.5 text-right font-semibold numeric">
+                            <td className="py-1.5 text-right font-semibold numeric text-them">
                               {formatCurrency(groupActual)}
                             </td>
                             <td className="py-1.5 text-right font-semibold numeric">
-                              {formatSignedCurrency(groupDiff)}
+                              <DeltaCurrencyBadge value={groupDiff} />
                             </td>
                           </tr>
                         </Fragment>
@@ -520,13 +522,15 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                     {netInterestBps > 0 && (
                       <tr className="border-b border-line text-locked">
                         <td className="py-1.5">Net Interest (mandatory)</td>
-                        <td className="py-1.5 text-right">
+                        <td className="py-1.5 text-right text-you">
+                          {formatCurrency(netInterestFraction * taxAmount)}
+                        </td>
+                        <td className="py-1.5 text-right text-them">
                           {formatCurrency(netInterestFraction * taxAmount)}
                         </td>
                         <td className="py-1.5 text-right">
-                          {formatCurrency(netInterestFraction * taxAmount)}
+                          <DeltaCurrencyBadge value={0} />
                         </td>
-                        <td className="py-1.5 text-right">{formatCurrency(0)}</td>
                       </tr>
                     )}
                   </>
@@ -535,8 +539,8 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
               <tfoot>
                 <tr className="border-t border-line font-semibold">
                   <td className="pt-2">Total</td>
-                  <td className="pt-2 text-right numeric">{formatCurrency(taxAmount)}</td>
-                  <td className="pt-2 text-right numeric">{formatCurrency(taxAmount)}</td>
+                  <td className="pt-2 text-right numeric text-you">{formatCurrency(taxAmount)}</td>
+                  <td className="pt-2 text-right numeric text-them">{formatCurrency(taxAmount)}</td>
                   <td />
                 </tr>
               </tfoot>
@@ -579,6 +583,25 @@ function DeltaBadge({ value }: { value: number }) {
       )}
     >
       {formatSignedPercent(value)}
+    </Badge>
+  );
+}
+
+function DeltaCurrencyBadge({ value }: { value: number }) {
+  const nearZero = Math.abs(value) < 1;
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "font-mono tabular-nums border-transparent",
+        nearZero
+          ? "bg-surface-3 text-ink-faint"
+          : value > 0
+            ? "bg-you-soft text-you"
+            : "bg-them-soft text-them",
+      )}
+    >
+      {formatSignedCurrency(value)}
     </Badge>
   );
 }
