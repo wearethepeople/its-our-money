@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+Claude can run all of the following commands without asking for permission.
+
 ```bash
 npm run dev            # start dev server with MSW mocks on port 3000
 npm run dev:no-mocks   # dev server without mocks
@@ -14,12 +16,14 @@ npm run test           # vitest (watch)
 npm run test -- --run  # vitest single run
 npx vitest app/utils/auth.server.test.ts  # run a single test file
 
-npm run test:e2e:dev   # Playwright UI mode
+npm run test:e2e:dev   # Playwright UI mode; use this instead of npx playwright test
 npm run test:e2e:run   # Playwright headless (builds first)
 
 npx prisma migrate dev --name <name>   # create + apply a migration
 npx prisma studio                       # browse the DB
 npx prisma db seed                      # seed via prisma/seed.ts
+
+sed
 ```
 
 ## Architecture

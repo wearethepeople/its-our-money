@@ -323,17 +323,28 @@ export default function AllocateRoute() {
         <ErrorList id={form.errorId} errors={form.errors} />
         <Separator className="my-8" />
         <div className="flex flex-col">
-          <TypographyH2 className="mb-0">How's that feel?</TypographyH2>
-          <TypographyLead className="mb-12">
-            Now that you've set your priorities, they'll be mapped against Washington's. See where
-            you agree, and where you don't. Some of it might surprise you.
-          </TypographyLead>
+          {existingAllocation ? (
+            <>
+              <TypographyH2 className="mb-0">Fine-tuning?</TypographyH2>
+              <TypographyLead className="mb-12">
+                Adjust anything. Your updated priorities will replace the previous comparison.
+              </TypographyLead>
+            </>
+          ) : (
+            <>
+              <TypographyH2 className="mb-0">How's that feel?</TypographyH2>
+              <TypographyLead className="mb-12">
+                Now that you've set your priorities, they'll be mapped against Washington's. See
+                where you agree, and where you don't. Some of it might surprise you.
+              </TypographyLead>
+            </>
+          )}
           <Button
             type="submit"
             className="h-10 border-ink border-2 bg-surface font-semibold mx-auto py-6 px-7 mb-4"
             variant="outline"
           >
-            See how your priorities compare
+            {existingAllocation ? "Update your comparison" : "See how your priorities compare"}
           </Button>
         </div>
       </form>

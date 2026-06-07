@@ -15,10 +15,18 @@ import { checkHoneypot } from "@/utils/honeypot.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
 import { useState } from "react";
-import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
-import { Card } from "#app/components/ui/card.tsx";
+import {
+  TypographyH1,
+  TypographyH2,
+  TypographyH3,
+  TypographyLead,
+  TypographyP,
+} from "#app/components/ui/typography.tsx";
+import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { AllocationViewer } from "@/components/allocation-viewer.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
+import { Copy } from "lucide-react";
+import { InsightCarousel } from "@/components/insight-carousel.tsx";
 
 const manageAllocationSchema = z.object({
   intent: z.enum(["publish", "unpublish"]),
@@ -193,41 +201,46 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             breakdown, nothing more. No name, no identifying information — just your priorities.
           </TypographyP>
           <p className="text-sm text-you">
-            Want to change your numbers?{" "}
+            Want to change your numbers?
+            <br />
             <Link
               to={href("/allocate/:year", {
                 year: new Date().getFullYear().toString(),
               })}
             >
-              Go back to the sliders
+              Go back to your allocation
             </Link>
             .
           </p>
         </div>
       </div>
-      <Card className="flex shrink-0 flex-row gap-4 rounded-lg border p-4">
-        <div>
-          <Form method="post" {...getFormProps(form)}>
+      <Card className="rounded-lg border p-4">
+        <CardTitle>
+          Your allocation is{" "}
+          <Form method="post" {...getFormProps(form)} className="inline">
             <HoneypotInputs />
             <input type="hidden" name="intent" value={publishButtonText.toLowerCase()} />
-            <Button>{publishButtonText}</Button>
+            <Button type="submit" size="xs">
+              {publishState}
+            </Button>
           </Form>
-          <div id={form.errorId} className="mb-2 text-sm text-red-500">
-            {form.errors}
-          </div>
-        </div>
-        <div>
-          <p className="mb-1 text-base">
-            Your allocation is <strong className="font-semibold">{publishState}</strong>.
-          </p>
+        </CardTitle>
+        <CardContent>
           {allocation.publicId && publishState === "Published" && (
             <div className="mt-3">
               <ShareInfo publicId={allocation.publicId} url={url} />
             </div>
           )}
-        </div>
+          <div id={form.errorId} className="mb-2 text-sm text-red-500">
+            {form.errors}
+          </div>
+        </CardContent>
       </Card>
-      <Separator className="my-6" />
+      <TypographyH2 className="border-b border-b-muted-foreground mt-12 mb-6">
+        Insights
+      </TypographyH2>
+      <InsightCarousel pairedData={pairedData} />
+      <TypographyH2 className="border-b border-b-muted-foreground">The numbers</TypographyH2>
       <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} />
     </div>
   );
@@ -246,17 +259,19 @@ function ShareInfo({ publicId, url }: { publicId: string; url: string }) {
 
   return (
     <>
-      <p className="mb-2">Share this link with your friends to see how they compare to you:</p>
-      <div className="flex items-center gap-2">
+      <p className="mb-4">Share and see where you agree.</p>
+      <div className="flex gap-2">
         <input
           readOnly
           type="text"
           value={shareUrl}
-          className="bg-muted min-w-0 flex-1 rounded border px-3 py-1.5 text-sm"
+          onClick={handleCopy}
           onFocus={(e) => e.currentTarget.select()}
+          className="bg-muted block w-full cursor-pointer rounded border border-line px-3 py-1.5 text-sm"
+          title={copied ? "Copied!" : "Click to copy"}
         />
-        <Button type="button" variant="outline" size="sm" onClick={handleCopy}>
-          {copied ? "Copied!" : "Copy"}
+        <Button variant="outline" onClick={handleCopy} className="bg-line">
+          <Copy />
         </Button>
       </div>
     </>
