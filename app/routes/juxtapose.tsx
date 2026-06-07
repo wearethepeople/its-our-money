@@ -15,11 +15,18 @@ import { checkHoneypot } from "@/utils/honeypot.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
 import { useState } from "react";
-import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
+import {
+  TypographyH1,
+  TypographyH2,
+  TypographyH3,
+  TypographyLead,
+  TypographyP,
+} from "#app/components/ui/typography.tsx";
 import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { AllocationViewer } from "@/components/allocation-viewer.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
 import { Copy } from "lucide-react";
+import { InsightCarousel } from "@/components/insight-carousel.tsx";
 
 const manageAllocationSchema = z.object({
   intent: z.enum(["publish", "unpublish"]),
@@ -229,7 +236,11 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
           </div>
         </CardContent>
       </Card>
-      <Separator className="my-6" />
+      <TypographyH2 className="border-b border-b-muted-foreground mt-12 mb-6">
+        Insights
+      </TypographyH2>
+      <InsightCarousel pairedData={pairedData} />
+      <TypographyH2 className="border-b border-b-muted-foreground">The numbers</TypographyH2>
       <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} />
     </div>
   );
