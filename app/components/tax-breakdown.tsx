@@ -4,6 +4,10 @@ import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-sc
 import { Card } from "#app/components/ui/card.tsx";
 import { formatCurrency } from "@/utils/numbers.ts";
 import { DeltaCurrencyBadge, type PairedItem } from "@/components/comparison.tsx";
+import { Button } from "@/ui/button.tsx";
+
+const MIN_RANDOM_TAX = 7000;
+const MAX_RANDOM_TAX = 24000;
 
 export function TaxBreakdown({
   pairedData,
@@ -11,8 +15,6 @@ export function TaxBreakdown({
   viewScheme,
   subject = "you",
   stickyHeaderClassName,
-  extraControls,
-  belowTable,
 }: {
   /** Items in the order rows should render. */
   pairedData: PairedItem[];
@@ -20,10 +22,6 @@ export function TaxBreakdown({
   viewScheme: ViewSchemeId;
   subject?: "you" | "they";
   stickyHeaderClassName?: string;
-  /** Renders next to the tax input; receives a setter for the amount. */
-  extraControls?: (setTaxAmount: (amount: number | "") => void) => ReactNode;
-  /** Renders beneath the table once an amount is entered. */
-  belowTable?: ReactNode;
 }) {
   const [taxAmount, setTaxAmount] = useState<number | "">("");
 
@@ -58,7 +56,18 @@ export function TaxBreakdown({
               placeholder="0"
             />
           </div>
-          {extraControls?.(setTaxAmount)}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setTaxAmount(
+                Math.floor(Math.random() * (MAX_RANDOM_TAX - MIN_RANDOM_TAX + 1)) + MIN_RANDOM_TAX,
+              )
+            }
+          >
+            Use random amount
+          </Button>
         </div>
       </Card>
       {taxAmount !== "" && taxAmount > 0 && (
@@ -211,7 +220,6 @@ export function TaxBreakdown({
               </tr>
             </tfoot>
           </table>
-          {belowTable}
         </>
       )}
     </div>

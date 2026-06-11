@@ -5,7 +5,7 @@ import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { AllocationService } from "@/services/allocation-service.server.ts";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
 import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
-import { Button, buttonVariants } from "@/ui/button.tsx";
+import { Button } from "@/ui/button.tsx";
 import {
   ComparisonLegend,
   ComparisonList,
@@ -33,9 +33,6 @@ const INTERSTITIAL_INSIGHTS = {
   "insight-a": "biggest-departures",
   "insight-b": "concentrated-bet",
 } as const satisfies Partial<Record<Step, InsightId>>;
-
-const MIN_RANDOM_TAX = 7000;
-const MAX_RANDOM_TAX = 24000;
 
 type ViewPrefs = {
   sortMode: SortMode;
@@ -130,7 +127,9 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             Next
           </Button>
         )}
-        {stepIndex + 1 === STEPS.length && <Link to={href("/juxtapose")}>Finish</Link>}
+        {stepIndex + 1 === STEPS.length && (
+          <Link to={href("/juxtapose")}>Go to Comparison dashboard</Link>
+        )}
       </div>
       <div className="flex items-center gap-1.5">
         {STEPS.map((s, i) => (
@@ -208,6 +207,10 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
               of your total, and set them against the government's actual spending shares.
             </TypographyLead>
             <TypographyP className="mb-6">
+              The bars are scaled to the largest share on this page, not a 0–100% scale, ie. the
+              longest bar is the biggest slice, not the whole budget.
+            </TypographyP>
+            <TypographyP className="mb-6">
               The badge on the right is the gap: where you'd spend more than Washington, and where
               you'd spend less.
             </TypographyP>
@@ -234,36 +237,6 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
               netInterestBps={netInterestBps}
               viewScheme="flat"
               subject="you"
-              extraControls={(setTaxAmount) => (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setTaxAmount(
-                        Math.floor(Math.random() * (MAX_RANDOM_TAX - MIN_RANDOM_TAX + 1)) +
-                          MIN_RANDOM_TAX,
-                      )
-                    }
-                  >
-                    Use random amount
-                  </Button>
-                  <Link
-                    to={href("/juxtapose")}
-                    className={buttonVariants({ variant: "ghost", size: "sm" })}
-                  >
-                    Skip
-                  </Link>
-                </>
-              )}
-              belowTable={
-                <div className="mt-6 flex justify-center">
-                  <Link to={href("/juxtapose")} className={buttonVariants({ variant: "default" })}>
-                    Go to Comparison dashboard
-                  </Link>
-                </div>
-              }
             />
           </section>
         )}
