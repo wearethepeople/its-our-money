@@ -19,13 +19,11 @@ import { clearFirstLookStep } from "@/utils/first-look-progress.ts";
 import {
   TypographyH1,
   TypographyH2,
-  TypographyH3,
   TypographyLead,
   TypographyP,
 } from "#app/components/ui/typography.tsx";
 import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { AllocationViewer } from "@/components/allocation-viewer.tsx";
-import { Separator } from "#app/components/ui/separator.tsx";
 import { Copy } from "lucide-react";
 import { InsightCarousel } from "@/components/insight-carousel.tsx";
 
@@ -218,14 +216,14 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             breakdown, nothing more. No name, no identifying information — just your priorities.
           </TypographyP>
           <p className="text-sm text-you">
-            Want to change your numbers?
+            Want to update your priorities?
             <br />
             <Link
               to={href("/priorities/:year", {
                 year: new Date().getFullYear().toString(),
               })}
             >
-              Go back to your priorities
+              Go back to the sliders
             </Link>
             .
           </p>
