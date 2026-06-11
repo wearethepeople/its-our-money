@@ -62,7 +62,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
   }
 
-  return redirect(href("/allocate/:year", { year: new Date().getFullYear().toString() }));
+  return redirect(href("/priorities/:year", { year: new Date().getFullYear().toString() }));
 }
 
 export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {

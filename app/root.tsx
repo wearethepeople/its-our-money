@@ -189,7 +189,7 @@ function App() {
             {data.participant && !inFirstLook && (
               <div className="flex gap-4">
                 <NavLink
-                  to={href("/allocate/:year", {
+                  to={href("/priorities/:year", {
                     year: new Date().getFullYear().toString(),
                   })}
                   end
@@ -197,7 +197,7 @@ function App() {
                     isActive ? "underline font-semibold" : "text-ink-faint no-underline"
                   }
                 >
-                  Allocation
+                  Priorities
                 </NavLink>
                 <Separator orientation="vertical" />
                 <NavLink

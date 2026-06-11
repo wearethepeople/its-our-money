@@ -5,7 +5,7 @@ const year = new Date().getFullYear().toString();
 test.beforeEach(async ({ page, navigate, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
-  await navigate("/allocate/:year", { year });
+  await navigate("/priorities/:year", { year });
   await page.getByRole("button", { name: /see how your priorities compare/i }).click();
   await page.waitForURL(/\/juxtapose$/);
 });

@@ -45,7 +45,7 @@ function BuildYourOwnBudget() {
           Have you ever wondered why it is that you give the federal government your money, but you
           don't get to decide where it goes?
         </div>
-        <Link to={href("/allocate/:year", { year: "2025" })}>
+        <Link to={href("/priorities/:year", { year: "2025" })}>
           <Button>Make your own budget</Button>
         </Link>
       </div>

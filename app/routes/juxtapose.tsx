@@ -65,7 +65,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
   }
 
-  return redirect(href("/allocate/:year", { year: new Date().getFullYear().toString() }));
+  return redirect(href("/priorities/:year", { year: new Date().getFullYear().toString() }));
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -221,11 +221,11 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             Want to change your numbers?
             <br />
             <Link
-              to={href("/allocate/:year", {
+              to={href("/priorities/:year", {
                 year: new Date().getFullYear().toString(),
               })}
             >
-              Go back to your allocation
+              Go back to your priorities
             </Link>
             .
           </p>

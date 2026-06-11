@@ -20,7 +20,7 @@ import {
   getParticipantBySession,
 } from "@/utils/participant-session.server.ts";
 
-import { type Route } from "./+types/allocate";
+import { type Route } from "./+types/priorities";
 import { getFunctionDetailsById } from "@/utils/budget-data.ts";
 import { AllocationService } from "@/services/allocation-service.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
@@ -137,7 +137,7 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect(isFirstTime ? href("/first-look") : href("/juxtapose"), { headers });
 }
 
-export default function AllocateRoute() {
+export default function PrioritiesRoute() {
   const actionData = useActionData<typeof action>();
   const { existingAllocation } = useLoaderData<typeof loader>();
   const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false);

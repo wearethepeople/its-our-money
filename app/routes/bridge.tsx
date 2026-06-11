@@ -33,7 +33,7 @@ export default function BridgeRoute() {
         </span>
       </TypographyLead>
       <a
-        href={href("/allocate/:year", { year: "2026" })}
+        href={href("/priorities/:year", { year: "2026" })}
         className={cn(
           buttonVariants({ variant: "default", size: "lg" }),
           "no-underline py-5 px- bg-line border border-ink-faint text-ink-faint",

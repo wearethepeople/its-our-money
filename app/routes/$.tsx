@@ -16,8 +16,8 @@ export function loader({ request, params }: Route.LoaderArgs) {
   const pathname = url.pathname;
   const currentYear = new Date().getFullYear().toString();
 
-  if (pathname.startsWith("/allocate")) {
-    return redirect(href("/allocate/:year", { year: currentYear }));
+  if (pathname.startsWith("/priorities")) {
+    return redirect(href("/priorities/:year", { year: currentYear }));
   }
 
   throw new Response("Not found", { status: 404 });
