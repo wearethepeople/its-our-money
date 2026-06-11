@@ -116,3 +116,12 @@ Note that at one point in the git history the follow routes had different paths:
 
 - `/priorities` was `/allocate`
 - `/comparison` was `/juxtapose`.
+
+### Page structure
+
+Most pages start begin with a headline and a lede:
+
+```
+<TypographyH1>Headline</TypographyH1>
+<TypographyLead>Sub headline with a period.</TypographyLead>
+```
