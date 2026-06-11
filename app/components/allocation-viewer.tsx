@@ -84,7 +84,7 @@ export function AllocationViewer({
         </div>
       </div>
       <div
-        className="flex border-b border-ink bg-background sticky top-[calc(var(--header-height)+var(--data-massage-height))]"
+        className="flex border-b border-muted-foreground bg-background sticky top-[calc(var(--header-height)+var(--data-massage-height))]"
         ref={(el) => {
           if (el)
             document.documentElement.style.setProperty("--tabs-height", `${el.offsetHeight}px`);
@@ -95,7 +95,7 @@ export function AllocationViewer({
           type="button"
           className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
             activeTab === "priorities"
-              ? "border-you"
+              ? "border-you bg-you/10"
               : "border-transparent text-ink-muted hover:text-ink"
           }`}
           onClick={() => setActiveTab("priorities")}
@@ -106,7 +106,7 @@ export function AllocationViewer({
           type="button"
           className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
             activeTab === "percentages"
-              ? "border-you"
+              ? "border-you bg-you/10"
               : "border-transparent text-ink-muted hover:text-ink"
           }`}
           onClick={() => setActiveTab("percentages")}
@@ -117,7 +117,7 @@ export function AllocationViewer({
           type="button"
           className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
             activeTab === "tax-breakdown"
-              ? "border-you"
+              ? "border-you bg-you/10"
               : "border-transparent text-ink-muted hover:text-ink"
           }`}
           onClick={() => setActiveTab("tax-breakdown")}
