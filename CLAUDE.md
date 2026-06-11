@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## You/Claude
 
-Claude can run all of the following commands without asking for permission.
+- Do not assume or contrive details
+- If you don't know what something is, ask
+- If you aren't sure about something call it out and provide any assumptions made
+-
+
+## Commands
 
 ```bash
 npm run dev            # start dev server with MSW mocks on port 3000
@@ -24,12 +29,14 @@ npx prisma studio                       # browse the DB
 npx prisma db seed                      # seed via prisma/seed.ts
 
 sed
+rg
+cat
 ```
 
 ## Architecture
 
 Built on [epic-stack](https://github.com/epicweb-dev/epic-stack): React Router v7, Express, SQLite via Prisma, Tailwind
-v4, Vitest, Playwright.
+v4, ShadCN w/BaseUI, Vitest, and Playwright.
 
 ### Path aliases (tsconfig.json)
 
@@ -45,10 +52,10 @@ Files with `.server.ts` are server-only. Files with `.client.tsx` are client-onl
 
 ### Application domain
 
-**It's Our Money** is an anonymous budget-allocation tool. Visitors allocate weights across US federal outlay functions,
+**It's Our Money** (https://www.itsourmoney.org) is an anonymous "budget values"-prioritization tool. Visitors prioritize weights across US federal outlay functions,
 compare their allocation to the actual OMB budget, and optionally publish their result.
 
-**User flow:** `/` → `/allocate/:year` → `/juxtapose` → optionally `/s/:publicId` (shared view)
+**User flow:** `/` → `/priorities/:year` → `/comparison` → optionally `/s/:publicId` (shared view)
 
 There are no user accounts. Participants are created automatically on first interaction and identified via a session
 cookie backed by the `Session` DB table.
@@ -102,3 +109,19 @@ Forms use [conform](https://conform.guide/) + Zod schemas. The `ConformSlider` c
 
 Icons are an SVG spritesheet. Use the `<Icon name="..." />` component (`app/components/ui/icon.tsx`). Add new icons via
 `npx sly add` (see `docs/icons.md`).
+
+### History
+
+Note that at one point in the git history the follow routes had different paths:
+
+- `/priorities` was `/allocate`
+- `/comparison` was `/juxtapose`.
+
+### Page structure
+
+Most pages start begin with a headline and a lede:
+
+```
+<TypographyH1>Headline</TypographyH1>
+<TypographyLead>Sub headline with a period.</TypographyLead>
+```

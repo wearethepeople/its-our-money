@@ -27,7 +27,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   });
 
   // @TODO: Redirect with toast and/or render a banner that describes the need to regenerate recovery link
-  return redirect("/allocate", {
+  return redirect("/priorities/2025", {
     headers: {
       "Set-Cookie": setCookie,
     },

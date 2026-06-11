@@ -1,4 +1,4 @@
-import { Route } from "./+types/juxtapose";
+import { Route } from "./+types/comparison";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { href, redirect, Form, data, Link } from "react-router";
 import { Button } from "@/ui/button.tsx";
@@ -14,17 +14,16 @@ import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { checkHoneypot } from "@/utils/honeypot.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { clearFirstLookStep } from "@/utils/first-look-progress.ts";
 import {
   TypographyH1,
   TypographyH2,
-  TypographyH3,
   TypographyLead,
   TypographyP,
 } from "#app/components/ui/typography.tsx";
 import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { AllocationViewer } from "@/components/allocation-viewer.tsx";
-import { Separator } from "#app/components/ui/separator.tsx";
 import { Copy } from "lucide-react";
 import { InsightCarousel } from "@/components/insight-carousel.tsx";
 
@@ -51,11 +50,20 @@ export async function loader({ request }: Route.LoaderArgs) {
       const ombData = getOmbBudgetByCodeForYear(2025);
       const netInterestBps = ombData["net_interest"]?.bps ?? 0;
 
+      // Reaching the comparison dashboard ends the first-look funnel,
+      // however the participant got here (Finish, Skip, or direct nav).
+      // Redirect so the root loader re-reads the participant and shows the
+      // nav immediately, rather than waiting for the next navigation.
+      if (participant.firstLookCompletedAt === null) {
+        await ParticipantService.markFirstLookCompleted(participant.id);
+        return redirect(href("/comparison"));
+      }
+
       return { allocation, pairedData, url, netInterestBps, ombYear: 2025 };
     }
   }
 
-  return redirect(href("/allocate/:year", { year: new Date().getFullYear().toString() }));
+  return redirect(href("/priorities/:year", { year: new Date().getFullYear().toString() }));
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -166,6 +174,13 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
   const publishState = allocation.publicId && allocation.publishedAt ? "Published" : "Unpublished";
   const publishButtonText = publishState === "Published" ? "Unpublish" : "Publish";
 
+  // Reaching the comparison dashboard ends the first-look funnel (loader marks
+  // it complete server-side); clear the resume step so a future first-look
+  // visit starts fresh rather than resuming mid-funnel.
+  useEffect(() => {
+    clearFirstLookStep();
+  }, []);
+
   const [form, fields] = useForm({
     defaultValue: {
       intent: publishButtonText.toLowerCase(),
@@ -183,59 +198,56 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
         <div className="flex-1 space-y-3">
           <TypographyH1>Where your priorities land.</TypographyH1>
           <TypographyLead>Not a budget. A statement of priorities.</TypographyLead>
-          <TypographyP>Your preferences, next to what Washington actually spent.</TypographyP>
-          <TypographyP>
-            When you moved the sliders, you distributed your priorities across the 18 allocatable
-            federal budget functions. Those choices were converted into percentages, your personal
-            allocation, and are shown here alongside the government's actual spending from the most
-            recent OMB data.
-          </TypographyP>
-          <TypographyP>
-            Use the <strong>Comparison</strong> tab to see where you and the federal government
-            align or diverge — sort by difference to find where your priorities diverge most. The{" "}
-            <strong>Tax Breakdown</strong> tab translates those percentages into dollar amounts
-            based on your federal tax payment, making the abstract concrete.
-          </TypographyP>
-          <TypographyP>
-            If you decide to publish, this page is exactly what gets shared: your percentage
-            breakdown, nothing more. No name, no identifying information — just your priorities.
-          </TypographyP>
-          <p className="text-sm text-you">
-            Want to change your numbers?
-            <br />
-            <Link
-              to={href("/allocate/:year", {
-                year: new Date().getFullYear().toString(),
-              })}
-            >
-              Go back to your allocation
-            </Link>
-            .
-          </p>
+          <div className="flex gap-6 flex-col sm:flex-row">
+            <div>
+              <TypographyP>Your preferences, next to what Washington actually spent.</TypographyP>
+              <TypographyP className="text-sm text-you">
+                Want to update your priorities?
+                <br />
+                <Link
+                  to={href("/priorities/:year", {
+                    year: new Date().getFullYear().toString(),
+                  })}
+                >
+                  Go back to the sliders
+                </Link>
+                .
+              </TypographyP>
+            </div>
+            <div className="sm:ml-auto">
+              <Card className="rounded-lg border p-4">
+                <CardTitle>
+                  Your priorities are{" "}
+                  <Form method="post" {...getFormProps(form)} className="inline">
+                    <HoneypotInputs />
+                    <input type="hidden" name="intent" value={publishButtonText.toLowerCase()} />
+                    <Button type="submit" size="xs">
+                      {publishState}
+                    </Button>
+                  </Form>
+                </CardTitle>
+                <CardContent>
+                  {allocation.publicId && publishState === "Published" && (
+                    <div className="mt-3">
+                      <ShareInfo publicId={allocation.publicId} url={url} />
+                    </div>
+                  )}
+                  <div id={form.errorId} className="mb-2 text-sm text-red-500">
+                    {form.errors}
+                  </div>
+                  <p>
+                    {publishState === "Published" ? "What's published?" : "What will be published?"}
+                    &nbsp;
+                    <span className="text-muted-foreground">
+                      Comparison page with your priorities. Tax payment is never stored.
+                    </span>
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
-      <Card className="rounded-lg border p-4">
-        <CardTitle>
-          Your allocation is{" "}
-          <Form method="post" {...getFormProps(form)} className="inline">
-            <HoneypotInputs />
-            <input type="hidden" name="intent" value={publishButtonText.toLowerCase()} />
-            <Button type="submit" size="xs">
-              {publishState}
-            </Button>
-          </Form>
-        </CardTitle>
-        <CardContent>
-          {allocation.publicId && publishState === "Published" && (
-            <div className="mt-3">
-              <ShareInfo publicId={allocation.publicId} url={url} />
-            </div>
-          )}
-          <div id={form.errorId} className="mb-2 text-sm text-red-500">
-            {form.errors}
-          </div>
-        </CardContent>
-      </Card>
       <TypographyH2 className="border-b border-b-muted-foreground mt-12 mb-6">
         Insights
       </TypographyH2>

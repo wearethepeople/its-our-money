@@ -9,12 +9,15 @@ datasource db {
 }
 
 model Participant {
-  id            String                  @id @default(cuid())
-  createdAt     DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
-  sessions      Session[]
-  allocations   ParticipantAllocation[]
-  recoveryToken RecoveryToken?
+  id                   String                  @id @default(cuid())
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  /// Set when the participant reaches /juxtapose for the first time. While
+  /// null, the first-look funnel is in progress and the site nav is hidden.
+  firstLookCompletedAt DateTime?
+  sessions             Session[]
+  allocations          ParticipantAllocation[]
+  recoveryToken        RecoveryToken?
 
   @@map("participant")
 }

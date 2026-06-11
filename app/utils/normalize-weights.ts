@@ -55,6 +55,15 @@ export function normalizeToPercent(weights: number[]) {
 }
 
 /**
+ * Convert basis points back to a slider weight on a 1..max scale (rounded, clamped).
+ * @param bps
+ * @param max
+ */
+export function bpsToSliderWeight(bps: number, max: number) {
+  return Math.min(max, Math.max(1, Math.round((bps * max) / 10000)));
+}
+
+/**
  * Sum an array of numbers.
  * @param arr
  */

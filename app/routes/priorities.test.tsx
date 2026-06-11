@@ -5,7 +5,7 @@ import { render, screen } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { afterEach, beforeAll, expect, test, vi } from "vitest";
 
-import AllocateRoute from "./allocate";
+import PrioritiesRoute from "./priorities";
 import type { AllocationService } from "@/services/allocation-service.server.ts";
 
 type ExistingAllocation = Awaited<
@@ -29,21 +29,21 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderAllocateRoute(existingAllocation: ExistingAllocation | null) {
+function renderPrioritiesRoute(existingAllocation: ExistingAllocation | null) {
   const Stub = createRoutesStub([
     {
-      path: "/allocate",
-      Component: AllocateRoute,
+      path: "/priorities",
+      Component: PrioritiesRoute,
       HydrateFallback: () => null,
       loader: () => ({ existingAllocation }),
     },
   ]);
 
-  return render(<Stub initialEntries={["/allocate"]} />);
+  return render(<Stub initialEntries={["/priorities"]} />);
 }
 
 test("first-time participants see the initial comparison copy", async () => {
-  renderAllocateRoute(null);
+  renderPrioritiesRoute(null);
 
   expect(await screen.findByRole("heading", { name: "How's that feel?" })).toBeInTheDocument();
   expect(
@@ -56,7 +56,7 @@ test("first-time participants see the initial comparison copy", async () => {
 });
 
 test("returning participants see the fine-tuning copy", async () => {
-  renderAllocateRoute({
+  renderPrioritiesRoute({
     id: "allocation-1",
     publicId: null,
     participantId: "participant-1",

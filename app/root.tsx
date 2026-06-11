@@ -150,12 +150,13 @@ function App() {
   const data = useLoaderData<typeof loader>();
   const theme = useTheme();
   const { pathname } = useLocation();
-  console.log("Pathname", pathname);
 
   const isHome = pathname === "/";
   const isParticipant = data?.participant !== null;
-  console.log("");
-  console.log("Participant", data?.participant);
+
+  // Hide the site nav while the participant is mid-funnel in /first-look
+  // (i.e. hasn't reached /comparison for the first time yet).
+  const inFirstLook = data?.participant != null && data.participant.firstLookCompletedAt === null;
 
   useToast(data.toast);
 
@@ -185,10 +186,10 @@ function App() {
                 </Link>
               </h1>
             </div>
-            {data.participant && (
+            {data.participant && !inFirstLook && (
               <div className="flex gap-4">
                 <NavLink
-                  to={href("/allocate/:year", {
+                  to={href("/priorities/:year", {
                     year: new Date().getFullYear().toString(),
                   })}
                   end
@@ -196,11 +197,11 @@ function App() {
                     isActive ? "underline font-semibold" : "text-ink-faint no-underline"
                   }
                 >
-                  Allocation
+                  Priorities
                 </NavLink>
                 <Separator orientation="vertical" />
                 <NavLink
-                  to={href("/juxtapose")}
+                  to={href("/comparison")}
                   end
                   className={({ isActive }) =>
                     isActive ? "underline font-semibold" : "text-ink-faint no-underline"
@@ -225,15 +226,29 @@ function App() {
           }}
         >
           <div className="container flex justify-between">
-            <p className="text-sm leading-snug text-ink-muted">
-              A&nbsp;
-              <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
-                We&nbsp;(ARE)&nbsp;the&nbsp;People
-              </Link>
-              &nbsp;project.
-              <br />
-              <small className="text-ink-muted">&copy; 2026 We (ARE) the People</small>
-            </p>
+            <div>
+              <p className="text-sm leading-snug text-ink-muted">
+                A&nbsp;
+                <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
+                  We&nbsp;(ARE)&nbsp;the&nbsp;People
+                </Link>
+                &nbsp;project.
+              </p>
+              <p>
+                <small className="text-ink-muted">&copy; 2026 We (ARE) the People</small>
+              </p>
+            </div>
+            <ul className="text-sm flex gap-2">
+              <li>
+                <Link to={href("/about")}>About</Link>
+              </li>
+              <li>
+                <Link to={href("/privacy")}>Privacy</Link>
+              </li>
+              <li>
+                <Link to={href("/help")}>Help</Link>
+              </li>
+            </ul>
             <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
           </div>
         </footer>

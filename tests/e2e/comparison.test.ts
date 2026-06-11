@@ -5,9 +5,18 @@ const year = new Date().getFullYear().toString();
 test.beforeEach(async ({ page, navigate, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
-  await navigate("/allocate/:year", { year });
+  await navigate("/priorities/:year", { year });
   await page.getByRole("button", { name: /see how your priorities compare/i }).click();
-  await page.waitForURL(/\/juxtapose$/);
+  await page.waitForURL(/\/first-look$/);
+
+  // First-time participants land on the /first-look funnel before /comparison.
+  // Walk through every step and follow the link to the comparison dashboard.
+  const nextButton = page.getByRole("button", { name: "Next" });
+  while (await nextButton.isVisible()) {
+    await nextButton.click();
+  }
+  await page.getByRole("link", { name: /go to comparison dashboard/i }).click();
+  await page.waitForURL(/\/comparison$/);
 });
 
 test("toggles the allocation's publish status and the share panel", async ({ page }) => {
