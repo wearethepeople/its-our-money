@@ -226,15 +226,29 @@ function App() {
           }}
         >
           <div className="container flex justify-between">
-            <p className="text-sm leading-snug text-ink-muted">
-              A&nbsp;
-              <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
-                We&nbsp;(ARE)&nbsp;the&nbsp;People
-              </Link>
-              &nbsp;project.
-              <br />
-              <small className="text-ink-muted">&copy; 2026 We (ARE) the People</small>
-            </p>
+            <div>
+              <p className="text-sm leading-snug text-ink-muted">
+                A&nbsp;
+                <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
+                  We&nbsp;(ARE)&nbsp;the&nbsp;People
+                </Link>
+                &nbsp;project.
+              </p>
+              <p>
+                <small className="text-ink-muted">&copy; 2026 We (ARE) the People</small>
+              </p>
+            </div>
+            <ul className="text-sm flex gap-2">
+              <li>
+                <Link to={href("/about")}>About</Link>
+              </li>
+              <li>
+                <Link to={href("/privacy")}>Privacy</Link>
+              </li>
+              <li>
+                <Link to={href("/help")}>Help</Link>
+              </li>
+            </ul>
             <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
           </div>
         </footer>
