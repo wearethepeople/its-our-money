@@ -13,6 +13,7 @@ import {
 import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
 import { bpsToSliderWeight } from "@/utils/normalize-weights.ts";
 import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
+import { AllocationRoundingNote } from "@/components/allocation-rounding-note.tsx";
 
 export type { PairedItem } from "@/components/comparison.tsx";
 
@@ -126,10 +127,7 @@ export function AllocationViewer({
       </div>
       {activeTab === "priorities" && (
         <div>
-          <p className="mb-4 text-sm text-ink-faint">
-            Note: Washington's smallest priorities are rounded up to the lowest spot on the scale,
-            so very small allocations may look slightly larger here than they really are.
-          </p>
+          <AllocationRoundingNote />
           <ComparisonLegend
             ombYear={ombYear}
             className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]"

@@ -25,6 +25,7 @@ import { getFirstLookStep, setFirstLookStep } from "@/utils/first-look-progress.
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
 import { cn } from "@/utils/misc.tsx";
+import { AllocationRoundingNote } from "@/components/allocation-rounding-note.tsx";
 
 const STEPS = ["weights", "insight-a", "percents", "insight-b", "tax"] as const;
 type Step = (typeof STEPS)[number];
@@ -192,10 +193,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
               No percentages, no dollar signs — just priorities against priorities. The bars show
               each side's relative emphasis.
             </TypographyP>
-            <TypographyP className="mb-6 text-sm text-ink-faint">
-              Note: Washington's smallest priorities are rounded up to the lowest spot on the
-              scale, so very small allocations may look slightly larger here than they really are.
-            </TypographyP>
+            <AllocationRoundingNote />
             <Separator className="my-8" />
             {sortBar}
             <ComparisonLegend ombYear={ombYear} />
