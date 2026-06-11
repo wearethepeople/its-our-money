@@ -150,12 +150,13 @@ function App() {
   const data = useLoaderData<typeof loader>();
   const theme = useTheme();
   const { pathname } = useLocation();
-  console.log("Pathname", pathname);
 
   const isHome = pathname === "/";
   const isParticipant = data?.participant !== null;
-  console.log("");
-  console.log("Participant", data?.participant);
+
+  // Hide the site nav while the participant is mid-funnel in /first-look
+  // (i.e. hasn't reached /juxtapose for the first time yet).
+  const inFirstLook = data?.participant != null && data.participant.firstLookCompletedAt === null;
 
   useToast(data.toast);
 
@@ -185,7 +186,7 @@ function App() {
                 </Link>
               </h1>
             </div>
-            {data.participant && (
+            {data.participant && !inFirstLook && (
               <div className="flex gap-4">
                 <NavLink
                   to={href("/allocate/:year", {

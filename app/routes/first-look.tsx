@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { href, Link, redirect } from "react-router";
 import { type Route } from "./+types/first-look";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
@@ -20,6 +20,7 @@ import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
 import { InsightCard } from "@/components/insight-cards.tsx";
 import { computeInsights, type InsightId } from "@/utils/insights.ts";
 import { useLocalStorageState } from "@/hooks/use-local-storage-state.ts";
+import { getFirstLookStep, setFirstLookStep } from "@/utils/first-look-progress.ts";
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
 import { cn } from "@/utils/misc.tsx";
@@ -72,6 +73,22 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const step = STEPS[stepIndex] ?? "weights";
 
+  // Restore mid-funnel progress on refresh; otherwise mark the funnel as
+  // started so the rest of the app (e.g. the site nav) knows we're in it.
+  useEffect(() => {
+    const stored = getFirstLookStep();
+    if (stored === null) {
+      setFirstLookStep(0);
+    } else {
+      setStepIndex(Math.min(stored, STEPS.length - 1));
+    }
+  }, []);
+
+  const goToStep = (i: number) => {
+    setStepIndex(i);
+    setFirstLookStep(i);
+  };
+
   const [viewPrefs, setViewPrefs] = useLocalStorageState(
     "first-look:view-prefs",
     DEFAULT_VIEW_PREFS,
@@ -87,8 +104,8 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
     ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
-  const back = () => setStepIndex((i) => Math.max(i - 1, 0));
-  const next = () => setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+  const back = () => goToStep(Math.max(stepIndex - 1, 0));
+  const next = () => goToStep(Math.min(stepIndex + 1, STEPS.length - 1));
 
   const stepNav = (
     <div className="flex flex-col items-center gap-4">

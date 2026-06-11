@@ -35,12 +35,21 @@ export namespace ParticipantService {
             id: true,
             createdAt: true,
             updatedAt: true,
+            firstLookCompletedAt: true,
           },
         },
       },
     });
 
     return session?.participant ?? null;
+  }
+
+  export async function markFirstLookCompleted(participantId: string) {
+    return prisma.participant.update({
+      where: { id: participantId },
+      data: { firstLookCompletedAt: new Date() },
+      select: { id: true, firstLookCompletedAt: true },
+    });
   }
 
   export async function saveParticipantAllocations({

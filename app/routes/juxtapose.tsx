@@ -14,7 +14,8 @@ import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { checkHoneypot } from "@/utils/honeypot.server.ts";
 import { ParticipantService } from "@/services/participant-service.server.ts";
 import { getOmbBudgetByCodeForYear } from "@/utils/budget-data.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { clearFirstLookStep } from "@/utils/first-look-progress.ts";
 import {
   TypographyH1,
   TypographyH2,
@@ -50,6 +51,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
       const ombData = getOmbBudgetByCodeForYear(2025);
       const netInterestBps = ombData["net_interest"]?.bps ?? 0;
+
+      // Reaching the comparison dashboard ends the first-look funnel,
+      // however the participant got here (Finish, Skip, or direct nav).
+      // Redirect so the root loader re-reads the participant and shows the
+      // nav immediately, rather than waiting for the next navigation.
+      if (participant.firstLookCompletedAt === null) {
+        await ParticipantService.markFirstLookCompleted(participant.id);
+        return redirect(href("/juxtapose"));
+      }
 
       return { allocation, pairedData, url, netInterestBps, ombYear: 2025 };
     }
@@ -165,6 +175,13 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
   const lastResult = actionData?.result;
   const publishState = allocation.publicId && allocation.publishedAt ? "Published" : "Unpublished";
   const publishButtonText = publishState === "Published" ? "Unpublish" : "Publish";
+
+  // Reaching the comparison dashboard ends the first-look funnel (loader marks
+  // it complete server-side); clear the resume step so a future first-look
+  // visit starts fresh rather than resuming mid-funnel.
+  useEffect(() => {
+    clearFirstLookStep();
+  }, []);
 
   const [form, fields] = useForm({
     defaultValue: {
