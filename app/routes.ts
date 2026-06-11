@@ -4,7 +4,7 @@ export default [
   index("./routes/index.tsx"),
   route("bridge", "./routes/bridge.tsx"),
   route("priorities/:year", "./routes/priorities.tsx"),
-  route("juxtapose", "./routes/juxtapose.tsx"),
+  route("comparison", "./routes/comparison.tsx"),
   route("first-look", "./routes/first-look.tsx"),
   route("s/:publicId", "./routes/share-allocation.route.tsx"),
   route("recover/:token", "./routes/recovery.route.tsx"),

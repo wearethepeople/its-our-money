@@ -55,7 +55,7 @@ Files with `.server.ts` are server-only. Files with `.client.tsx` are client-onl
 **It's Our Money** (https://www.itsourmoney.org) is an anonymous "budget values"-prioritization tool. Visitors prioritize weights across US federal outlay functions,
 compare their allocation to the actual OMB budget, and optionally publish their result.
 
-**User flow:** `/` → `/priorities/:year` → `/juxtapose` → optionally `/s/:publicId` (shared view)
+**User flow:** `/` → `/priorities/:year` → `/comparison` → optionally `/s/:publicId` (shared view)
 
 There are no user accounts. Participants are created automatically on first interaction and identified via a session
 cookie backed by the `Session` DB table.
@@ -109,3 +109,10 @@ Forms use [conform](https://conform.guide/) + Zod schemas. The `ConformSlider` c
 
 Icons are an SVG spritesheet. Use the `<Icon name="..." />` component (`app/components/ui/icon.tsx`). Add new icons via
 `npx sly add` (see `docs/icons.md`).
+
+### History
+
+Note that at one point in the git history the follow routes had different paths:
+
+- `/priorities` was `/allocate`
+- `/comparison` was `/juxtapose`.

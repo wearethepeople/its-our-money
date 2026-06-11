@@ -144,7 +144,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           </Button>
         )}
         {stepIndex + 1 === STEPS.length && (
-          <Link to={href("/juxtapose")}>Go to Comparison dashboard</Link>
+          <Link to={href("/comparison")}>Go to Comparison dashboard</Link>
         )}
       </div>
       <div className="flex items-center gap-1.5">

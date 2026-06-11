@@ -7,7 +7,7 @@ test.beforeEach(async ({ page, navigate, context }) => {
 
   await navigate("/priorities/:year", { year });
   await page.getByRole("button", { name: /see how your priorities compare/i }).click();
-  await page.waitForURL(/\/juxtapose$/);
+  await page.waitForURL(/\/comparison$/);
 });
 
 test("toggles the allocation's publish status and the share panel", async ({ page }) => {

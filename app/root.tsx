@@ -155,7 +155,7 @@ function App() {
   const isParticipant = data?.participant !== null;
 
   // Hide the site nav while the participant is mid-funnel in /first-look
-  // (i.e. hasn't reached /juxtapose for the first time yet).
+  // (i.e. hasn't reached /comparison for the first time yet).
   const inFirstLook = data?.participant != null && data.participant.firstLookCompletedAt === null;
 
   useToast(data.toast);
@@ -201,7 +201,7 @@ function App() {
                 </NavLink>
                 <Separator orientation="vertical" />
                 <NavLink
-                  to={href("/juxtapose")}
+                  to={href("/comparison")}
                   end
                   className={({ isActive }) =>
                     isActive ? "underline font-semibold" : "text-ink-faint no-underline"

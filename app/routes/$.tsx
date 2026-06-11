@@ -5,13 +5,14 @@
 // ensure the user gets the right status code and we can display a nicer error
 // message for them than the Remix and/or browser default.
 
-import { href, Link, redirect, useLocation } from "react-router";
+import { href, Link, redirect } from "react-router";
 import { GeneralErrorBoundary } from "@/components/error-boundary.tsx";
 import { Icon } from "@/components/ui/icon.tsx";
+import { TypographyH1, TypographyLead } from "@/components/ui/typography.tsx";
 
 import { type Route } from "./+types/$";
 
-export function loader({ request, params }: Route.LoaderArgs) {
+export function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const currentYear = new Date().getFullYear().toString();
@@ -34,17 +35,16 @@ export default function NotFound() {
 }
 
 export function ErrorBoundary() {
-  const location = useLocation();
   return (
     <GeneralErrorBoundary
       statusHandlers={{
         404: () => (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
-              <h1>We can't find this page:</h1>
-              <pre className="text-body-lg break-all whitespace-pre-wrap">{location.pathname}</pre>
+              <TypographyH1>Not found</TypographyH1>
+              <TypographyLead>We could not find the requested resource.</TypographyLead>
             </div>
-            <Link to="/" className="text-body-md underline">
+            <Link to="/" className="text-body-sm underline">
               <Icon name="arrow-left">Back to home</Icon>
             </Link>
           </div>

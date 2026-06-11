@@ -1,4 +1,4 @@
-import { Route } from "./+types/juxtapose";
+import { Route } from "./+types/comparison";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { href, redirect, Form, data, Link } from "react-router";
 import { Button } from "@/ui/button.tsx";
@@ -56,7 +56,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       // nav immediately, rather than waiting for the next navigation.
       if (participant.firstLookCompletedAt === null) {
         await ParticipantService.markFirstLookCompleted(participant.id);
-        return redirect(href("/juxtapose"));
+        return redirect(href("/comparison"));
       }
 
       return { allocation, pairedData, url, netInterestBps, ombYear: 2025 };

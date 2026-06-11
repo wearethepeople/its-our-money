@@ -134,7 +134,7 @@ export async function action({ request }: Route.ActionArgs) {
     allocations: finalAllocation,
   });
 
-  return redirect(isFirstTime ? href("/first-look") : href("/juxtapose"), { headers });
+  return redirect(isFirstTime ? href("/first-look") : href("/comparison"), { headers });
 }
 
 export default function PrioritiesRoute() {
