@@ -5,6 +5,7 @@ export default [
   route("bridge", "./routes/bridge.tsx"),
   route("allocate/:year", "./routes/allocate.tsx"),
   route("juxtapose", "./routes/juxtapose.tsx"),
+  route("first-look", "./routes/first-look.tsx"),
   route("s/:publicId", "./routes/share-allocation.route.tsx"),
   route("recover/:token", "./routes/recovery.route.tsx"),
   route("resources/healthcheck", "./routes/resources/healthcheck.tsx"),

@@ -14,7 +14,7 @@ import { Icon } from "@/ui/icon";
 import { ConformSlider } from "@/ui/conform-slider.tsx";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { checkHoneypot } from "@/utils/honeypot.server";
-import { normalizeToBasisPoints, sum } from "@/utils/normalize-weights.ts";
+import { bpsToSliderWeight, normalizeToBasisPoints, sum } from "@/utils/normalize-weights.ts";
 import {
   getOrCreateParticipantSession,
   getParticipantBySession,
@@ -67,6 +67,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+  const isFirstTime = (await getParticipantBySession(request)) === null;
   const { headers, participantId } = await getOrCreateParticipantSession(request);
   const formData = await request.formData();
   await checkHoneypot(formData);
@@ -133,7 +134,7 @@ export async function action({ request }: Route.ActionArgs) {
     allocations: finalAllocation,
   });
 
-  return redirect(href("/juxtapose"), { headers });
+  return redirect(isFirstTime ? href("/first-look") : href("/juxtapose"), { headers });
 }
 
 export default function AllocateRoute() {
@@ -154,12 +155,7 @@ export default function AllocateRoute() {
       allocatableCategories.map((c) => {
         const existingBps = existingAllocationByCategoryId.get(c.id);
         const weight =
-          existingBps === undefined
-            ? 1
-            : Math.min(
-                MAX_ALLOCATION_WEIGHT,
-                Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000)),
-              );
+          existingBps === undefined ? 1 : bpsToSliderWeight(existingBps, MAX_ALLOCATION_WEIGHT);
         return [c.id, weight];
       }),
     ),
@@ -176,10 +172,7 @@ export default function AllocateRoute() {
 
         return {
           id: c.id,
-          weight: Math.min(
-            MAX_ALLOCATION_WEIGHT,
-            Math.max(1, Math.round((existingBps * MAX_ALLOCATION_WEIGHT) / 10000)),
-          ),
+          weight: bpsToSliderWeight(existingBps, MAX_ALLOCATION_WEIGHT),
         };
       }),
     },
