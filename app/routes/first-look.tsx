@@ -20,6 +20,7 @@ import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
 import { InsightCard } from "@/components/insight-cards.tsx";
 import { computeInsights, type InsightId } from "@/utils/insights.ts";
 import { useLocalStorageState } from "@/hooks/use-local-storage-state.ts";
+import { bpsToSliderWeight } from "@/utils/normalize-weights.ts";
 import { getFirstLookStep, setFirstLookStep } from "@/utils/first-look-progress.ts";
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
@@ -97,8 +98,22 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
   );
   const insights = useMemo(() => computeInsights(pairedData), [pairedData]);
 
+  const weightedPairedData = useMemo(
+    () =>
+      sortedPairedData.map((d) => ({
+        ...d,
+        participantPercent: bpsToSliderWeight(d.participantPercent * 100, MAX_ALLOCATION_WEIGHT),
+        budgetPercent: bpsToSliderWeight(d.budgetPercent * 100, MAX_ALLOCATION_WEIGHT),
+      })),
+    [sortedPairedData],
+  );
+
   const maxPercent = Math.max(
     ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
+  );
+
+  const weightsMaxPercent = Math.max(
+    ...weightedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
   const back = () => goToStep(Math.max(stepIndex - 1, 0));
@@ -177,13 +192,17 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
               No percentages, no dollar signs — just priorities against priorities. The bars show
               each side's relative emphasis.
             </TypographyP>
+            <TypographyP className="mb-6 text-sm text-ink-faint">
+              Note: Washington's smallest priorities are rounded up to the lowest spot on the
+              scale, so very small allocations may look slightly larger here than they really are.
+            </TypographyP>
             <div className="my-10">{stepNav}</div>
             <Separator className="mb-8" />
             {sortBar}
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList
-              items={sortedPairedData}
-              maxPercent={maxPercent}
+              items={weightedPairedData}
+              maxPercent={weightsMaxPercent}
               viewScheme={viewPrefs.viewScheme}
               badges="none"
             />

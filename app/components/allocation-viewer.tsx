@@ -11,6 +11,8 @@ import {
   type SortMode,
 } from "@/components/comparison.tsx";
 import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
+import { bpsToSliderWeight } from "@/utils/normalize-weights.ts";
+import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
 
 export type { PairedItem } from "@/components/comparison.tsx";
 
@@ -28,7 +30,9 @@ export function AllocationViewer({
   const [viewScheme, setViewScheme] = useState<ViewSchemeId>("public_domain");
   const [sortMode, setSortMode] = useState<SortMode>("participantPercent");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [activeTab, setActiveTab] = useState<"comparison" | "tax-breakdown">("comparison");
+  const [activeTab, setActiveTab] = useState<"priorities" | "percentages" | "tax-breakdown">(
+    "priorities",
+  );
 
   const sortedPairedData = useMemo(
     () => sortPairedData(pairedData, sortMode, sortDirection),
@@ -37,6 +41,20 @@ export function AllocationViewer({
 
   const maxPercent = Math.max(
     ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
+  );
+
+  const weightedPairedData = useMemo(
+    () =>
+      sortedPairedData.map((d) => ({
+        ...d,
+        participantPercent: bpsToSliderWeight(d.participantPercent * 100, MAX_ALLOCATION_WEIGHT),
+        budgetPercent: bpsToSliderWeight(d.budgetPercent * 100, MAX_ALLOCATION_WEIGHT),
+      })),
+    [sortedPairedData],
+  );
+
+  const weightsMaxPercent = Math.max(
+    ...weightedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
   return (
@@ -75,13 +93,24 @@ export function AllocationViewer({
         <button
           type="button"
           className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-            activeTab === "comparison"
+            activeTab === "priorities"
               ? "border-you"
               : "border-transparent text-ink-muted hover:text-ink"
           }`}
-          onClick={() => setActiveTab("comparison")}
+          onClick={() => setActiveTab("priorities")}
         >
-          Comparison
+          Priorities
+        </button>
+        <button
+          type="button"
+          className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
+            activeTab === "percentages"
+              ? "border-you"
+              : "border-transparent text-ink-muted hover:text-ink"
+          }`}
+          onClick={() => setActiveTab("percentages")}
+        >
+          Percentages
         </button>
         <button
           type="button"
@@ -95,7 +124,25 @@ export function AllocationViewer({
           Tax Breakdown
         </button>
       </div>
-      {activeTab === "comparison" && (
+      {activeTab === "priorities" && (
+        <div>
+          <p className="mb-4 text-sm text-ink-faint">
+            Note: Washington's smallest priorities are rounded up to the lowest spot on the scale,
+            so very small allocations may look slightly larger here than they really are.
+          </p>
+          <ComparisonLegend
+            ombYear={ombYear}
+            className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]"
+          />
+          <ComparisonList
+            items={weightedPairedData}
+            maxPercent={weightsMaxPercent}
+            viewScheme={viewScheme}
+            badges="none"
+          />
+        </div>
+      )}
+      {activeTab === "percentages" && (
         <div>
           <ComparisonLegend
             ombYear={ombYear}
