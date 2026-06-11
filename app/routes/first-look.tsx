@@ -196,8 +196,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
               Note: Washington's smallest priorities are rounded up to the lowest spot on the
               scale, so very small allocations may look slightly larger here than they really are.
             </TypographyP>
-            <div className="my-10">{stepNav}</div>
-            <Separator className="mb-8" />
+            <Separator className="my-8" />
             {sortBar}
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList
@@ -233,8 +232,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
               The badge on the right is the gap: where you'd spend more than Washington, and where
               you'd spend less.
             </TypographyP>
-            <div className="my-10">{stepNav}</div>
-            <Separator className="mb-8" />
+            <Separator className="my-8" />
             {sortBar}
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList
@@ -260,7 +258,9 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           </section>
         )}
       </div>
-      <div className="mt-10">{stepNav}</div>
+      <div className="sticky bottom-0 mt-10 border-t border-ink-faint bg-background py-4">
+        {stepNav}
+      </div>
     </div>
   );
 }
