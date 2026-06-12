@@ -168,9 +168,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             Next
           </Button>
         )}
-        {stepIndex + 1 === STEPS.length && (
-          <Link to={href("/comparison")}>Go to Comparison dashboard</Link>
-        )}
+        {stepIndex + 1 === STEPS.length && <Link to={href("/comparison")}>Finish</Link>}
       </div>
       <div className="flex items-center gap-1.5">
         {STEPS.map((s, i) => (
@@ -250,8 +248,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           <section>
             <TypographyH1 className="mb-3">Make it concrete.</TypographyH1>
             <TypographyLead className="mb-4">
-              Percentages are abstract. Your tax bill isn't. See where your federal taxes actually
-              went — and where you'd have sent them instead.
+              Percentages are abstract. Your tax bill isn't.
             </TypographyLead>
             <TaxBreakdown
               pairedData={sortedPairedData}
