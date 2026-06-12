@@ -89,6 +89,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
   const goToStep = (i: number) => {
     setStepIndex(i);
     setFirstLookStep(i);
+    window.scrollTo({ top: 0 });
   };
 
   const [viewPrefs, setViewPrefs] = useLocalStorageState(
@@ -102,18 +103,39 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
   );
   const insights = useMemo(() => computeInsights(pairedData), [pairedData]);
 
+  const pairedDataWithNetInterest = useMemo(() => {
+    if (netInterestBps <= 0) return pairedData;
+    const netInterestPercent = netInterestBps / 100;
+    return [
+      ...pairedData,
+      {
+        code: "900",
+        category: "Net Interest",
+        id: "net_interest",
+        participantPercent: netInterestPercent,
+        budgetPercent: netInterestPercent,
+        delta: 0,
+      },
+    ];
+  }, [pairedData, netInterestBps]);
+
+  const sortedPairedDataWithNetInterest = useMemo(
+    () => sortPairedData(pairedDataWithNetInterest, viewPrefs.sortMode, viewPrefs.sortDirection),
+    [pairedDataWithNetInterest, viewPrefs.sortMode, viewPrefs.sortDirection],
+  );
+
   const weightedPairedData = useMemo(
     () =>
-      sortedPairedData.map((d) => ({
+      sortedPairedDataWithNetInterest.map((d) => ({
         ...d,
         participantPercent: bpsToSliderWeight(d.participantPercent * 100, MAX_ALLOCATION_WEIGHT),
         budgetPercent: bpsToSliderWeight(d.budgetPercent * 100, MAX_ALLOCATION_WEIGHT),
       })),
-    [sortedPairedData],
+    [sortedPairedDataWithNetInterest],
   );
 
   const maxPercent = Math.max(
-    ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
+    ...sortedPairedDataWithNetInterest.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
   const weightsMaxPercent = Math.max(
@@ -218,7 +240,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             <PercentsRoundingNote />
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList
-              items={sortedPairedData}
+              items={sortedPairedDataWithNetInterest}
               maxPercent={maxPercent}
               viewScheme={viewPrefs.viewScheme}
             />
