@@ -25,15 +25,18 @@ import { getFirstLookStep, setFirstLookStep } from "@/utils/first-look-progress.
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
 import { cn } from "@/utils/misc.tsx";
-import { AllocationRoundingNote } from "@/components/allocation-rounding-note.tsx";
+import {
+  PercentsRoundingNote,
+  WeightsRoundingNote,
+} from "@/components/allocation-rounding-note.tsx";
 
-const STEPS = ["weights", "insight-a", "percents", "insight-b", "tax"] as const;
+const STEPS = ["weights", "percents", "insight-a", "tax"] as const;
 type Step = (typeof STEPS)[number];
 
 /** Which insight card shows at each interstitial. Both must always apply (see insightApplies). */
 const INTERSTITIAL_INSIGHTS = {
   "insight-a": "biggest-departures",
-  "insight-b": "concentrated-bet",
+  // "insight-b": "concentrated-bet",
 } as const satisfies Partial<Record<Step, InsightId>>;
 
 type ViewPrefs = {
@@ -122,8 +125,8 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
 
   const stepNav = (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex items-center gap-4">
-        {stepIndex > 0 && (
+      <div className="flex items-center gap-4 w-full place-content-between">
+        {(stepIndex > 0 && (
           <Button
             variant="default"
             size="lg"
@@ -132,7 +135,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           >
             Back
           </Button>
-        )}
+        )) || <div></div>}
         {step !== "tax" && (
           <Button
             variant="default"
@@ -185,17 +188,9 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
         {step === "weights" && (
           <section>
             <TypographyH1 className="mb-3">Priorities, side by side.</TypographyH1>
-            <TypographyLead className="mb-4">
-              Here's Washington's actual budget translated onto the same 1–{MAX_ALLOCATION_WEIGHT}{" "}
-              scale you just used.
-            </TypographyLead>
-            <TypographyP className="mb-6">
-              No percentages, no dollar signs — just priorities against priorities. The bars show
-              each side's relative emphasis.
-            </TypographyP>
-            <AllocationRoundingNote />
-            <Separator className="my-8" />
+            <Separator className="my-6" />
             {sortBar}
+            <WeightsRoundingNote />
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList
               items={weightedPairedData}
@@ -205,7 +200,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             />
           </section>
         )}
-        {(step === "insight-a" || step === "insight-b") && (
+        {step === "insight-a" /*|| step === "insight-b"*/ && (
           <section className="mx-auto max-w-md py-12">
             <TypographyLead className="mb-6">
               {step === "insight-a"
@@ -217,21 +212,10 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
         )}
         {step === "percents" && (
           <section>
-            <TypographyH1 className="mb-3">From priorities to percentages.</TypographyH1>
-            <TypographyLead className="mb-4">
-              To compare precisely, we convert your weights into percentages, each function's share
-              of your total, and set them against the government's actual spending shares.
-            </TypographyLead>
-            <TypographyP className="mb-6">
-              The bars are scaled to the largest share on this page, not a 0–100% scale, ie. the
-              longest bar is the biggest slice, not the whole budget.
-            </TypographyP>
-            <TypographyP className="mb-6">
-              The badge on the right is the gap: where you'd spend more than Washington, and where
-              you'd spend less.
-            </TypographyP>
-            <Separator className="my-8" />
+            <TypographyH1 className="mb-3">Here's where you land.</TypographyH1>
+            <Separator className="my-6" />
             {sortBar}
+            <PercentsRoundingNote />
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList
               items={sortedPairedData}

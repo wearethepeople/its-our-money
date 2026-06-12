@@ -2,8 +2,13 @@ import { cn } from "@/utils/misc.tsx";
 import { Badge } from "@/ui/badge.tsx";
 import { Button } from "@/ui/button.tsx";
 import { ButtonGroup } from "@/ui/button-group.tsx";
+import { Card, CardContent, CardTitle } from "@/ui/card.tsx";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/ui/collapsible.tsx";
+import { Icon } from "@/ui/icon.tsx";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
+import { getFunctionDetailsById } from "@/utils/budget-data.ts";
 import { formatPercent, formatSignedCurrency, formatSignedPercent } from "@/utils/numbers.ts";
+import { ArrowUpDown } from "lucide-react";
 
 export type PairedItem = {
   code: string;
@@ -94,6 +99,11 @@ export function ComparisonList({
     );
   }
 
+  const groupedFunctionIds = new Set(
+    PUBLIC_DOMAIN_SCHEME.groups.flatMap((group) => group.functionIds),
+  );
+  const ungroupedItems = items.filter((d) => !groupedFunctionIds.has(String(d.id)));
+
   return (
     <div className="flex flex-col gap-10">
       {PUBLIC_DOMAIN_SCHEME.groups.map((group) => {
@@ -114,6 +124,17 @@ export function ComparisonList({
           </div>
         );
       })}
+      {ungroupedItems.length > 0 && (
+        <div className="public-domain rounded bg-surface p-3">
+          <div className="divide-y divide-muted-foreground">
+            {ungroupedItems.map((item, index) => (
+              <div key={item.code} className={index % 2 === 1 ? "bg-surface-2" : ""}>
+                <ComparisonRow item={item} maxPercent={maxPercent} badges={badges} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -191,29 +212,66 @@ export function ComparisonRow({
   badges?: "percent" | "none";
 }) {
   const scale = maxPercent > 0 ? 100 / maxPercent : 1;
+  const fnData = getFunctionDetailsById(item.id);
+  const isNetInterest = item.id === "net_interest";
+
   return (
-    <article className="py-3">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium">{item.category}</span>
-        {badges === "percent" && (
-          <div className="flex shrink-0 items-center gap-1">
-            <PercentBadge value={item.participantPercent} className="text-you" />
-            <span className="text-xs text-muted-foreground">vs</span>
-            <PercentBadge value={item.budgetPercent} className="text-them" />
-            <DeltaBadge value={item.delta} />
-          </div>
+    <article className="py-3 px-4">
+      <Collapsible className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <h3>
+            <CollapsibleTrigger className="flex items-center gap-1.5 text-left text-sm font-medium text-ink-2 data-panel-open:text-you underline decoration-dotted decoration-you underline-offset-2 hover:cursor-pointer">
+              {isNetInterest && (
+                <Icon name="lock-closed" className="size-3.5 shrink-0 text-ink-faint" />
+              )}
+              {item.category}
+            </CollapsibleTrigger>
+          </h3>
+          {badges === "percent" && (
+            <div className="flex shrink-0 items-center gap-1">
+              <PercentBadge value={item.participantPercent} className="text-you" />
+              <span className="text-xs text-muted-foreground">vs</span>
+              <PercentBadge value={item.budgetPercent} className="text-them" />
+              <DeltaBadge value={item.delta} />
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <div
+            className="h-2 rounded-full bg-you"
+            style={{ width: `${item.participantPercent * scale}%` }}
+          />
+          <div
+            className="h-2 rounded-full bg-them"
+            style={{ width: `${item.budgetPercent * scale}%` }}
+          />
+        </div>
+        {fnData && (
+          <CollapsibleContent>
+            <Card className="bg-surface-3 border-line-2 border-l-2 border-l-you/60 my-6">
+              <CardTitle className="px-4 uppercase text-ink-muted">What this pays for</CardTitle>
+              {isNetInterest && (
+                <CardContent className="text-ink-2 italic">
+                  Mandatory obligation — this is not a priority you set. It reflects the cost of
+                  existing national debt and cannot be redirected.
+                </CardContent>
+              )}
+              <CardContent className="text-ink-2">{fnData.description}</CardContent>
+              {fnData.commonUses && fnData.commonUses.length > 0 && (
+                <CardContent className="text-ink-2">
+                  <ul>
+                    {fnData.commonUses.map((use, i) => (
+                      <li key={i} className="ml-4 list-disc">
+                        {use}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              )}
+            </Card>
+          </CollapsibleContent>
         )}
-      </div>
-      <div className="mt-2 flex flex-col gap-1">
-        <div
-          className="h-2 rounded-full bg-you"
-          style={{ width: `${item.participantPercent * scale}%` }}
-        />
-        <div
-          className="h-2 rounded-full bg-them"
-          style={{ width: `${item.budgetPercent * scale}%` }}
-        />
-      </div>
+      </Collapsible>
     </article>
   );
 }

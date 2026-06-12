@@ -27,7 +27,6 @@ import { ParticipantService } from "@/services/participant-service.server.ts";
 import type { FinalAllocationItem } from "@/services/participant-service.server.ts";
 import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { Progress } from "#app/components/ui/progress.tsx";
-import { cn } from "#app/utils/misc.tsx";
 import {
   Collapsible,
   CollapsibleContent,
@@ -41,6 +40,7 @@ import {
 } from "#app/components/ui/typography.tsx";
 import { Button } from "#app/components/ui/button.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
+import { cn } from "#app/utils/misc.tsx";
 
 const formSchema = z.object({
   allocations: z.array(
@@ -63,7 +63,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     ? await AllocationService.getAllocationByParticipantId(participant.id)
     : null;
 
-  return data({ existingAllocation });
+  return data({ existingAllocation, existingParticipant: !!participant });
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -139,7 +139,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function PrioritiesRoute() {
   const actionData = useActionData<typeof action>();
-  const { existingAllocation } = useLoaderData<typeof loader>();
+  const { existingAllocation, existingParticipant } = useLoaderData<typeof loader>();
   const allocatableCategories = FUNCTIONS.filter((f) => f.allocatable !== false);
   const [viewScheme, setViewScheme] = useState<ViewSchemeId>("public_domain");
 
@@ -262,12 +262,19 @@ export default function PrioritiesRoute() {
 
   return (
     <section ref={contentRef}>
-      <div>
+      <div className="mb-4">
         <TypographyH1 className="mb-3">Your turn.</TypographyH1>
         <TypographyLead className="mb-8">
-          Drag the sliders to match your priorities — where you'd put your money. You know your
-          values, so no expertise required. Tap any title for context.
+          Slide each category to reflect your priorities – you rate each one independently. Tap any
+          title for context.
         </TypographyLead>
+        <TypographyP>
+          Keep in mind:
+          <br />
+          <span className="text-muted-foreground">
+            if everything's a priority, nothing is. And you can always change your mind.
+          </span>
+        </TypographyP>
       </div>
       <form className="flex flex-col gap-4" method="post" {...getFormProps(form)}>
         <HoneypotInputs />
@@ -314,9 +321,14 @@ export default function PrioritiesRoute() {
         </div>
         <div ref={sentinelRef} />
         <ErrorList id={form.errorId} errors={form.errors} />
-        <Separator className="my-8" />
-        <div className="flex flex-col">
-          {existingAllocation ? (
+        <Separator className="mt-8 mb-4" />
+        <div
+          className={cn(
+            "flex flex-col bg-background pt-4",
+            existingParticipant ? "sticky bottom-0" : "",
+          )}
+        >
+          {existingParticipant ? (
             <>
               <TypographyH2 className="mb-0">Fine-tuning?</TypographyH2>
               <TypographyLead className="mb-12">

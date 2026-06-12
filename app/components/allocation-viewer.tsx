@@ -40,18 +40,39 @@ export function AllocationViewer({
     [pairedData, sortDirection, sortMode],
   );
 
+  const pairedDataWithNetInterest = useMemo(() => {
+    if (netInterestBps <= 0) return pairedData;
+    const netInterestPercent = netInterestBps / 100;
+    return [
+      ...pairedData,
+      {
+        code: "900",
+        category: "Net Interest",
+        id: "net_interest",
+        participantPercent: netInterestPercent,
+        budgetPercent: netInterestPercent,
+        delta: 0,
+      },
+    ];
+  }, [pairedData, netInterestBps]);
+
+  const sortedPairedDataWithNetInterest = useMemo(
+    () => sortPairedData(pairedDataWithNetInterest, sortMode, sortDirection),
+    [pairedDataWithNetInterest, sortDirection, sortMode],
+  );
+
   const maxPercent = Math.max(
-    ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
+    ...sortedPairedDataWithNetInterest.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
   const weightedPairedData = useMemo(
     () =>
-      sortedPairedData.map((d) => ({
+      sortedPairedDataWithNetInterest.map((d) => ({
         ...d,
         participantPercent: bpsToSliderWeight(d.participantPercent * 100, MAX_ALLOCATION_WEIGHT),
         budgetPercent: bpsToSliderWeight(d.budgetPercent * 100, MAX_ALLOCATION_WEIGHT),
       })),
-    [sortedPairedData],
+    [sortedPairedDataWithNetInterest],
   );
 
   const weightsMaxPercent = Math.max(
