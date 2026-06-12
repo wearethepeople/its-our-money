@@ -15,7 +15,7 @@ test.beforeEach(async ({ page, navigate, context }) => {
   while (await nextButton.isVisible()) {
     await nextButton.click();
   }
-  await page.getByRole("link", { name: /go to comparison dashboard/i }).click();
+  await page.getByRole("link", { name: /finish/i }).click();
   await page.waitForURL(/\/comparison$/);
 });
 
