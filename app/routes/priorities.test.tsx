@@ -35,7 +35,7 @@ function renderPrioritiesRoute(existingAllocation: ExistingAllocation | null) {
       path: "/priorities",
       Component: PrioritiesRoute,
       HydrateFallback: () => null,
-      loader: () => ({ existingAllocation }),
+      loader: () => ({ existingAllocation, existingParticipant: !!existingAllocation }),
     },
   ]);
 

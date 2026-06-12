@@ -226,7 +226,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                     </Button>
                   </Form>
                 </CardTitle>
-                <CardContent>
+                <CardContent className="px-0">
                   {allocation.publicId && publishState === "Published" && (
                     <div className="mt-3">
                       <ShareInfo publicId={allocation.publicId} url={url} />
@@ -237,7 +237,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                   </div>
                   <p>
                     {publishState === "Published" ? "What's published?" : "What will be published?"}
-                    &nbsp;
+                    <br />
                     <span className="text-muted-foreground">
                       Comparison page with your priorities. Tax payment is never stored.
                     </span>

@@ -36,7 +36,7 @@ export function InsightCarousel({ pairedData }: { pairedData: PairedItem[] }) {
   const insights = useMemo(() => computeInsights(pairedData), [pairedData]);
 
   return (
-    <div className="relative px-10 -mx-10 mb-8">
+    <div className="relative px-8 -mx-8 mb-8">
       <Carousel opts={{ align: "start" }} setApi={setApi} className="w-full">
         <CarouselContent className="-ml-3">
           {CAROUSEL_INSIGHTS.filter((id) => insightApplies(id, insights)).map((id) => (
@@ -48,8 +48,8 @@ export function InsightCarousel({ pairedData }: { pairedData: PairedItem[] }) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="-left-6" />
+        <CarouselNext className="-right-6" />
       </Carousel>
       <div className="mt-3 flex justify-center items-center gap-1.5">
         {Array.from({ length: count }).map((_, i) => (

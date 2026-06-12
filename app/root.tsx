@@ -165,7 +165,7 @@ function App() {
       <div className="mx-auto flex min-h-screen flex-col justify-between">
         <header
           className={cn(
-            "bg-background border-b py-2 sticky top-0 z-10 mb-8",
+            "bg-background border-b-muted-foreground border-b py-2 sticky top-0 z-10 mb-8",
             isHome && !isParticipant ? "" : "",
           )}
           ref={(el) => {
@@ -219,26 +219,14 @@ function App() {
         </main>
 
         <footer
-          className="mt-8 py-2 border-t border-t-line-2 bg-surface text-ink-muted"
+          className="mt-8 py-4 border-t border-t-line-2 bg-surface text-ink-muted"
           ref={(el) => {
             if (el)
               document.documentElement.style.setProperty("--footer-height", `${el.offsetHeight}px`);
           }}
         >
-          <div className="container flex justify-between">
-            <div>
-              <p className="text-sm leading-snug text-ink-muted">
-                A&nbsp;
-                <Link to="http://www.wearethepeople.us/" target="_blank" className="font-semibold">
-                  We&nbsp;(ARE)&nbsp;the&nbsp;People
-                </Link>
-                &nbsp;project.
-              </p>
-              <p>
-                <small className="text-ink-muted">&copy; 2026 We (ARE) the People</small>
-              </p>
-            </div>
-            <ul className="text-sm flex gap-2">
+          <div className="container flex justify-between flex-col sm:flex-row text-ink-muted">
+            <ul className="text-sm flex gap-6 mb-8 sm:gap-2 sm:mb-auto">
               <li>
                 <Link to={href("/about")}>About</Link>
               </li>
@@ -249,22 +237,33 @@ function App() {
                 <Link to={href("/help")}>Help</Link>
               </li>
             </ul>
-            <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+            <div className="flex flex-row sm:flex-col sm:grow sm:text-right">
+              <div>
+                <p className="text-sm leading-snug text-ink-muted sm:pr-2">
+                  A&nbsp;
+                  <Link
+                    to="http://www.wearethepeople.us/"
+                    target="_blank"
+                    className="font-semibold"
+                  >
+                    We&nbsp;(ARE)&nbsp;the&nbsp;People
+                  </Link>
+                  &nbsp;project.
+                </p>
+                <p className="sm:mb-4">
+                  <small className="text-ink-muted sm:pr-2">&copy; 2026 We (ARE) the People</small>
+                </p>
+              </div>
+              <div className="flex grow place-content-end">
+                <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+              </div>
+            </div>
           </div>
         </footer>
       </div>
       <EpicToaster closeButton position="top-center" theme={theme} />
       <EpicProgress />
     </OpenImgContextProvider>
-  );
-}
-
-function Logo() {
-  return (
-    <Link to="/" className="group grid leading-snug">
-      <span className="font-light transition group-hover:-translate-x-1">epic</span>
-      <span className="font-bold transition group-hover:translate-x-1">notes</span>
-    </Link>
   );
 }
 

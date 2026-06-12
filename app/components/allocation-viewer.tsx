@@ -13,7 +13,10 @@ import {
 import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
 import { bpsToSliderWeight } from "@/utils/normalize-weights.ts";
 import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
-import { AllocationRoundingNote } from "@/components/allocation-rounding-note.tsx";
+import {
+  WeightsRoundingNote,
+  PercentsRoundingNote,
+} from "@/components/allocation-rounding-note.tsx";
 
 export type { PairedItem } from "@/components/comparison.tsx";
 
@@ -40,18 +43,39 @@ export function AllocationViewer({
     [pairedData, sortDirection, sortMode],
   );
 
+  const pairedDataWithNetInterest = useMemo(() => {
+    if (netInterestBps <= 0) return pairedData;
+    const netInterestPercent = netInterestBps / 100;
+    return [
+      ...pairedData,
+      {
+        code: "900",
+        category: "Net Interest",
+        id: "net_interest",
+        participantPercent: netInterestPercent,
+        budgetPercent: netInterestPercent,
+        delta: 0,
+      },
+    ];
+  }, [pairedData, netInterestBps]);
+
+  const sortedPairedDataWithNetInterest = useMemo(
+    () => sortPairedData(pairedDataWithNetInterest, sortMode, sortDirection),
+    [pairedDataWithNetInterest, sortDirection, sortMode],
+  );
+
   const maxPercent = Math.max(
-    ...sortedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
+    ...sortedPairedDataWithNetInterest.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
   const weightedPairedData = useMemo(
     () =>
-      sortedPairedData.map((d) => ({
+      sortedPairedDataWithNetInterest.map((d) => ({
         ...d,
         participantPercent: bpsToSliderWeight(d.participantPercent * 100, MAX_ALLOCATION_WEIGHT),
         budgetPercent: bpsToSliderWeight(d.budgetPercent * 100, MAX_ALLOCATION_WEIGHT),
       })),
-    [sortedPairedData],
+    [sortedPairedDataWithNetInterest],
   );
 
   const weightsMaxPercent = Math.max(
@@ -127,7 +151,7 @@ export function AllocationViewer({
       </div>
       {activeTab === "priorities" && (
         <div>
-          <AllocationRoundingNote />
+          <WeightsRoundingNote />
           <ComparisonLegend
             ombYear={ombYear}
             className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]"
@@ -142,12 +166,13 @@ export function AllocationViewer({
       )}
       {activeTab === "percentages" && (
         <div>
+          <PercentsRoundingNote />
           <ComparisonLegend
             ombYear={ombYear}
             className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]"
           />
           <ComparisonList
-            items={sortedPairedData}
+            items={sortedPairedDataWithNetInterest}
             maxPercent={maxPercent}
             viewScheme={viewScheme}
           />

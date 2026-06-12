@@ -489,7 +489,7 @@
 
   header a,
   footer a {
-    color: var(--ink-2);
+    color: var(--ink-2-muted);
   }
 
   .numeric {

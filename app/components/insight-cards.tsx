@@ -8,7 +8,7 @@ import { formatPercent } from "@/utils/numbers.ts";
 function MethodologyFooter({ children }: { children: ReactNode }) {
   return (
     <CardFooter className="border-t-muted-foreground mt-auto p-0 px-4 pb-4 group-data-[size=sm]/card:px-3">
-      <p className="text-xs text-muted-foreground pt-2.5">{children}</p>
+      <p className="text-xs text-muted-foreground pt-2.5 min-h-18.5">{children}</p>
     </CardFooter>
   );
 }
