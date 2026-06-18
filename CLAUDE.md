@@ -52,7 +52,7 @@ Files with `.server.ts` are server-only. Files with `.client.tsx` are client-onl
 
 ### Application domain
 
-**It's Our Money** (https://www.itsourmoney.org) is an anonymous "budget values"-prioritization tool. Visitors prioritize weights across US federal outlay functions,
+**It's Our Money** (https://www.itsourmoney.us) is an anonymous "budget values"-prioritization tool. Visitors prioritize weights across US federal outlay functions,
 compare their allocation to the actual OMB budget, and optionally publish their result.
 
 **User flow:** `/` → `/priorities/:year` → `/comparison` → optionally `/s/:publicId` (shared view)
