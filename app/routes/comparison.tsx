@@ -39,7 +39,7 @@ const inputFormSchema = manageAllocationSchema.omit({
 export async function loader({ request }: Route.LoaderArgs) {
   const participant = await getParticipantBySession(request);
   const url =
-    process.env.NODE_ENV === "production" ? "https://itsourmoney.org" : "http://localhost:3000";
+    process.env.NODE_ENV === "production" ? "https://itsourmoney.us" : "http://localhost:3000";
 
   if (participant) {
     const allocation = await AllocationService.getAllocationByParticipantId(participant.id);

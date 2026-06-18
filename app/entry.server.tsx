@@ -32,8 +32,8 @@ export default async function handleRequest(...args: DocRequestArgs) {
   // Make the root the canonical URL
   const url = new URL(request.url);
 
-  if (url.hostname === "www.itsourmoney.org") {
-    url.hostname = "itsourmoney.org";
+  if (url.hostname === "www.itsourmoney.us") {
+    url.hostname = "itsourmoney.us";
     return Response.redirect(url.toString(), 301);
   }
 
