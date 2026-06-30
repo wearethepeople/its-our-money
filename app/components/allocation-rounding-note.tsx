@@ -17,8 +17,8 @@ export function PercentsRoundingNote() {
     <TypographyP className="my-6 text-sm">
       A note:&nbsp;
       <span className="text-ink-faint">
-        The badge on the right is the gap: where you'd spend more than Washington, and where you'd
-        spend less.
+        The badge on the right is the difference: where you'd spend more than Washington, and where
+        you'd spend less.
       </span>
     </TypographyP>
   );
