@@ -9,12 +9,10 @@ import { Button } from "@/ui/button.tsx";
 import {
   ComparisonLegend,
   ComparisonList,
-  SortControls,
   sortPairedData,
   type SortDirection,
   type SortMode,
 } from "@/components/comparison.tsx";
-import { ViewToggle } from "@/components/view-toggle.tsx";
 import { type ViewSchemeId } from "@/constants/grouping-schemes.ts";
 import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
 import { InsightCard } from "@/components/insight-cards.tsx";
@@ -48,7 +46,7 @@ type ViewPrefs = {
 const DEFAULT_VIEW_PREFS: ViewPrefs = {
   sortMode: "participantPercent",
   sortDirection: "desc",
-  viewScheme: "flat",
+  viewScheme: "public_domain",
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -184,24 +182,6 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
     </div>
   );
 
-  const sortBar = (
-    <div className="my-4 flex flex-nowrap items-center gap-3 py-2">
-      <SortControls
-        sortMode={viewPrefs.sortMode}
-        sortDirection={viewPrefs.sortDirection}
-        onChange={(sortMode, sortDirection) =>
-          setViewPrefs({ ...viewPrefs, sortMode, sortDirection })
-        }
-      />
-      <div className="ml-auto">
-        <ViewToggle
-          value={viewPrefs.viewScheme}
-          onChange={(viewScheme) => setViewPrefs({ ...viewPrefs, viewScheme })}
-        />
-      </div>
-    </div>
-  );
-
   return (
     <div>
       <div key={step} className="motion-safe:animate-slide-top">
@@ -209,7 +189,6 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           <section>
             <TypographyH1 className="mb-3">Priorities, side by side.</TypographyH1>
             <Separator className="my-6" />
-            {sortBar}
             <WeightsRoundingNote />
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList
@@ -234,7 +213,6 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           <section>
             <TypographyH1 className="mb-3">Here's where you land.</TypographyH1>
             <Separator className="my-6" />
-            {sortBar}
             <PercentsRoundingNote />
             <ComparisonLegend ombYear={ombYear} />
             <ComparisonList

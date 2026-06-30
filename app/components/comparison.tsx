@@ -9,6 +9,7 @@ import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-sc
 import { getFunctionDetailsById } from "@/utils/budget-data.ts";
 import { formatPercent, formatSignedCurrency, formatSignedPercent } from "@/utils/numbers.ts";
 import { ArrowUpDown } from "lucide-react";
+import { WithClassName } from "@/types/ui";
 
 export type PairedItem = {
   code: string;
@@ -115,8 +116,14 @@ export function ComparisonList({
               {group.label}
             </h3>
             <div className="divide-y divide-muted-foreground">
-              {groupItems.map((item, index) => (
-                <div key={item.code} className={index % 2 === 1 ? "bg-surface-2" : ""}>
+              {groupItems.map((item, index, arr) => (
+                <div
+                  key={item.code}
+                  className={cn(
+                    index % 2 === 1 ? "bg-surface-2" : "",
+                    index + 1 === arr.length ? "rounded-b" : "",
+                  )}
+                >
                   <ComparisonRow item={item} maxPercent={maxPercent} badges={badges} />
                 </div>
               ))}
@@ -189,14 +196,23 @@ export function DeltaCurrencyBadge({ value }: { value: number }) {
 export function ComparisonLegend({ ombYear, className }: { ombYear: number; className?: string }) {
   const fy = String(ombYear).slice(2);
   return (
-    <div className={cn("bg-background mb-6 mt-4 flex items-center py-2 gap-5 text-sm", className)}>
-      <div className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded-sm bg-you" />
-        <span className="text-ink-muted">You</span>
+    <div className="bg-background mt-4 flex flex-row mb-6 py-2">
+      <div className={cn("grow flex gap-5 text-sm", className)}>
+        <div className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-sm bg-you" />
+          <span className="text-ink-muted">You</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-sm bg-them" />
+          <span className="text-ink-muted">Washington (FY{fy})</span>
+        </div>
       </div>
-      <div className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded-sm bg-them" />
-        <span className="text-ink-muted">Washington (FY{fy})</span>
+      <div className="text-ink-faint text-xs">
+        Tap a{" "}
+        <span className="text-ink-2 underline decoration-dotted decoration-you underline-offset-2">
+          Budget Function
+        </span>{" "}
+        for context.
       </div>
     </div>
   );
@@ -206,11 +222,11 @@ export function ComparisonRow({
   item,
   maxPercent,
   badges = "percent",
-}: {
+}: WithClassName<{
   item: PairedItem;
   maxPercent: number;
   badges?: "percent" | "none";
-}) {
+}>) {
   const scale = maxPercent > 0 ? 100 / maxPercent : 1;
   const fnData = getFunctionDetailsById(item.id);
   const isNetInterest = item.id === "net_interest";
