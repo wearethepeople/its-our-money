@@ -19,7 +19,7 @@ import faviconAssetUrl from "./assets/favicons/favicon.svg";
 import { GeneralErrorBoundary } from "./components/error-boundary.tsx";
 import { EpicProgress } from "./components/progress-bar.tsx";
 import { useToast } from "./components/toaster.tsx";
-import { href as iconsHref } from "./components/ui/icon.tsx";
+import { Icon, href as iconsHref } from "./components/ui/icon.tsx";
 import { EpicToaster } from "./components/ui/sonner.tsx";
 import { ThemeSwitch, useOptionalTheme, useTheme } from "./routes/resources/theme-switch.tsx";
 import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
@@ -34,6 +34,7 @@ import { makeTimings } from "./utils/timing.server.ts";
 import { getToast } from "./utils/toast.server.ts";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { Separator } from "./components/ui/separator.tsx";
+import { useElementHeightVar } from "@/hooks/use-element-height-var.ts";
 
 export const links: Route.LinksFunction = () => {
   return [
@@ -150,6 +151,8 @@ function App() {
   const data = useLoaderData<typeof loader>();
   const theme = useTheme();
   const { pathname } = useLocation();
+  const headerRef = useElementHeightVar<HTMLElement>("--header-height");
+  const footerRef = useElementHeightVar<HTMLElement>("--footer-height");
 
   const isHome = pathname === "/";
   const isParticipant = data?.participant !== null;
@@ -162,16 +165,14 @@ function App() {
 
   return (
     <OpenImgContextProvider optimizerEndpoint="/resources/images" getSrc={getImgSrc}>
+      <a id="top" />
       <div className="mx-auto flex min-h-screen flex-col justify-between">
         <header
           className={cn(
             "bg-background border-b-muted-foreground border-b py-2 sticky top-0 z-10 mb-8",
             isHome && !isParticipant ? "" : "",
           )}
-          ref={(el) => {
-            if (el)
-              document.documentElement.style.setProperty("--header-height", `${el.offsetHeight}px`);
-          }}
+          ref={headerRef}
         >
           <nav
             className={cn(
@@ -220,10 +221,7 @@ function App() {
 
         <footer
           className="mt-8 py-4 border-t border-t-line-2 bg-surface text-ink-muted"
-          ref={(el) => {
-            if (el)
-              document.documentElement.style.setProperty("--footer-height", `${el.offsetHeight}px`);
-          }}
+          ref={footerRef}
         >
           <div className="container flex justify-between flex-col sm:flex-row text-ink-muted">
             <ul className="text-sm flex gap-6 mb-8 sm:gap-2 sm:mb-auto">
@@ -240,6 +238,7 @@ function App() {
             <div className="flex flex-row sm:flex-col sm:grow sm:text-right">
               <div>
                 <p className="text-sm leading-snug text-ink-muted sm:pr-2">
+                  <Icon name="wrtp-01" size="md" className="mr-1" />
                   A&nbsp;
                   <Link
                     to="http://www.wearethepeople.us/"

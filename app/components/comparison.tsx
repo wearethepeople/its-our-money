@@ -8,8 +8,8 @@ import { Icon } from "@/ui/icon.tsx";
 import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-schemes.ts";
 import { getFunctionDetailsById } from "@/utils/budget-data.ts";
 import { formatPercent, formatSignedCurrency, formatSignedPercent } from "@/utils/numbers.ts";
-import { ArrowUpDown } from "lucide-react";
 import { WithClassName } from "@/types/ui";
+import { Info } from "lucide-react";
 
 export type PairedItem = {
   code: string;
@@ -196,8 +196,8 @@ export function DeltaCurrencyBadge({ value }: { value: number }) {
 export function ComparisonLegend({ ombYear, className }: { ombYear: number; className?: string }) {
   const fy = String(ombYear).slice(2);
   return (
-    <div className="bg-background mt-4 flex flex-row mb-6 py-2">
-      <div className={cn("grow flex gap-5 text-sm", className)}>
+    <div className={cn("bg-background mt-4 flex flex-row mb-6 py-2", className)}>
+      <div className="grow flex gap-5 text-sm">
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm bg-you" />
           <span className="text-ink-muted">You</span>
@@ -207,7 +207,7 @@ export function ComparisonLegend({ ombYear, className }: { ombYear: number; clas
           <span className="text-ink-muted">Washington (FY{fy})</span>
         </div>
       </div>
-      <div className="text-ink-faint text-xs">
+      <div className="flex text-ink-faint text-xs gap-1 items-center">
         Tap a{" "}
         <span className="text-ink-2 underline decoration-dotted decoration-you underline-offset-2">
           Budget Function

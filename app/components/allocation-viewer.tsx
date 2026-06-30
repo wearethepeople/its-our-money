@@ -17,6 +17,7 @@ import {
   WeightsRoundingNote,
   PercentsRoundingNote,
 } from "@/components/allocation-rounding-note.tsx";
+import { useElementHeightVar } from "@/hooks/use-element-height-var.ts";
 
 export type { PairedItem } from "@/components/comparison.tsx";
 
@@ -82,18 +83,15 @@ export function AllocationViewer({
     ...weightedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
+  const dataMassageRef = useElementHeightVar<HTMLDivElement>("--data-massage-height");
+  const tabsRef = useElementHeightVar<HTMLDivElement>("--tabs-height");
+
   return (
     <div>
       <div
         className="my-4 flex flex-nowrap items-center gap-3 bg-background sticky top-(--header-height) py-2"
         id="data-massage"
-        ref={(el) => {
-          if (el)
-            document.documentElement.style.setProperty(
-              "--data-massage-height",
-              `${el.offsetHeight}px`,
-            );
-        }}
+        ref={dataMassageRef}
       >
         <SortControls
           sortMode={sortMode}
@@ -108,11 +106,8 @@ export function AllocationViewer({
         </div>
       </div>
       <div
-        className="flex border-b border-muted-foreground bg-background sticky top-[calc(var(--header-height)+var(--data-massage-height))]"
-        ref={(el) => {
-          if (el)
-            document.documentElement.style.setProperty("--tabs-height", `${el.offsetHeight}px`);
-        }}
+        className="flex border-b border-muted-foreground bg-background sticky top-[calc(var(--header-height)+var(--data-massage-height))] z-50"
+        ref={tabsRef}
         id="tabs"
       >
         <button
@@ -154,7 +149,7 @@ export function AllocationViewer({
           <WeightsRoundingNote />
           <ComparisonLegend
             ombYear={ombYear}
-            className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]"
+            className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))] z-0"
           />
           <ComparisonList
             items={weightedPairedData}

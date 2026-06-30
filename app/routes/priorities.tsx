@@ -13,6 +13,7 @@ import { PUBLIC_DOMAIN_SCHEME, type ViewSchemeId } from "@/constants/grouping-sc
 import { Icon } from "@/ui/icon";
 import { ConformSlider } from "@/ui/conform-slider.tsx";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
+import { useElementHeightVar } from "@/hooks/use-element-height-var.ts";
 import { checkHoneypot } from "@/utils/honeypot.server";
 import { bpsToSliderWeight, normalizeToBasisPoints, sum } from "@/utils/normalize-weights.ts";
 import {
@@ -41,6 +42,8 @@ import {
 import { Button } from "#app/components/ui/button.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
 import { cn } from "#app/utils/misc.tsx";
+import { Info } from "lucide-react";
+import BackToTop from "#app/components/back-to-top.tsx";
 
 const formSchema = z.object({
   allocations: z.array(
@@ -145,6 +148,7 @@ export default function PrioritiesRoute() {
 
   const contentRef = useRef<HTMLElement>(null);
   const { sentinelRef, progress } = useScrollProgress(contentRef);
+  const toolbarRef = useElementHeightVar<HTMLDivElement>("--priorities-toolbar-height");
 
   const existingAllocationByCategoryId = new Map(
     existingAllocation?.items.map((item) => [item.categoryCode, item.weightBps]) ?? [],
@@ -265,12 +269,11 @@ export default function PrioritiesRoute() {
       <div className="mb-4">
         <TypographyH1 className="mb-3">Your turn.</TypographyH1>
         <TypographyLead className="mb-8">
-          Slide each category to reflect your priorities – you rate each one independently. Tap any
-          title for context.
+          Slide each category (budget function) to reflect your priorities – you rate each one
+          independently.
         </TypographyLead>
         <TypographyP>
-          Keep in mind:
-          <br />
+          Keep in mind:{" "}
           <span className="text-muted-foreground">
             if everything's a priority, nothing is. And you can always change your mind.
           </span>
@@ -278,13 +281,23 @@ export default function PrioritiesRoute() {
       </div>
       <form className="flex flex-col gap-4" method="post" {...getFormProps(form)}>
         <HoneypotInputs />
-        {/* Legend + toggle */}
-        <div className="py-4 sticky top-(--header-height) bg-background z-10">
+        {/* Progress bar + grouping toggle */}
+        <div className="sticky top-(--header-height) bg-background z-10" ref={toolbarRef}>
           <div className="flex gap-4 items-center">
             <Progress value={progress * 100} className="grow" />
             <ViewToggle value={viewScheme} onChange={setViewScheme} />
           </div>
         </div>
+        <TypographyP className="flex items-center gap-2 text-sm pb-2 text-ink-faint sticky top-[calc(var(--header-height)+var(--priorities-toolbar-height))] bg-background z-10">
+          {!existingParticipant && <Info size={18} />}
+          <span>
+            Tap a{" "}
+            <span className="text-ink-2 underline decoration-dotted decoration-you underline-offset-2">
+              Budget Function
+            </span>{" "}
+            for context.
+          </span>
+        </TypographyP>
         {/* Allocations */}
         <div className="mx-0.5">
           {viewScheme === "flat" ? (
@@ -321,6 +334,7 @@ export default function PrioritiesRoute() {
         </div>
         <div ref={sentinelRef} />
         <ErrorList id={form.errorId} errors={form.errors} />
+        <BackToTop />
         <Separator className="mt-8 mb-4" />
         <div
           className={cn(

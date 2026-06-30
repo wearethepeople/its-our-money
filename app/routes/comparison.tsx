@@ -26,6 +26,7 @@ import { Card, CardContent, CardTitle } from "#app/components/ui/card.tsx";
 import { AllocationViewer } from "@/components/allocation-viewer.tsx";
 import { Copy } from "lucide-react";
 import { InsightCarousel } from "@/components/insight-carousel.tsx";
+import BackToTop from "#app/components/back-to-top.tsx";
 
 const manageAllocationSchema = z.object({
   intent: z.enum(["publish", "unpublish"]),
@@ -181,7 +182,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
     clearFirstLookStep();
   }, []);
 
-  const [form, fields] = useForm({
+  const [form, _] = useForm({
     defaultValue: {
       intent: publishButtonText.toLowerCase(),
     },
@@ -202,14 +203,13 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
             <div>
               <TypographyP>Your preferences, next to what Washington actually spent.</TypographyP>
               <TypographyP className="text-sm text-you">
-                Want to update your priorities?
-                <br />
+                Change your mind?&nbsp;
                 <Link
                   to={href("/priorities/:year", {
                     year: new Date().getFullYear().toString(),
                   })}
                 >
-                  Go back to the sliders
+                  Update your priorities
                 </Link>
                 .
               </TypographyP>
@@ -239,9 +239,13 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
                     {publishState === "Published" ? "What's published?" : "What will be published?"}
                     <br />
                     <span className="text-muted-foreground">
-                      Comparison page with your priorities. Tax payment is never stored.
+                      Comparison page, ie. this page, loaded with your priorities. Tax payment
+                      values are never stored.
                     </span>
                   </p>
+                  <TypographyP>
+                    No personal information is collected or displayed. Ever.
+                  </TypographyP>
                 </CardContent>
               </Card>
             </div>
@@ -254,6 +258,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
       <InsightCarousel pairedData={pairedData} />
       <TypographyH2 className="border-b border-b-muted-foreground">The numbers</TypographyH2>
       <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} />
+      <BackToTop />
     </div>
   );
 }
