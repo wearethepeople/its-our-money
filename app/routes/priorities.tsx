@@ -282,7 +282,7 @@ export default function PrioritiesRoute() {
       <form className="flex flex-col gap-4" method="post" {...getFormProps(form)}>
         <HoneypotInputs />
         {/* Progress bar + grouping toggle */}
-        <div className="sticky top-(--header-height) bg-background z-10" ref={toolbarRef}>
+        <div className="sticky top-(--header-height) bg-background z-10 pt-2" ref={toolbarRef}>
           <div className="flex gap-4 items-center">
             <Progress value={progress * 100} className="grow" />
             <ViewToggle value={viewScheme} onChange={setViewScheme} />
