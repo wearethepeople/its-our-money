@@ -190,7 +190,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             <TypographyH1 className="mb-3">Priorities, side by side.</TypographyH1>
             <Separator className="my-6" />
             <WeightsRoundingNote />
-            <ComparisonLegend ombYear={ombYear} />
+            <ComparisonLegend ombYear={ombYear} className="sticky top-(--header-height) z-10" />
             <ComparisonList
               items={weightedPairedData}
               maxPercent={weightsMaxPercent}
@@ -214,7 +214,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             <TypographyH1 className="mb-3">Here's where you land.</TypographyH1>
             <Separator className="my-6" />
             <PercentsRoundingNote />
-            <ComparisonLegend ombYear={ombYear} />
+            <ComparisonLegend ombYear={ombYear} className="sticky top-(--header-height) z-10" />
             <ComparisonList
               items={sortedPairedDataWithNetInterest}
               maxPercent={maxPercent}
