@@ -237,7 +237,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           </section>
         )}
       </div>
-      <div className="sticky bottom-0 mt-10 border-t border-ink-faint bg-background py-4">
+      <div className="sticky bottom-0 mt-10 border-t border-ink-faint bg-background pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         {stepNav}
       </div>
     </div>
