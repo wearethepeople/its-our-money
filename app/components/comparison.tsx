@@ -244,7 +244,7 @@ export function ComparisonLegend({
         )}
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm bg-them" />
-          <span className="text-ink-muted">Washington (FY{fy})</span>
+          <span className="text-ink-muted">Washington</span>
         </div>
       </div>
       <div className="flex text-ink-faint text-xs gap-1 items-center">

@@ -29,6 +29,7 @@ export default defineConfig((config) => {
       sourcemap: true,
     },
     server: {
+      allowedHosts: ["studio.local"],
       watch: {
         ignored: ["**/playwright-report/**"],
       },

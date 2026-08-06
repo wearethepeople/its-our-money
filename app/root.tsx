@@ -219,46 +219,50 @@ function App() {
           <Outlet />
         </main>
 
-        <footer
-          className="mt-8 py-4 border-t border-t-line-2 bg-surface text-ink-muted"
-          ref={footerRef}
-        >
-          <div className="container flex justify-between flex-col sm:flex-row text-ink-muted">
-            <ul className="text-sm flex gap-6 mb-8 sm:gap-2 sm:mb-auto">
-              <li>
-                <Link to={href("/about")}>About</Link>
-              </li>
-              <li>
-                <Link to={href("/privacy")}>Privacy</Link>
-              </li>
-              <li>
-                <Link to={href("/help")}>Help</Link>
-              </li>
-            </ul>
-            <div className="flex flex-row sm:flex-col sm:grow sm:text-right">
-              <div>
-                <p className="text-sm leading-snug text-ink-muted sm:pr-2">
-                  <Icon name="wrtp-01" size="md" className="mr-1" />
-                  A&nbsp;
-                  <Link
-                    to="http://www.wearethepeople.us/"
-                    target="_blank"
-                    className="font-semibold"
-                  >
-                    We&nbsp;(ARE)&nbsp;the&nbsp;People
-                  </Link>
-                  &nbsp;project.
-                </p>
-                <p className="sm:mb-4">
-                  <small className="text-ink-muted sm:pr-2">&copy; 2026 We (ARE) the People</small>
-                </p>
-              </div>
-              <div className="flex grow place-content-end">
-                <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+        {!inFirstLook && (
+          <footer
+            className="mt-8 py-4 border-t border-t-line-2 bg-surface text-ink-muted"
+            ref={footerRef}
+          >
+            <div className="container flex justify-between flex-col sm:flex-row text-ink-muted">
+              <ul className="text-sm flex gap-6 mb-8 sm:gap-2 sm:mb-auto">
+                <li>
+                  <Link to={href("/about")}>About</Link>
+                </li>
+                <li>
+                  <Link to={href("/privacy")}>Privacy</Link>
+                </li>
+                <li>
+                  <Link to={href("/help")}>Help</Link>
+                </li>
+              </ul>
+              <div className="flex flex-row sm:flex-col sm:grow sm:text-right">
+                <div>
+                  <p className="text-sm leading-snug text-ink-muted sm:pr-2">
+                    <Icon name="wrtp-01" size="md" className="mr-1" />
+                    A&nbsp;
+                    <Link
+                      to="http://www.wearethepeople.us/"
+                      target="_blank"
+                      className="font-semibold"
+                    >
+                      We&nbsp;(ARE)&nbsp;the&nbsp;People
+                    </Link>
+                    &nbsp;project.
+                  </p>
+                  <p className="sm:mb-4">
+                    <small className="text-ink-muted sm:pr-2">
+                      &copy; 2026 We (ARE) the People
+                    </small>
+                  </p>
+                </div>
+                <div className="flex grow place-content-end">
+                  <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+                </div>
               </div>
             </div>
-          </div>
-        </footer>
+          </footer>
+        )}
       </div>
       <EpicToaster closeButton position="top-center" theme={theme} />
       <EpicProgress />

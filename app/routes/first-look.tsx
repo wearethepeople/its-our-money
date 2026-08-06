@@ -18,6 +18,7 @@ import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
 import { InsightCard } from "@/components/insight-cards.tsx";
 import { computeInsights, type InsightId } from "@/utils/insights.ts";
 import { useLocalStorageState } from "@/hooks/use-local-storage-state.ts";
+import { useElementHeightVar } from "@/hooks/use-element-height-var.ts";
 import { bpsToSliderWeight, percentToDisplayWeight } from "@/utils/normalize-weights.ts";
 import { getFirstLookStep, setFirstLookStep } from "@/utils/first-look-progress.ts";
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
@@ -72,6 +73,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
   const { pairedData, netInterestBps, ombYear } = loaderData;
   const [stepIndex, setStepIndex] = useState(0);
   const step = STEPS[stepIndex] ?? "weights";
+  const footerRef = useElementHeightVar<HTMLDivElement>("--first-look-footer-height");
 
   // Restore mid-funnel progress on refresh; otherwise mark the funnel as
   // started so the rest of the app (e.g. the site nav) knows we're in it.
@@ -189,7 +191,11 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
   );
 
   return (
-    <div>
+    <div
+      style={{
+        paddingBottom: "calc(var(--first-look-footer-height, 0px) + 2.5rem)",
+      }}
+    >
       <div key={step} className="motion-safe:animate-slide-top">
         {step === "weights" && (
           <section>
@@ -251,7 +257,10 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           </section>
         )}
       </div>
-      <div className="sticky bottom-0 mt-10 border-t border-ink-faint bg-background pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div
+        ref={footerRef}
+        className="container fixed inset-x-0 bottom-0 z-20 mx-auto border-t border-ink-faint bg-background pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+      >
         {stepNav}
       </div>
     </div>
