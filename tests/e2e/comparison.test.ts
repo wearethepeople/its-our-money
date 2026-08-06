@@ -6,6 +6,12 @@ test.beforeEach(async ({ page, navigate, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
   await navigate("/priorities/:year", { year });
+  // Sliders start at 0 and submitting with everything at 0 is blocked, so give
+  // at least one category weight before proceeding.
+  const firstSlider = page.getByRole("slider").first();
+  await firstSlider.focus();
+  await firstSlider.press("ArrowRight");
+  await expect(firstSlider).toHaveValue("1");
   await page.getByRole("button", { name: /see how your priorities compare/i }).click();
   await page.waitForURL(/\/first-look$/);
 
