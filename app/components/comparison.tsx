@@ -196,8 +196,10 @@ export function DeltaCurrencyBadge({ value }: { value: number }) {
 export function ComparisonLegend({ ombYear, className }: { ombYear: number; className?: string }) {
   const fy = String(ombYear).slice(2);
   return (
-    <div className={cn("bg-background mt-4 flex flex-row mb-6 py-2", className)}>
-      <div className="grow flex gap-5 text-sm">
+    <div
+      className={cn("bg-background mt-4 flex flex-col gap-2 sm:flex-row sm:gap-0 mb-6 py-2", className)}
+    >
+      <div className="flex gap-5 text-sm sm:grow">
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm bg-you" />
           <span className="text-ink-muted">You</span>
