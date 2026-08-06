@@ -193,17 +193,52 @@ export function DeltaCurrencyBadge({ value }: { value: number }) {
   );
 }
 
-export function ComparisonLegend({ ombYear, className }: { ombYear: number; className?: string }) {
+/**
+ * The hollow-ring mark for a category the participant left unweighted. Shared by
+ * the comparison bars and the legend so the two can't visually drift. Pass
+ * `aria-label` where the ring is the only indicator (a bar row); omit it where a
+ * text label already names it (the legend).
+ */
+export function SkippedMarker({
+  className,
+  "aria-label": ariaLabel,
+}: {
+  className?: string;
+  "aria-label"?: string;
+}) {
+  return (
+    <span
+      {...(ariaLabel ? { role: "img", "aria-label": ariaLabel } : { "aria-hidden": true })}
+      className={cn("inline-block rounded-full border-[1.5px] border-you", className)}
+    />
+  );
+}
+
+export function ComparisonLegend({
+  ombYear,
+  hasSkipped = false,
+  className,
+}: {
+  ombYear: number;
+  hasSkipped?: boolean;
+  className?: string;
+}) {
   const fy = String(ombYear).slice(2);
   return (
     <div
       className={cn("bg-background mt-4 flex flex-col gap-2 sm:flex-row sm:gap-0 mb-6 py-2", className)}
     >
-      <div className="flex gap-5 text-sm sm:grow">
+      <div className="flex flex-wrap gap-5 text-sm sm:grow">
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm bg-you" />
           <span className="text-ink-muted">You</span>
         </div>
+        {hasSkipped && (
+          <div className="flex items-center gap-1.5">
+            <SkippedMarker className="size-3" />
+            <span className="text-ink-muted">You (skipped)</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm bg-them" />
           <span className="text-ink-muted">Washington (FY{fy})</span>
@@ -264,11 +299,7 @@ export function ComparisonRow({
             // Untouched category: a hollow ring reads as "you weighted this at
             // zero" without borrowing the filled-bar vocabulary.
             <div className="flex h-2 items-center">
-              <span
-                role="img"
-                aria-label="You left this unweighted"
-                className="size-2.5 rounded-full border-[1.5px] border-you"
-              />
+              <SkippedMarker className="size-2.5" aria-label="You left this unweighted" />
             </div>
           )}
           <div

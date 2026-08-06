@@ -85,6 +85,10 @@ export function AllocationViewer({
     ...weightedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
+  // Any allocatable category the participant left unweighted (net interest is
+  // always > 0 and not a user choice, so it never counts as skipped).
+  const hasSkipped = pairedData.some((d) => d.participantPercent === 0);
+
   const dataMassageRef = useElementHeightVar<HTMLDivElement>("--data-massage-height");
   const tabsRef = useElementHeightVar<HTMLDivElement>("--tabs-height");
 
@@ -151,6 +155,7 @@ export function AllocationViewer({
           <WeightsRoundingNote />
           <ComparisonLegend
             ombYear={ombYear}
+            hasSkipped={hasSkipped}
             className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))] z-0"
           />
           <ComparisonList
@@ -166,6 +171,7 @@ export function AllocationViewer({
           <PercentsRoundingNote />
           <ComparisonLegend
             ombYear={ombYear}
+            hasSkipped={hasSkipped}
             className="sticky top-[calc(var(--header-height)+var(--data-massage-height)+var(--tabs-height))]"
           />
           <ComparisonList

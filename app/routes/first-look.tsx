@@ -142,6 +142,10 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
     ...weightedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
 
+  // Any allocatable category the participant left unweighted (net interest is
+  // always > 0 and not a user choice, so it never counts as skipped).
+  const hasSkipped = pairedData.some((d) => d.participantPercent === 0);
+
   const back = () => goToStep(Math.max(stepIndex - 1, 0));
   const next = () => goToStep(Math.min(stepIndex + 1, STEPS.length - 1));
 
@@ -192,7 +196,11 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             <TypographyH1 className="mb-3">Priorities, side by side.</TypographyH1>
             <Separator className="my-6" />
             <WeightsRoundingNote />
-            <ComparisonLegend ombYear={ombYear} className="sticky top-(--header-height) z-10" />
+            <ComparisonLegend
+              ombYear={ombYear}
+              hasSkipped={hasSkipped}
+              className="sticky top-(--header-height) z-10"
+            />
             <ComparisonList
               items={weightedPairedData}
               maxPercent={weightsMaxPercent}
@@ -216,7 +224,11 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             <TypographyH1 className="mb-3">Here's where you land.</TypographyH1>
             <Separator className="my-6" />
             <PercentsRoundingNote />
-            <ComparisonLegend ombYear={ombYear} className="sticky top-(--header-height) z-10" />
+            <ComparisonLegend
+              ombYear={ombYear}
+              hasSkipped={hasSkipped}
+              className="sticky top-(--header-height) z-10"
+            />
             <ComparisonList
               items={sortedPairedDataWithNetInterest}
               maxPercent={maxPercent}
