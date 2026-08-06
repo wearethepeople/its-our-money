@@ -1,6 +1,6 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { data, href, redirect, useActionData, useLoaderData } from "react-router";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { z } from "zod";
@@ -15,7 +15,7 @@ import { ConformSlider } from "@/ui/conform-slider.tsx";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { useElementHeightVar } from "@/hooks/use-element-height-var.ts";
 import { checkHoneypot } from "@/utils/honeypot.server";
-import { bpsToSliderWeight, normalizeToBasisPoints, sum } from "@/utils/normalize-weights.ts";
+import { bpsToSliderWeight, sum, toStoredAllocations } from "@/utils/normalize-weights.ts";
 import {
   getOrCreateParticipantSession,
   getParticipantBySession,
@@ -45,18 +45,18 @@ import { cn } from "#app/utils/misc.tsx";
 import { Info } from "lucide-react";
 import BackToTop from "#app/components/back-to-top.tsx";
 
-const formSchema = z.object({
-  allocations: z.array(
-    z.object({
-      id: z.string(),
-      weight: z.coerce
-        .number()
-        .int()
-        .min(1, "Every outlay function must have an allocation.")
-        .max(MAX_ALLOCATION_WEIGHT),
-    }),
-  ),
-});
+const formSchema = z
+  .object({
+    allocations: z.array(
+      z.object({
+        id: z.string(),
+        weight: z.coerce.number().int().min(0).max(MAX_ALLOCATION_WEIGHT),
+      }),
+    ),
+  })
+  .refine((value) => value.allocations.some((allocation) => allocation.weight > 0), {
+    message: "Give weight to at least one category to proceed.",
+  });
 
 export type AllocationFormInput = z.infer<typeof formSchema>;
 
@@ -89,35 +89,9 @@ export async function action({ request }: Route.ActionArgs) {
     );
   }
 
-  const weights = submission.value.allocations.map((a) => a.weight);
-  const basisPoints = normalizeToBasisPoints(weights);
-  let finalAllocation: FinalAllocationItem[];
-
-  try {
-    if (basisPoints.length !== submission.value.allocations.length) {
-      throw new Error("Normalization output length mismatch");
-    }
-
-    finalAllocation = submission.value.allocations.map((allocation, i) => {
-      const bps = basisPoints[i];
-
-      if (bps === undefined) {
-        throw new Error(`Missing basis points at index ${i}`);
-      }
-
-      return { id: allocation.id, bps };
-    });
-  } catch {
-    return data(
-      {
-        resultType: "error",
-        result: submission.reply({
-          formErrors: ["Unable to normalize allocations."],
-        }),
-      },
-      { headers, status: 400 },
-    );
-  }
+  // Untouched (weight 0) categories are dropped here — only categories that
+  // received weight are persisted. The non-zero items still sum to 10,000.
+  const finalAllocation: FinalAllocationItem[] = toStoredAllocations(submission.value.allocations);
 
   // Ensure the basis points sum to 10,000
   if (sum(finalAllocation.map((a) => a.bps)) !== 10000) {
@@ -159,7 +133,7 @@ export default function PrioritiesRoute() {
       allocatableCategories.map((c) => {
         const existingBps = existingAllocationByCategoryId.get(c.id);
         const weight =
-          existingBps === undefined ? 1 : bpsToSliderWeight(existingBps, MAX_ALLOCATION_WEIGHT);
+          existingBps === undefined ? 0 : bpsToSliderWeight(existingBps, MAX_ALLOCATION_WEIGHT);
         return [c.id, weight];
       }),
     ),
@@ -171,7 +145,7 @@ export default function PrioritiesRoute() {
         const existingBps = existingAllocationByCategoryId.get(c.id);
 
         if (existingBps === undefined) {
-          return { id: c.id, weight: 1 };
+          return { id: c.id, weight: 0 };
         }
 
         return {
@@ -188,6 +162,17 @@ export default function PrioritiesRoute() {
     },
   });
   const allocations = fields.allocations.getFieldList();
+
+  // Form-level errors (e.g. the all-zero guard) render above the allocations.
+  // Conform focuses the first field on a failed submit, scrolling the user to
+  // the top, so bring the banner into view to make sure it isn't missed.
+  const formErrorRef = useRef<HTMLDivElement>(null);
+  const formErrorText = form.errors?.join(" ") ?? "";
+  useEffect(() => {
+    if (formErrorText) {
+      formErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [formErrorText]);
 
   const allocationsByFunctionId = new Map(
     allocations.flatMap((a, i) => {
@@ -224,9 +209,9 @@ export default function PrioritiesRoute() {
             <div className="flex flex-col mx-2">
               <ConformSlider
                 meta={categoryField.weight}
-                value={sliderWeights[fnId] ?? 1}
+                value={sliderWeights[fnId] ?? 0}
                 onValueChange={(v) => setSliderWeights((prev) => ({ ...prev, [fnId]: v }))}
-                min={1}
+                min={0}
                 max={MAX_ALLOCATION_WEIGHT}
                 step={1}
                 ariaLabel="Category weight"
@@ -269,8 +254,8 @@ export default function PrioritiesRoute() {
       <div className="mb-4">
         <TypographyH1 className="mb-3">Your turn.</TypographyH1>
         <TypographyLead className="mb-8">
-          Slide each category (budget function) to reflect your priorities – you rate each one
-          independently.
+          Slide each category (budget function) to reflect your priorities. Each one is
+          independent and does not represent a percentage.
         </TypographyLead>
         <TypographyP>
           Keep in mind:{" "}
@@ -281,6 +266,18 @@ export default function PrioritiesRoute() {
       </div>
       <form className="flex flex-col gap-4" method="post" {...getFormProps(form)}>
         <HoneypotInputs />
+        <div ref={formErrorRef}>
+          {form.errors?.length ? (
+            <div
+              id={form.errorId}
+              role="alert"
+              className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-foreground-destructive"
+            >
+              <Info size={18} className="shrink-0" />
+              <span>{form.errors.join(" ")}</span>
+            </div>
+          ) : null}
+        </div>
         {/* Progress bar + grouping toggle */}
         <div className="sticky top-(--header-height) bg-background z-10 pt-2" ref={toolbarRef}>
           <div className="flex gap-4 items-center">
@@ -333,7 +330,6 @@ export default function PrioritiesRoute() {
           )}
         </div>
         <div ref={sentinelRef} />
-        <ErrorList id={form.errorId} errors={form.errors} />
         <BackToTop />
         <Separator className="mt-8 mb-4" />
         <div
