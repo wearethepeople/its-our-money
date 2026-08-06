@@ -51,7 +51,5 @@ test("copies the share link to the clipboard", async ({ page }) => {
   await shareInput.click();
 
   await expect(shareInput).toHaveAttribute("title", "Copied!");
-  await expect
-    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-    .toBe(shareUrl);
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(shareUrl);
 });

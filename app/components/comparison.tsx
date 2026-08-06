@@ -226,7 +226,10 @@ export function ComparisonLegend({
   const fy = String(ombYear).slice(2);
   return (
     <div
-      className={cn("bg-background mt-4 flex flex-col gap-2 sm:flex-row sm:gap-0 mb-6 py-2", className)}
+      className={cn(
+        "bg-background mt-4 flex flex-col gap-2 sm:flex-row sm:gap-0 mb-6 py-2",
+        className,
+      )}
     >
       <div className="flex flex-wrap gap-5 text-sm sm:grow">
         <div className="flex items-center gap-1.5">

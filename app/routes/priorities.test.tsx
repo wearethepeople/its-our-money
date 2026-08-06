@@ -49,7 +49,9 @@ test("first-time participants see the initial comparison copy", async () => {
   expect(
     screen.getByText(/Now that you've set your priorities, they'll be mapped against/),
   ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "See how your priorities compare" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "See how your priorities compare" }),
+  ).toBeInTheDocument();
 
   expect(screen.queryByRole("heading", { name: "Fine-tuning?" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Update your comparison" })).not.toBeInTheDocument();
@@ -65,7 +67,9 @@ test("returning participants see the fine-tuning copy", async () => {
 
   expect(await screen.findByRole("heading", { name: "Fine-tuning?" })).toBeInTheDocument();
   expect(
-    screen.getByText("Adjust anything. Your updated priorities will replace the previous comparison."),
+    screen.getByText(
+      "Adjust anything. Your updated priorities will replace the previous comparison.",
+    ),
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Update your comparison" })).toBeInTheDocument();
 

@@ -2,11 +2,7 @@ import { describe, expect, test } from "vitest";
 import type { PairedItem } from "@/components/comparison.tsx";
 import { computeInsights, insightApplies } from "./insights.ts";
 
-function item(
-  id: string,
-  participantPercent: number,
-  budgetPercent: number,
-): PairedItem {
+function item(id: string, participantPercent: number, budgetPercent: number): PairedItem {
   return {
     id,
     code: `code_${id}`,

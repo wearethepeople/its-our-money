@@ -254,8 +254,8 @@ export default function PrioritiesRoute() {
       <div className="mb-4">
         <TypographyH1 className="mb-3">Your turn.</TypographyH1>
         <TypographyLead className="mb-8">
-          Slide each category (budget function) to reflect your priorities. Each one is
-          independent and does not represent a percentage.
+          Slide each category (budget function) to reflect your priorities. Each one is independent
+          and does not represent a percentage.
         </TypographyLead>
         <TypographyP>
           Keep in mind:{" "}
