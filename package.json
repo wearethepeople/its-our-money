@@ -154,6 +154,10 @@
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.18"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md,yaml,yml,css,html}": "oxfmt --stdin-filepath",
+    "*.{js,jsx,ts,tsx}": "oxlint --fix"
+  },
   "engines": {
     "node": "^22.18.0"
   },
@@ -163,9 +167,5 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,md,yaml,yml,css,html}": "oxfmt --stdin-filepath",
-    "*.{js,jsx,ts,tsx}": "oxlint --fix"
   }
 }

@@ -18,7 +18,7 @@ import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
 import { InsightCard } from "@/components/insight-cards.tsx";
 import { computeInsights, type InsightId } from "@/utils/insights.ts";
 import { useLocalStorageState } from "@/hooks/use-local-storage-state.ts";
-import { bpsToSliderWeight } from "@/utils/normalize-weights.ts";
+import { bpsToSliderWeight, percentToDisplayWeight } from "@/utils/normalize-weights.ts";
 import { getFirstLookStep, setFirstLookStep } from "@/utils/first-look-progress.ts";
 import { TypographyH1, TypographyLead, TypographyP } from "#app/components/ui/typography.tsx";
 import { Separator } from "#app/components/ui/separator.tsx";
@@ -126,7 +126,9 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
     () =>
       sortedPairedDataWithNetInterest.map((d) => ({
         ...d,
-        participantPercent: bpsToSliderWeight(d.participantPercent * 100, MAX_ALLOCATION_WEIGHT),
+        // A genuine 0% (an untouched category) stays 0 so no "You" bar renders;
+        // Washington keeps its round-up to the lowest spot (see WeightsRoundingNote).
+        participantPercent: percentToDisplayWeight(d.participantPercent, MAX_ALLOCATION_WEIGHT),
         budgetPercent: bpsToSliderWeight(d.budgetPercent * 100, MAX_ALLOCATION_WEIGHT),
       })),
     [sortedPairedDataWithNetInterest],
@@ -139,6 +141,10 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
   const weightsMaxPercent = Math.max(
     ...weightedPairedData.map((d) => Math.max(d.participantPercent, d.budgetPercent)),
   );
+
+  // Any allocatable category the participant left unweighted (net interest is
+  // always > 0 and not a user choice, so it never counts as skipped).
+  const hasSkipped = pairedData.some((d) => d.participantPercent === 0);
 
   const back = () => goToStep(Math.max(stepIndex - 1, 0));
   const next = () => goToStep(Math.min(stepIndex + 1, STEPS.length - 1));
@@ -190,7 +196,11 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             <TypographyH1 className="mb-3">Priorities, side by side.</TypographyH1>
             <Separator className="my-6" />
             <WeightsRoundingNote />
-            <ComparisonLegend ombYear={ombYear} className="sticky top-(--header-height) z-10" />
+            <ComparisonLegend
+              ombYear={ombYear}
+              hasSkipped={hasSkipped}
+              className="sticky top-(--header-height) z-10"
+            />
             <ComparisonList
               items={weightedPairedData}
               maxPercent={weightsMaxPercent}
@@ -214,7 +224,11 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
             <TypographyH1 className="mb-3">Here's where you land.</TypographyH1>
             <Separator className="my-6" />
             <PercentsRoundingNote />
-            <ComparisonLegend ombYear={ombYear} className="sticky top-(--header-height) z-10" />
+            <ComparisonLegend
+              ombYear={ombYear}
+              hasSkipped={hasSkipped}
+              className="sticky top-(--header-height) z-10"
+            />
             <ComparisonList
               items={sortedPairedDataWithNetInterest}
               maxPercent={maxPercent}
@@ -237,7 +251,7 @@ export default function FirstLookRoute({ loaderData }: Route.ComponentProps) {
           </section>
         )}
       </div>
-      <div className="sticky bottom-0 mt-10 border-t border-ink-faint bg-background py-4">
+      <div className="sticky bottom-0 mt-10 border-t border-ink-faint bg-background pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         {stepNav}
       </div>
     </div>

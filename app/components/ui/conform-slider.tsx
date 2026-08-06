@@ -27,7 +27,7 @@ export function ConformSlider({
   meta,
   value,
   onValueChange,
-  min = 1,
+  min = 0,
   max = MAX_ALLOCATION_WEIGHT,
   step = 1,
   ariaLabel,

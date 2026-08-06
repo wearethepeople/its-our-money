@@ -31,7 +31,12 @@ export default function ShareAllocationRoute({ loaderData, params }: Route.Compo
 
   return (
     <div>
-      <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} subject="they" />
+      <AllocationViewer
+        pairedData={pairedData}
+        netInterestBps={netInterestBps}
+        ombYear={ombYear}
+        subject="they"
+      />
       <BuildYourOwnBudget />
     </div>
   );
