@@ -11,7 +11,7 @@ import {
   type SortMode,
 } from "@/components/comparison.tsx";
 import { TaxBreakdown } from "@/components/tax-breakdown.tsx";
-import { bpsToSliderWeight } from "@/utils/normalize-weights.ts";
+import { bpsToSliderWeight, percentToDisplayWeight } from "@/utils/normalize-weights.ts";
 import { MAX_ALLOCATION_WEIGHT } from "@/constants/index.ts";
 import {
   WeightsRoundingNote,
@@ -73,7 +73,9 @@ export function AllocationViewer({
     () =>
       sortedPairedDataWithNetInterest.map((d) => ({
         ...d,
-        participantPercent: bpsToSliderWeight(d.participantPercent * 100, MAX_ALLOCATION_WEIGHT),
+        // A genuine 0% (an untouched category) stays 0 so no "You" bar renders;
+        // Washington keeps its round-up to the lowest spot (see WeightsRoundingNote).
+        participantPercent: percentToDisplayWeight(d.participantPercent, MAX_ALLOCATION_WEIGHT),
         budgetPercent: bpsToSliderWeight(d.budgetPercent * 100, MAX_ALLOCATION_WEIGHT),
       })),
     [sortedPairedDataWithNetInterest],

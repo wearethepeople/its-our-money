@@ -255,10 +255,22 @@ export function ComparisonRow({
           )}
         </div>
         <div className="flex flex-col gap-1">
-          <div
-            className="h-2 rounded-full bg-you"
-            style={{ width: `${item.participantPercent * scale}%` }}
-          />
+          {item.participantPercent > 0 ? (
+            <div
+              className="h-2 rounded-full bg-you"
+              style={{ width: `${item.participantPercent * scale}%` }}
+            />
+          ) : (
+            // Untouched category: a hollow ring reads as "you weighted this at
+            // zero" without borrowing the filled-bar vocabulary.
+            <div className="flex h-2 items-center">
+              <span
+                role="img"
+                aria-label="You left this unweighted"
+                className="size-2.5 rounded-full border-[1.5px] border-you"
+              />
+            </div>
+          )}
           <div
             className="h-2 rounded-full bg-them"
             style={{ width: `${item.budgetPercent * scale}%` }}

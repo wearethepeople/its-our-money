@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   bpsToSliderWeight,
   normalizeToBasisPoints,
+  percentToDisplayWeight,
   sum,
   toStoredAllocations,
 } from "./normalize-weights.ts";
@@ -27,6 +28,21 @@ describe("bpsToSliderWeight", () => {
 
   test("clamps to the max weight", () => {
     expect(bpsToSliderWeight(20000, 20)).toBe(20);
+  });
+});
+
+describe("percentToDisplayWeight", () => {
+  test("a genuine 0% maps to 0 (no bar)", () => {
+    expect(percentToDisplayWeight(0, 20)).toBe(0);
+  });
+
+  test("a tiny nonzero percent is floored to 1 (lowest spot on the scale)", () => {
+    expect(percentToDisplayWeight(1.1, 20)).toBe(1);
+  });
+
+  test("larger percentages scale onto the 1..max range", () => {
+    expect(percentToDisplayWeight(50, 20)).toBe(10);
+    expect(percentToDisplayWeight(100, 20)).toBe(20);
   });
 });
 

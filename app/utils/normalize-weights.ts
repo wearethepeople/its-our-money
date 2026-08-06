@@ -66,6 +66,17 @@ export function bpsToSliderWeight(bps: number, max: number) {
 }
 
 /**
+ * Map a display percentage onto the 1..max comparison-bar scale. A genuine 0%
+ * (an untouched category) stays 0 so no bar renders; any nonzero value is
+ * floored to 1 so very small priorities remain visible on the scale.
+ * @param percent a 0..100 percentage
+ * @param max
+ */
+export function percentToDisplayWeight(percent: number, max: number) {
+  return percent === 0 ? 0 : bpsToSliderWeight(percent * 100, max);
+}
+
+/**
  * Normalize slider weights to per-category basis points and drop the zero-weight
  * categories. Untouched (weight 0) categories are simply not stored; the remaining
  * non-zero items always sum to exactly 10,000. Returns an empty array when every
