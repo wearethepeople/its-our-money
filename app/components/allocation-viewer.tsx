@@ -95,24 +95,7 @@ export function AllocationViewer({
   return (
     <div>
       <div
-        className="my-4 flex flex-nowrap items-center gap-3 bg-background sticky top-(--header-height) py-2"
-        id="data-massage"
-        ref={dataMassageRef}
-      >
-        <SortControls
-          sortMode={sortMode}
-          sortDirection={sortDirection}
-          onChange={(mode, direction) => {
-            setSortMode(mode);
-            setSortDirection(direction);
-          }}
-        />
-        <div className="ml-auto">
-          <ViewToggle value={viewScheme} onChange={setViewScheme} />
-        </div>
-      </div>
-      <div
-        className="flex border-b border-muted-foreground bg-background sticky top-[calc(var(--header-height)+var(--data-massage-height))] z-50"
+        className="flex border-b border-muted-foreground bg-background sticky top-(--header-height) z-50"
         ref={tabsRef}
         id="tabs"
       >
@@ -149,6 +132,23 @@ export function AllocationViewer({
         >
           Tax Breakdown
         </button>
+      </div>
+      <div
+        className="flex flex-nowrap items-center gap-3 bg-background sticky top-[calc(var(--header-height)+var(--tabs-height))] z-40 pt-6"
+        id="data-massage"
+        ref={dataMassageRef}
+      >
+        <SortControls
+          sortMode={sortMode}
+          sortDirection={sortDirection}
+          onChange={(mode, direction) => {
+            setSortMode(mode);
+            setSortDirection(direction);
+          }}
+        />
+        <div className="ml-auto">
+          <ViewToggle value={viewScheme} onChange={setViewScheme} />
+        </div>
       </div>
       {activeTab === "priorities" && (
         <div>

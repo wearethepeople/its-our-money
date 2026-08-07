@@ -256,7 +256,7 @@ export default function JuxtaposeRoute({ actionData, loaderData }: Route.Compone
         Insights
       </TypographyH2>
       <InsightCarousel pairedData={pairedData} />
-      <TypographyH2 className="border-b border-b-muted-foreground">The numbers</TypographyH2>
+      <TypographyH2 className="border-b border-b-muted-foreground mb-6">The numbers</TypographyH2>
       <AllocationViewer pairedData={pairedData} netInterestBps={netInterestBps} ombYear={ombYear} />
       <BackToTop />
     </div>
