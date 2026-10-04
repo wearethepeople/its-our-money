@@ -225,17 +225,22 @@ function App() {
             ref={footerRef}
           >
             <div className="container flex justify-between flex-col sm:flex-row text-ink-muted">
-              <ul className="text-sm flex gap-6 mb-8 sm:gap-2 sm:mb-auto">
-                <li>
-                  <Link to={href("/about")}>About</Link>
-                </li>
-                <li>
-                  <Link to={href("/privacy")}>Privacy</Link>
-                </li>
-                <li>
-                  <Link to={href("/help")}>Help</Link>
-                </li>
-              </ul>
+              <div className="mb-8 sm:mb-auto">
+                <ul className="text-sm flex gap-6 mb-2 sm:gap-2">
+                  <li>
+                    <Link to={href("/about")}>About</Link>
+                  </li>
+                  <li>
+                    <Link to={href("/privacy")}>Privacy</Link>
+                  </li>
+                  <li>
+                    <Link to={href("/help")}>Help</Link>
+                  </li>
+                </ul>
+                <p>
+                  <small className="text-ink-faint">&copy; 2026 We (ARE) the People</small>
+                </p>
+              </div>
               <div className="flex flex-row sm:flex-col sm:grow sm:text-right">
                 <div>
                   <p className="text-sm leading-snug text-ink-muted sm:pr-2">
@@ -250,11 +255,23 @@ function App() {
                     </Link>
                     &nbsp;project.
                   </p>
-                  <p className="sm:mb-4">
-                    <small className="text-ink-muted sm:pr-2">
-                      &copy; 2026 We (ARE) the People
-                    </small>
-                  </p>
+                  <div className="flex items-center gap-2 sm:mb-4 sm:justify-end sm:pr-2">
+                    <a
+                      href="https://www.instagram.com/wrtp.us/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="We (ARE) the People on Instagram (@wrtp.us)"
+                      className="text-ink-faint hover:text-ink-muted"
+                    >
+                      <Icon name="instagram" size="sm" />
+                    </a>
+                    <a
+                      href="mailto:info@wearethepeople.us"
+                      className="text-xs text-ink-faint underline-offset-2 hover:text-ink-muted hover:underline"
+                    >
+                      info@wearethepeople.us
+                    </a>
+                  </div>
                 </div>
                 <div className="flex grow place-content-end">
                   <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
