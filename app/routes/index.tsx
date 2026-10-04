@@ -17,7 +17,9 @@ export default function IndexRoute() {
         <span className="text-you-ok-soft">It’s a ledger of values.</span>
       </TypographyLead>
       <TypographyLead>
-        <span className="font-bold text-ink-2">You pay in with every paycheck.</span>
+        <span className="font-bold text-ink-2">
+          You pay into the federal government&rsquo;s coffers with every paycheck.
+        </span>
         <br />
         <span className="text-you-ok-soft">
           If you could decide… what would <em>you</em> choose?
