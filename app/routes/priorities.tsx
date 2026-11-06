@@ -1,5 +1,5 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
-import { parseWithZod } from "@conform-to/zod";
+import { parseWithZod } from "@conform-to/zod/v4";
 import { useEffect, useRef, useState } from "react";
 import { data, href, redirect, useActionData, useLoaderData } from "react-router";
 import { type SEOHandle } from "@nasa-gcn/remix-seo";

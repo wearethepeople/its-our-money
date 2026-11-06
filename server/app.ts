@@ -11,10 +11,7 @@ app.use(
     build: () => import("virtual:react-router/server-build"),
     getLoadContext: async () => {
       const context = new RouterContextProvider();
-      context.set(
-        serverBuildContext,
-        await import("virtual:react-router/server-build"),
-      );
+      context.set(serverBuildContext, await import("virtual:react-router/server-build"));
       return context;
     },
   }),

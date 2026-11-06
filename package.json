@@ -70,7 +70,6 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "get-port": "^7.1.0",
-    "glob": "^13.0.0",
     "input-otp": "^1.4.2",
     "intl-parse-accept-language": "^1.0.0",
     "isbot": "^5.1.34",
@@ -90,17 +89,17 @@
     "remix-auth-github": "^3.0.2",
     "remix-utils": "^9.0.1",
     "set-cookie-parser": "^3.0.1",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "sonner": "^2.0.7",
     "source-map-support": "^0.5.21",
     "spin-delay": "^2.0.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "vite-env-only": "^3.0.3",
-    "zod": "^3.25.76"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@epic-web/config": "^1.21.3",
+    "@epic-web/config": "^3.2.1",
     "@faker-js/faker": "^10.2.0",
     "@playwright/test": "^1.58.1",
     "@react-router/dev": "^8.5.1",
@@ -113,7 +112,6 @@
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.6",
     "@types/fs-extra": "^11.0.4",
-    "@types/glob": "^9.0.0",
     "@types/mime-types": "^3.0.1",
     "@types/morgan": "^1.9.10",
     "@types/node": "^26.6.6",
@@ -132,7 +130,7 @@
     "lint-staged": "^16.4.0",
     "msw": "^2.12.7",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.52.0",
+    "oxfmt": "^0.76.0",
     "oxlint": "^1.67.0",
     "react-router-auto-routes": "^0.7.1",
     "react-router-devtools": "^6.2.3",
@@ -143,6 +141,11 @@
     "vite-plugin-icons-spritesheet": "^3.0.1",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "openimg": {
+      "sharp": "$sharp"
+    }
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,md,yaml,yml,css,html}": "oxfmt --stdin-filepath",

@@ -61,10 +61,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
               reportOnly: true,
               directives: {
                 fetch: {
-                  "connect-src": [
-                    MODE === "development" ? "ws:" : undefined,
-                    "'self'",
-                  ],
+                  "connect-src": [MODE === "development" ? "ws:" : undefined, "'self'"],
                   "font-src": ["'self'"],
                   "frame-src": ["'self'"],
                   "img-src": ["'self'", "data:"],

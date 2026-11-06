@@ -5,7 +5,7 @@ import { type SEOHandle } from "@nasa-gcn/remix-seo";
 import { Button } from "@/ui/button.tsx";
 import { getFormProps, useForm } from "@conform-to/react";
 import { z } from "zod";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4";
 import { getSessionId } from "@/utils/session.server.ts";
 import {
   AllocationService,

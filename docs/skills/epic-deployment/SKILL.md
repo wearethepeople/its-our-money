@@ -793,6 +793,6 @@ fly releases rollback --app my-app
 ```toml
 # fly.toml
 [experimental]
-  auto_rollback = true
-  min_machines_running = 1
+auto_rollback = true
+min_machines_running = 1
 ```
