@@ -92,8 +92,14 @@ jobs:
 
   playwright:
     name: 🎭 Playwright
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
+    # Playwright's image ships the browsers and their system packages, so
+    # nothing is downloaded per run. The tag must match the installed
+    # @playwright/test version in package-lock.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.1-noble
+      options: --user 1001
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -108,9 +114,6 @@ jobs:
 
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
-
-      - name: 📥 Install Playwright Browsers
-        run: npm run test:e2e:install
 
       - name: 🛠 Setup Database
         run: npx prisma migrate deploy && npx prisma generate --sql
