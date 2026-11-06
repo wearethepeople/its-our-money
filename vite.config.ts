@@ -16,7 +16,6 @@ export default defineConfig((config) => {
       cssMinify: mode === "production",
 
       rollupOptions: {
-        input: config.isSsrBuild ? "./server/app.ts" : undefined,
         external: [/node:.*/, "fsevents"],
       },
 
@@ -27,6 +26,16 @@ export default defineConfig((config) => {
       },
 
       sourcemap: true,
+    },
+    // React Router 8 only honors a custom SSR entry set on the ssr environment.
+    environments: {
+      ssr: {
+        build: {
+          rollupOptions: {
+            input: "./server/app.ts",
+          },
+        },
+      },
     },
     server: {
       allowedHosts: ["studio.local"],

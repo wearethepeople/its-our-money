@@ -62,8 +62,8 @@ const DESCRIPTION = "It’s our money. A We (ARE) the People civic identity proj
 // No route exports its own meta, so this applies site-wide. The canonical is
 // built from the page's path, never the request URL, so query strings and
 // non-canonical hosts never reach it.
-export const meta: Route.MetaFunction = ({ data, location }) => {
-  const title = data ? SITE_NAME : `Error | ${SITE_NAME}`;
+export const meta: Route.MetaFunction = ({ loaderData, location }) => {
+  const title = loaderData ? SITE_NAME : `Error | ${SITE_NAME}`;
   const url = absoluteUrl(location.pathname);
   return [
     { title },
