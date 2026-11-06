@@ -67,12 +67,6 @@ app.use((_, res, next) => {
   next();
 });
 
-app.get([/^\/img\/.*/, /^\/favicons\/.*/], (_req, res) => {
-  // if we made it past the express.static for these, then we're missing something.
-  // So we'll just send a 404 and won't bother calling other middleware.
-  return res.status(404).send("Not found");
-});
-
 morgan.token("url", (req) => {
   try {
     return decodeURIComponent(req.url ?? "");
@@ -191,7 +185,15 @@ if (IS_DEV) {
   );
   // Everything else (like favicon.ico) is cached for an hour. You may want to be
   // more aggressive with this caching.
+  // Fonts are never edited in place (rename the file to change one), so cache them long.
+  app.use("/fonts", express.static("build/client/fonts", { immutable: true, maxAge: "1y", fallthrough: false }));
   app.use(express.static("build/client", { maxAge: "1h" }));
+  // If we made it past express.static for these, the file is missing. Send a 404
+  // and don't bother calling other middleware. This must come after the static
+  // handler above, otherwise it shadows the real files.
+  app.get([/^\/img\/.*/, /^\/favicons\/.*/], (_req, res) => {
+    return res.status(404).send("Not found");
+  });
   app.use(await import(BUILD_PATH).then((mod) => mod.app));
 }
 

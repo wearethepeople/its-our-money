@@ -41,6 +41,10 @@ export const links: Route.LinksFunction = () => {
   return [
     // Preload svg sprite as a resource to avoid render blocking
     { rel: "preload", href: iconsHref, as: "image" },
+    // Body (400) and H1 (800) weights; the rest are discovered after the CSS loads.
+    // crossOrigin is required for font preloads to be reused.
+    { rel: "preload", href: "/fonts/libre-franklin-400.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" } as const,
+    { rel: "preload", href: "/fonts/libre-franklin-800.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" } as const,
     {
       rel: "icon",
       href: "/favicon.ico",
