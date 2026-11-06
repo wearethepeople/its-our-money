@@ -8,8 +8,6 @@ const schema = z.object({
   INTERNAL_COMMAND_TOKEN: z.string(),
   HONEYPOT_SECRET: z.string(),
   CACHE_DATABASE_PATH: z.string(),
-  // If you plan on using Sentry, remove the .optional()
-  SENTRY_DSN: z.string().optional(),
   // If you plan to use Resend, remove the .optional()
   RESEND_API_KEY: z.string().optional(),
   // If you plan to use GitHub auth, remove the .optional()
@@ -49,7 +47,6 @@ export function init() {
 export function getEnv() {
   return {
     MODE: process.env.NODE_ENV,
-    SENTRY_DSN: process.env.SENTRY_DSN,
     ALLOW_INDEXING: process.env.ALLOW_INDEXING,
   };
 }

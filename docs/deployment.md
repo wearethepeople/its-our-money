@@ -128,11 +128,6 @@ Prior to your first deployment, you'll need to do a few things:
 
 Find instructions for this optional step in [the email docs](./email.md).
 
-### Optional: Error monitoring setup
-
-Find instructions for this optional step in
-[the error tracking docs](./monitoring.md).
-
 ### Optional: Connecting to your production database
 
 Find instructions for this optional step in [the database docs](./database.md).

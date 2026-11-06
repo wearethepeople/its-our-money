@@ -3,7 +3,6 @@ import { PassThrough } from "node:stream";
 import { styleText } from "node:util";
 import { contentSecurity } from "@nichtsam/helmet/content";
 import { createReadableStreamFromReadable } from "@react-router/node";
-import * as Sentry from "@sentry/react-router";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import {
@@ -36,10 +35,6 @@ export default async function handleRequest(...args: DocRequestArgs) {
   responseHeaders.set("fly-primary-instance", primaryInstance);
   responseHeaders.set("fly-instance", currentInstance);
 
-  if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
-    responseHeaders.append("Document-Policy", "js-profiling");
-  }
-
   const callbackName = isbot(request.headers.get("user-agent")) ? "onAllReady" : "onShellReady";
 
   const nonce = crypto.randomBytes(16).toString("hex");
@@ -68,7 +63,6 @@ export default async function handleRequest(...args: DocRequestArgs) {
                 fetch: {
                   "connect-src": [
                     MODE === "development" ? "ws:" : undefined,
-                    process.env.SENTRY_DSN ? "*.sentry.io" : undefined,
                     "'self'",
                   ],
                   "font-src": ["'self'"],
@@ -128,6 +122,4 @@ export function handleError(
   } else {
     console.error(error);
   }
-
-  Sentry.captureException(error);
 }
