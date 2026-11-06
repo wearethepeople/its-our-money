@@ -5,22 +5,9 @@ they pass through to Remix, so by redirecting earlier you improve performance.
 
 ## HTTP to HTTPS
 
-We force all traffic to HTTPS automatically. That way, no part of your
-application is open to request interception. This does not affect localhost, as
-we use Fly's request headers for determining when to redirect.
-
-```ts
-app.use((req, res, next) => {
-  const proto = req.get("X-Forwarded-Proto");
-  const host = getHost(req);
-  if (proto === "http") {
-    res.set("X-Forwarded-Proto", "https");
-    res.redirect(`https://${host}${req.originalUrl}`);
-    return;
-  }
-  next();
-});
-```
+Fly's edge forces all traffic to HTTPS (`force_https = true` on port 80 in
+`fly.toml`), before a request reaches the app, so the app has no HTTPS
+redirect of its own. wearethepeople.us and whatsyourtake.us do the same.
 
 ## Remove trailing slashes
 
@@ -44,45 +31,14 @@ app.use((req, res, next) => {
 });
 ```
 
-## www subdomains
+## www and the Fly hostname
 
-You can redirect root domain traffic to your www subdomain or vice versa.
+`www.itsourmoney.us` and `its-our-money.fly.dev` are sent to
+`https://itsourmoney.us` with a 301, keeping the path and query. The rule is
+`canonicalHostRedirect` in `app/utils/seo.ts`, applied as the first middleware
+in `server/index.ts`, so it covers static files too. The health check path is
+never redirected, so Fly's checks pass on any host.
 
-[DNS level redirects do not work with Fly](https://community.fly.io/t/how-to-redirect-from-non-www-to-www/5795/2).
-The recommended way to implement this redirect is in your application code.
-
-First, you will need to register SSL certificates for both the www and the root
-domain. You can
-[register an SSL certificate for your domains in the terminal](https://fly.io/docs/getting-started/working-with-fly-apps/#fly-io-and-custom-domains)
-or in your [Fly dashboard](https://fly.io/dashboard/) by navigating to your app
-and selecting "Certificates" on the sidebar.
-
-After registering the two SSL certificates, Fly will allow traffic from either
-source to hit your application, and then you can redirect to your preferred
-domain in code.
-
-**To redirect non-www traffic to www**
-
-```ts
-app.use((req, res, next) => {
-  const host = getHost(req);
-  if (!host.startsWith("www.")) {
-    return res.redirect(301, `https://www.${host}${req.url}`);
-  } else {
-    next();
-  }
-});
-```
-
-**To redirect www traffic to non-www:**
-
-```ts
-app.use((req, res, next) => {
-  const host = getHost(req);
-  if (host.startsWith("www.")) {
-    return res.redirect(301, `https://${host.slice(4)}${req.url}`);
-  } else {
-    next();
-  }
-});
-```
+[DNS level redirects do not work with Fly](https://community.fly.io/t/how-to-redirect-from-non-www-to-www/5795/2),
+so this has to live in the app. Both the apex and www need certificates
+registered in Fly for traffic from either to reach it.

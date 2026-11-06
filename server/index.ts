@@ -23,24 +23,13 @@ const getHost = (req: { get: (key: string) => string | undefined }) =>
 // fly is our proxy
 app.set("trust proxy", true);
 
-// Send www and the Fly hostname to the canonical host with a 301. Runs before
-// the HTTPS redirect so http://www.… reaches the apex in one hop.
+// Send www and the Fly hostname to the canonical host with a 301, ahead of
+// everything else, static files included. Same pattern as wearethepeople.us
+// and whatsyourtake.us. HTTPS is forced at Fly's edge (force_https in
+// fly.toml), so nothing here handles plain HTTP.
 app.use((req, res, next) => {
   const target = canonicalHostRedirect(new URL(req.originalUrl, `http://${getHost(req)}`));
   if (target) return res.redirect(301, target);
-  next();
-});
-
-// ensure HTTPS only (X-Forwarded-Proto comes from Fly)
-app.use((req, res, next) => {
-  if (req.method !== "GET") return next();
-  const proto = req.get("X-Forwarded-Proto");
-  const host = getHost(req);
-  if (proto === "http") {
-    res.set("X-Forwarded-Proto", "https");
-    res.redirect(`https://${host}${req.originalUrl}`);
-    return;
-  }
   next();
 });
 
