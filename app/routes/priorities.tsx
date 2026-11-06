@@ -2,6 +2,7 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { useEffect, useRef, useState } from "react";
 import { data, href, redirect, useActionData, useLoaderData } from "react-router";
+import { type SEOHandle } from "@nasa-gcn/remix-seo";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { z } from "zod";
 
@@ -57,6 +58,12 @@ const formSchema = z
   .refine((value) => value.allocations.some((allocation) => allocation.weight > 0), {
     message: "Give weight to at least one category to proceed.",
   });
+
+// The path has a :year param, so the sitemap needs it spelled out: the
+// current year is the one /priorities redirects to.
+export const handle: SEOHandle = {
+  getSitemapEntries: () => [{ route: `/priorities/${new Date().getFullYear()}` }],
+};
 
 export type AllocationFormInput = z.infer<typeof formSchema>;
 

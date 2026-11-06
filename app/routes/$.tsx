@@ -6,11 +6,15 @@
 // message for them than the Remix and/or browser default.
 
 import { href, Link, redirect } from "react-router";
+import { type SEOHandle } from "@nasa-gcn/remix-seo";
 import { GeneralErrorBoundary } from "@/components/error-boundary.tsx";
 import { Icon } from "@/components/ui/icon.tsx";
 import { TypographyH1, TypographyLead } from "@/components/ui/typography.tsx";
 
 import { type Route } from "./+types/$";
+
+// The catch-all is not a page: kept out of the sitemap.
+export const handle: SEOHandle = { getSitemapEntries: () => null };
 
 export function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);

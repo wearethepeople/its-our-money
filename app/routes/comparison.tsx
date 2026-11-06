@@ -1,6 +1,7 @@
 import { Route } from "./+types/comparison";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { href, redirect, Form, data, Link } from "react-router";
+import { type SEOHandle } from "@nasa-gcn/remix-seo";
 import { Button } from "@/ui/button.tsx";
 import { getFormProps, useForm } from "@conform-to/react";
 import { z } from "zod";
@@ -36,6 +37,9 @@ const manageAllocationSchema = z.object({
 const inputFormSchema = manageAllocationSchema.omit({
   allocationId: true,
 });
+
+// Redirects anonymous visitors, crawlers included: kept out of the sitemap.
+export const handle: SEOHandle = { getSitemapEntries: () => null };
 
 export async function loader({ request }: Route.LoaderArgs) {
   const participant = await getParticipantBySession(request);

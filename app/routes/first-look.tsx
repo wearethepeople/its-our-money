@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { href, Link, redirect } from "react-router";
+import { type SEOHandle } from "@nasa-gcn/remix-seo";
 import { type Route } from "./+types/first-look";
 import { getParticipantBySession } from "@/utils/participant-session.server.ts";
 import { AllocationService } from "@/services/allocation-service.server.ts";
@@ -49,6 +50,9 @@ const DEFAULT_VIEW_PREFS: ViewPrefs = {
   sortDirection: "desc",
   viewScheme: "public_domain",
 };
+
+// Redirects anonymous visitors, crawlers included: kept out of the sitemap.
+export const handle: SEOHandle = { getSitemapEntries: () => null };
 
 export async function loader({ request }: Route.LoaderArgs) {
   const participant = await getParticipantBySession(request);
