@@ -50,7 +50,7 @@ export const StatusButton = ({
       {message ? (
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>{companion}</TooltipTrigger>
+            <TooltipTrigger render={<span />}>{companion}</TooltipTrigger>
             <TooltipContent>{message}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
