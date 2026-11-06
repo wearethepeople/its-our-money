@@ -29,6 +29,7 @@ import { pipeHeaders } from "./utils/headers.server.ts";
 import { honeypot } from "./utils/honeypot.server.ts";
 import { cn, combineHeaders, getDomainUrl, getImgSrc } from "./utils/misc.tsx";
 import { useNonce } from "./utils/nonce-provider.ts";
+import { absoluteUrl, ORGANIZATION, ORGANIZATION_ID, SITE_NAME, SITE_ORIGIN } from "./utils/seo.ts";
 import { type Theme, getTheme } from "./utils/theme.server.ts";
 import { makeTimings } from "./utils/timing.server.ts";
 import { getToast } from "./utils/toast.server.ts";
@@ -56,13 +57,49 @@ export const links: Route.LinksFunction = () => {
   ].filter(Boolean);
 };
 
-export const meta: Route.MetaFunction = ({ data }) => {
+const DESCRIPTION = "It’s our money. A We (ARE) the People civic identity project.";
+
+// No route exports its own meta, so this applies site-wide. The canonical is
+// built from the page's path, never the request URL, so query strings and
+// non-canonical hosts never reach it.
+export const meta: Route.MetaFunction = ({ data, location }) => {
+  const title = data ? SITE_NAME : `Error | ${SITE_NAME}`;
+  const url = absoluteUrl(location.pathname);
   return [
-    { title: data ? `It’s Our Money` : "Error | It’s Our Money" },
-    {
-      name: "description",
-      content: `It’s our money. A We (ARE) the People civic identity project.`,
-    },
+    { title },
+    { name: "description", content: DESCRIPTION },
+    { tagName: "link", rel: "canonical", href: url },
+    { property: "og:type", content: "website" },
+    { property: "og:site_name", content: SITE_NAME },
+    { property: "og:title", content: title },
+    { property: "og:description", content: DESCRIPTION },
+    { property: "og:url", content: url },
+    { property: "og:image", content: absoluteUrl("/og.png") },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:image:alt", content: "It’s Our Money. A We (ARE) the People project." },
+    { name: "twitter:card", content: "summary_large_image" },
+    // Same WebSite + Organization @graph as the other WrTP sites, home only.
+    ...(location.pathname === "/"
+      ? [
+          {
+            "script:ld+json": {
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": `${SITE_ORIGIN}/#website`,
+                  url: `${SITE_ORIGIN}/`,
+                  name: SITE_NAME,
+                  description: DESCRIPTION,
+                  publisher: { "@id": ORGANIZATION_ID },
+                },
+                { ...ORGANIZATION, sameAs: ["https://www.instagram.com/wrtp.us/"] },
+              ],
+            },
+          },
+        ]
+      : []),
   ];
 };
 
@@ -246,11 +283,7 @@ function App() {
                   <p className="text-sm leading-snug text-ink-muted sm:pr-2">
                     <Icon name="wrtp-01" size="md" className="mr-1" />
                     A&nbsp;
-                    <Link
-                      to="http://www.wearethepeople.us/"
-                      target="_blank"
-                      className="font-semibold"
-                    >
+                    <Link to="https://wearethepeople.us" target="_blank" className="font-semibold">
                       We&nbsp;(ARE)&nbsp;the&nbsp;People
                     </Link>
                     &nbsp;project.

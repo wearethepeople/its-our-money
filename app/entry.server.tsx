@@ -29,14 +29,7 @@ type DocRequestArgs = Parameters<HandleDocumentRequestFunction>;
 export default async function handleRequest(...args: DocRequestArgs) {
   const [request, responseStatusCode, responseHeaders, reactRouterContext] = args;
 
-  // Make the root the canonical URL
-  const url = new URL(request.url);
-
-  if (url.hostname === "www.itsourmoney.us") {
-    url.hostname = "itsourmoney.us";
-    return Response.redirect(url.toString(), 301);
-  }
-
+  // www and fly.dev are redirected to the canonical host in server/index.ts.
   const { currentInstance, primaryInstance } = await getInstanceInfo();
   responseHeaders.set("fly-region", process.env.FLY_REGION ?? "unknown");
   responseHeaders.set("fly-app", process.env.FLY_APP_NAME ?? "unknown");

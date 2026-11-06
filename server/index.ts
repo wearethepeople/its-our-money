@@ -8,6 +8,7 @@ import express from "express";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import getPort, { portNumbers } from "get-port";
 import morgan from "morgan";
+import { canonicalHostRedirect } from "../app/utils/seo.ts";
 
 const MODE = process.env.NODE_ENV ?? "development";
 const IS_PROD = MODE === "production";
@@ -27,6 +28,14 @@ const getHost = (req: { get: (key: string) => string | undefined }) =>
 
 // fly is our proxy
 app.set("trust proxy", true);
+
+// Send www and the Fly hostname to the canonical host with a 301. Runs before
+// the HTTPS redirect so http://www.… reaches the apex in one hop.
+app.use((req, res, next) => {
+  const target = canonicalHostRedirect(new URL(req.originalUrl, `http://${getHost(req)}`));
+  if (target) return res.redirect(301, target);
+  next();
+});
 
 // ensure HTTPS only (X-Forwarded-Proto comes from Fly)
 app.use((req, res, next) => {
